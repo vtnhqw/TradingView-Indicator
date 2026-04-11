@@ -1,0 +1,367 @@
+//@version=6
+indicator("Pink Candle Indicator [v6]", overlay=true, max_bars_back=500, max_lines_count=10, max_labels_count=200)
+
+// ============================================================
+//  PINK CANDLE INDICATOR — Pine Script v6
+//  Based on: Buy-on-Dip reversal system using candle colour
+//  signals, dynamic pillow support, shark zone (Tory Box),
+//  and selling/buying climax volume detection.
+//
+//  Signal legend:
+//    PINK   — Potential reversal / standby-to-buy zone
+//    WHITE  — Entry confirmation (White Knight)
+//    YELLOW — Standby-to-sell / take-profit zone
+//    BLUE   — Breakout / momentum signal
+//    GREEN  — Trend confirmed uptrend (above pillow)
+//    RED    — Downtrend / avoid buying
+//    SC tag — Selling Climax (heavy panic sell volume)
+//    BC tag — Buying Climax (exhaustion / consider exit)
+// ============================================================
+
+// ─────────────────────────────────────────────
+// GROUP: PILLOW (Dynamic Support Band)
+// ─────────────────────────────────────────────
+grp_pillow = "Pillow Support (Dynamic EMA Band)"
+pillow_len    = input.int(21,    "Pillow EMA Length",         group=grp_pillow, minval=5, maxval=200)
+pillow_mult   = input.float(0.5, "Band Width Multiplier",     group=grp_pillow, minval=0.1, maxval=3.0, step=0.1)
+show_pillow   = input.bool(true, "Show Pillow Band",          group=grp_pillow)
+
+// ─────────────────────────────────────────────
+// GROUP: SHARK ZONE (Tory Box — Institutional Resistance)
+// ─────────────────────────────────────────────
+grp_shark = "Shark Zone / Tory Box (Institutional Resistance)"
+shark_len     = input.int(50,    "Lookback Period (bars)",    group=grp_shark, minval=10, maxval=300)
+shark_offset  = input.float(0.5, "Zone Thickness (%)",       group=grp_shark, minval=0.1, maxval=5.0, step=0.1)
+show_shark    = input.bool(true, "Show Shark Zone",           group=grp_shark)
+
+// ─────────────────────────────────────────────
+// GROUP: VOLUME CLIMAX
+// ─────────────────────────────────────────────
+grp_vol = "Volume Climax Settings"
+vol_len       = input.int(20,   "Volume MA Length",           group=grp_vol, minval=5, maxval=100)
+vol_mult_sc   = input.float(2.0,"Selling Climax Threshold (x avg)", group=grp_vol, minval=1.0, maxval=10.0, step=0.1)
+vol_mult_bc   = input.float(2.0,"Buying Climax Threshold (x avg)",  group=grp_vol, minval=1.0, maxval=10.0, step=0.1)
+show_climax   = input.bool(true,"Show Climax Labels",         group=grp_vol)
+
+// ─────────────────────────────────────────────
+// GROUP: CANDLE SIGNAL SENSITIVITY
+// ─────────────────────────────────────────────
+grp_sig = "Candle Signal Sensitivity"
+rsi_len       = input.int(14,   "RSI Length",                 group=grp_sig, minval=2, maxval=50)
+rsi_os        = input.int(35,   "RSI Oversold Level (Pink)",  group=grp_sig, minval=10, maxval=50)
+rsi_ob        = input.int(65,   "RSI Overbought Level (Yellow)", group=grp_sig, minval=50, maxval=90)
+stoch_len     = input.int(14,   "Stoch Length",               group=grp_sig, minval=5, maxval=50)
+stoch_smooth  = input.int(3,    "Stoch Smooth",               group=grp_sig, minval=1, maxval=10)
+body_pct      = input.float(0.4,"Min Body Size (% of range)", group=grp_sig, minval=0.1, maxval=0.9, step=0.05)
+
+// ─────────────────────────────────────────────
+// GROUP: DISPLAY
+// ─────────────────────────────────────────────
+grp_disp = "Display Options"
+show_labels   = input.bool(true, "Show Signal Labels on Chart", group=grp_disp)
+show_bg       = input.bool(true, "Colour Candle Backgrounds",   group=grp_disp)
+show_table    = input.bool(true, "Show Signal Dashboard Table",  group=grp_disp)
+label_size    = input.string("small", "Label Size", options=["tiny","small","normal","large"], group=grp_disp)
+
+// ─────────────────────────────────────────────
+// COLOURS
+// ─────────────────────────────────────────────
+col_pink   = color.new(color.fuchsia,  10)
+col_white  = color.new(color.white,    10)
+col_yellow = color.new(color.yellow,   10)
+col_blue   = color.new(color.blue,     10)
+col_green  = color.new(color.lime,     30)
+col_red    = color.new(color.red,      30)
+col_shark  = color.new(color.red,      80)
+col_pillow = color.new(color.aqua,     80)
+col_sc     = color.new(color.red,      0)
+col_bc     = color.new(color.orange,   0)
+
+// ─────────────────────────────────────────────
+// CORE CALCULATIONS
+// ─────────────────────────────────────────────
+
+// — Pillow: EMA ± ATR-based band
+pillow_mid   = ta.ema(close, pillow_len)
+atr_val      = ta.atr(pillow_len)
+pillow_upper = pillow_mid + atr_val * pillow_mult
+pillow_lower = pillow_mid - atr_val * pillow_mult
+
+// — Shark Zone: based on highest high over lookback
+shark_high   = ta.highest(high, shark_len)
+shark_top    = shark_high
+shark_bot    = shark_high * (1.0 - shark_offset / 100.0)
+
+// — Volume metrics
+vol_ma       = ta.sma(volume, vol_len)
+vol_ratio    = volume / vol_ma
+
+// — RSI
+rsi_val      = ta.rsi(close, rsi_len)
+
+// — Stochastic
+stoch_k      = ta.sma(ta.stoch(close, high, low, stoch_len), stoch_smooth)
+
+// — Candle body size
+candle_range = high - low
+candle_body  = math.abs(close - open)
+body_ratio   = candle_range > 0 ? candle_body / candle_range : 0.0
+
+// — Trend state (price vs pillow)
+above_pillow = close > pillow_mid
+below_pillow = close < pillow_mid
+
+// — Candle direction
+bull_candle  = close >= open
+bear_candle  = close < open
+
+// ─────────────────────────────────────────────
+// SIGNAL LOGIC
+// ─────────────────────────────────────────────
+
+// ── SELLING CLIMAX (SC)
+// Heavy bear candle + volume surge + RSI oversold
+sc_signal = bear_candle
+          and vol_ratio >= vol_mult_sc
+          and rsi_val < rsi_os + 10
+          and body_ratio > body_pct
+
+// ── BUYING CLIMAX (BC)
+// Heavy bull candle + volume surge + RSI overbought
+bc_signal = bull_candle
+          and vol_ratio >= vol_mult_bc
+          and rsi_val > rsi_ob - 10
+          and body_ratio > body_pct
+
+// ── PINK CANDLE — Standby to Buy
+// Conditions: price near or below pillow, RSI oversold territory,
+// stoch oversold, candle showing early reversal wick (lower wick > body),
+// or immediately after a SC signal
+lower_wick   = math.min(open, close) - low
+upper_wick   = high - math.max(open, close)
+reversal_wick = lower_wick > candle_body * 0.8   // hammer-type wick
+
+pink_signal  = below_pillow
+             and rsi_val < rsi_os + 5
+             and stoch_k < 25
+             and (reversal_wick or sc_signal[1] or sc_signal)
+             and not bull_candle[1] == false   // don't fire in strong uptrend
+
+// ── WHITE CANDLE — Entry Signal (White Knight)
+// Strong bull candle after pink, price crossing back above pillow lower band,
+// volume confirms, RSI recovering
+white_signal = bull_candle
+             and body_ratio > body_pct
+             and (pink_signal[1] or pink_signal[2] or pink_signal[3])
+             and close > pillow_lower
+             and vol_ratio > 0.8
+             and rsi_val > rsi_val[1]
+
+// ── YELLOW CANDLE — Standby to Sell / Take Profit
+// Price near shark zone OR RSI overbought OR stoch overbought,
+// with a candle showing weakness (small body, upper wick dominant)
+near_shark   = high >= shark_bot * 0.99
+overbought   = rsi_val > rsi_ob or stoch_k > 75
+upper_wick_dom = upper_wick > candle_body * 0.8  // shooting star / doji wick
+
+yellow_signal = (near_shark or overbought)
+              and above_pillow
+              and (upper_wick_dom or not bull_candle)
+              and not bc_signal
+
+// ── BLUE CANDLE — Breakout Signal
+// Strong bull candle breaking above recent resistance / pillow upper,
+// with strong volume, not in shark zone yet
+breakout     = close > pillow_upper
+             and close > ta.highest(close, 10)[1]
+blue_signal  = breakout
+             and bull_candle
+             and body_ratio > body_pct
+             and vol_ratio > 1.2
+             and not near_shark
+
+// ── TREND COLOUR
+// Green = price above pillow mid → uptrend context
+// Red   = price below pillow mid → downtrend / danger zone
+trend_green  = above_pillow and not pink_signal and not white_signal and not yellow_signal and not blue_signal
+trend_red    = below_pillow and not pink_signal and not white_signal
+
+// ─────────────────────────────────────────────
+// CANDLE COLOURING
+// ─────────────────────────────────────────────
+candle_col = pink_signal   ? col_pink   :
+             white_signal  ? col_white  :
+             yellow_signal ? col_yellow :
+             blue_signal   ? col_blue   :
+             trend_green   ? col_green  :
+             trend_red     ? col_red    :
+             color.new(color.gray, 50)
+
+barcolor(candle_col)
+
+// ─────────────────────────────────────────────
+// BACKGROUND HIGHLIGHT
+// ─────────────────────────────────────────────
+bg_col = show_bg ?
+         (pink_signal   ? color.new(color.fuchsia, 92) :
+          white_signal  ? color.new(color.white,   92) :
+          yellow_signal ? color.new(color.yellow,  92) :
+          blue_signal   ? color.new(color.blue,    92) :
+          na) : na
+
+bgcolor(bg_col)
+
+// ─────────────────────────────────────────────
+// PILLOW BAND PLOTS
+// ─────────────────────────────────────────────
+p_upper = plot(show_pillow ? pillow_upper : na, "Pillow Upper", color=color.new(color.aqua, 70), linewidth=1, style=plot.style_line)
+p_lower = plot(show_pillow ? pillow_lower : na, "Pillow Lower", color=color.new(color.aqua, 70), linewidth=1, style=plot.style_line)
+p_mid   = plot(show_pillow ? pillow_mid   : na, "Pillow Mid",   color=color.new(color.aqua, 50), linewidth=2, style=plot.style_line)
+fill(p_upper, p_lower, color=col_pillow, title="Pillow Fill")
+
+// ─────────────────────────────────────────────
+// SHARK ZONE (TORY BOX) — drawn as a band
+// ─────────────────────────────────────────────
+p_shark_top = plot(show_shark ? shark_top : na, "Shark Zone Top", color=color.new(color.red, 60), linewidth=1, style=plot.style_stepline)
+p_shark_bot = plot(show_shark ? shark_bot : na, "Shark Zone Bot", color=color.new(color.red, 60), linewidth=1, style=plot.style_stepline)
+fill(p_shark_top, p_shark_bot, color=col_shark, title="Shark Zone Fill")
+
+// ─────────────────────────────────────────────
+// SIGNAL LABELS ON CHART
+// ─────────────────────────────────────────────
+lbl_sz = label_size == "tiny"   ? size.tiny   :
+         label_size == "small"  ? size.small  :
+         label_size == "normal" ? size.normal : size.large
+
+if show_labels
+    if pink_signal
+        label.new(bar_index, low - atr_val * 0.6,
+                  "🌸 PINK\nStandby Buy",
+                  style=label.style_label_up,
+                  color=color.new(color.fuchsia, 20),
+                  textcolor=color.white,
+                  size=lbl_sz)
+
+    if white_signal
+        label.new(bar_index, low - atr_val * 0.6,
+                  "⚪ WHITE\nEntry!",
+                  style=label.style_label_up,
+                  color=color.new(color.white, 10),
+                  textcolor=color.black,
+                  size=lbl_sz)
+
+    if yellow_signal
+        label.new(bar_index, high + atr_val * 0.6,
+                  "🟡 YELLOW\nStandby Sell",
+                  style=label.style_label_down,
+                  color=color.new(color.yellow, 20),
+                  textcolor=color.black,
+                  size=lbl_sz)
+
+    if blue_signal
+        label.new(bar_index, low - atr_val * 0.6,
+                  "🔵 BLUE\nBreakout",
+                  style=label.style_label_up,
+                  color=color.new(color.blue, 20),
+                  textcolor=color.white,
+                  size=lbl_sz)
+
+    if show_climax and sc_signal
+        label.new(bar_index, low - atr_val * 1.2,
+                  "SC\nSell Climax",
+                  style=label.style_label_up,
+                  color=color.new(color.red, 10),
+                  textcolor=color.white,
+                  size=size.tiny)
+
+    if show_climax and bc_signal
+        label.new(bar_index, high + atr_val * 1.2,
+                  "BC\nBuy Climax",
+                  style=label.style_label_down,
+                  color=color.new(color.orange, 10),
+                  textcolor=color.black,
+                  size=size.tiny)
+
+// ─────────────────────────────────────────────
+// SIGNAL DASHBOARD TABLE
+// ─────────────────────────────────────────────
+if show_table and barstate.islast
+    var table dash = table.new(position.top_right, 2, 9,
+                                border_width=1,
+                                border_color=color.new(color.gray, 60),
+                                frame_color=color.new(color.gray, 40),
+                                frame_width=1)
+
+    // Header
+    table.cell(dash, 0, 0, "PINK CANDLE",      text_color=color.fuchsia,  text_size=size.small, bgcolor=color.new(color.black, 70), text_halign=text.align_center)
+    table.cell(dash, 1, 0, "Signal Dashboard", text_color=color.white,    text_size=size.small, bgcolor=color.new(color.black, 70), text_halign=text.align_center)
+
+    // Active signal
+    active_sig  = pink_signal ? "🌸 PINK — Standby Buy" :
+                  white_signal ? "⚪ WHITE — ENTER" :
+                  yellow_signal ? "🟡 YELLOW — TP Zone" :
+                  blue_signal  ? "🔵 BLUE — Breakout" :
+                  sc_signal    ? "💥 SELL CLIMAX" :
+                  bc_signal    ? "🔶 BUY CLIMAX" :
+                  above_pillow ? "🟢 Uptrend" : "🔴 Downtrend"
+    sig_col     = pink_signal ? color.fuchsia :
+                  white_signal ? color.white :
+                  yellow_signal ? color.yellow :
+                  blue_signal ? color.blue :
+                  sc_signal ? color.red :
+                  bc_signal ? color.orange :
+                  above_pillow ? color.lime : color.red
+    table.cell(dash, 0, 1, "Active Signal",   text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 1, active_sig,        text_color=sig_col,     text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+    // RSI
+    rsi_col = rsi_val < rsi_os ? color.lime : rsi_val > rsi_ob ? color.red : color.yellow
+    table.cell(dash, 0, 2, "RSI (" + str.tostring(rsi_len) + ")", text_color=color.gray, text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 2, str.tostring(math.round(rsi_val, 1)),   text_color=rsi_col,   text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+    // Stochastic
+    stoch_col = stoch_k < 20 ? color.lime : stoch_k > 80 ? color.red : color.yellow
+    table.cell(dash, 0, 3, "Stoch K",                  text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 3, str.tostring(math.round(stoch_k, 1)),   text_color=stoch_col, text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+    // Volume ratio
+    vol_col = vol_ratio >= vol_mult_sc ? color.red : vol_ratio > 1.5 ? color.orange : color.gray
+    table.cell(dash, 0, 4, "Volume x Avg",  text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 4, str.tostring(math.round(vol_ratio, 2)) + "x", text_color=vol_col, text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+    // Pillow
+    pill_col   = close > pillow_mid ? color.lime : color.red
+    pill_state = close > pillow_upper ? "Above Band ✓" : close > pillow_mid ? "Above Mid ↑" : close > pillow_lower ? "Below Mid ↓" : "Below Band ✗"
+    table.cell(dash, 0, 5, "vs Pillow",    text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 5, pill_state,     text_color=pill_col,    text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+    // Shark zone
+    shark_col   = near_shark ? color.red : color.gray
+    shark_state = high >= shark_top ? "INSIDE ZONE ⚠" : near_shark ? "Near Shark Zone" : "Below Shark Zone"
+    table.cell(dash, 0, 6, "Shark Zone",   text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 6, shark_state,    text_color=shark_col,   text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+    // Trend
+    trend_col   = above_pillow ? color.lime : color.red
+    trend_state = above_pillow ? "UPTREND ✓" : "DOWNTREND — Caution"
+    table.cell(dash, 0, 7, "Trend",        text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 7, trend_state,    text_color=trend_col,   text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+    // SOP reminder
+    sop = white_signal ? "✅ SOP: Enter now" :
+          pink_signal  ? "⏳ SOP: Wait for WHITE" :
+          yellow_signal? "💰 SOP: Book profits" :
+          sc_signal    ? "👀 SOP: Watch for PINK next" :
+          blue_signal  ? "🚀 SOP: Hold with volume" : "— Monitor —"
+    table.cell(dash, 0, 8, "SOP Hint",     text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 8, sop,            text_color=color.white, text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+// ─────────────────────────────────────────────
+// ALERTS
+// ─────────────────────────────────────────────
+alertcondition(pink_signal,   title="PINK Candle — Standby Buy",   message="Pink Candle detected on {{ticker}} ({{interval}}). Potential reversal zone. Standby to buy — wait for WHITE candle confirmation.")
+alertcondition(white_signal,  title="WHITE Candle — Enter Now",    message="White Knight candle on {{ticker}} ({{interval}}). ENTRY SIGNAL — buy-on-dip confirmed. Check volume!")
+alertcondition(yellow_signal, title="YELLOW Candle — Standby Sell",message="Yellow Candle on {{ticker}} ({{interval}}). Take profit zone. Consider booking gains.")
+alertcondition(blue_signal,   title="BLUE Candle — Breakout",      message="Blue Breakout candle on {{ticker}} ({{interval}}). Strong momentum with volume. Breakout confirmed.")
+alertcondition(sc_signal,     title="Selling Climax Detected",     message="Selling Climax (SC) on {{ticker}} ({{interval}}). Heavy panic selling. Watch for Pink Candle reversal next.")
+alertcondition(bc_signal,     title="Buying Climax Detected",      message="Buying Climax (BC) on {{ticker}} ({{interval}}). Exhaustion at top. Consider taking profits.")
