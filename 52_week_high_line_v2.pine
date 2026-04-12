@@ -1,0 +1,59 @@
+//@version=6
+indicator(title="52-Week High Line", shorttitle="52W High", overlay=true)
+
+// ─── Inputs ───────────────────────────────────────────────────────────────────
+lineColor  = input.color(color.new(color.orange, 0), "Line Color")
+lineWidth  = input.int(2, "Line Width", minval=1, maxval=4)
+lineStyle  = input.string("Solid", "Line Style", options=["Solid","Dashed","Dotted"])
+showLabel  = input.bool(true, "Show Label")
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+BARS_IN_52W = 252
+
+// ─── Logic ────────────────────────────────────────────────────────────────────
+// Rolling 52-week highest high
+weekHigh52 = ta.highest(high, BARS_IN_52W)
+
+// ─── Draw line and label (updated every bar) ──────────────────────────────────
+var line  highLine  = na
+var label highLabel = na
+
+_style = lineStyle == "Dashed" ? line.style_dashed :
+         lineStyle == "Dotted" ? line.style_dotted :
+         line.style_solid
+
+// On every bar, delete and redraw so the line always reflects current 52W high
+// Line starts from exactly 252 bars ago (the start of the 52-week window)
+if barstate.islast or barstate.isrealtime
+    if not na(highLine)
+        line.delete(highLine)
+    if not na(highLabel)
+        label.delete(highLabel)
+
+    startBar = bar_index - BARS_IN_52W + 1
+
+    highLine := line.new(
+         x1     = startBar,
+         y1     = weekHigh52,
+         x2     = bar_index,
+         y2     = weekHigh52,
+         xloc   = xloc.bar_index,
+         extend = extend.right,
+         color  = lineColor,
+         style  = _style,
+         width  = lineWidth)
+
+    if showLabel
+        highLabel := label.new(
+             x         = startBar,
+             y         = weekHigh52,
+             text      = "52W High: " + str.tostring(weekHigh52, format.mintick),
+             xloc      = xloc.bar_index,
+             yloc      = yloc.price,
+             style     = label.style_label_right,
+             color     = color.new(lineColor, 80),
+             textcolor = lineColor,
+             size      = size.small)
+
+// Plot for reference
+plot(weekHigh52, "52W High Value", color=color.new(color.orange, 100))
