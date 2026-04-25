@@ -1,36 +1,51 @@
 //@version=6
-indicator(title="52-Week High Line", shorttitle="52W High", overlay=true)
+indicator(title="52-Week High", shorttitle="52W High", overlay=true, max_bars_back=300)
 
 // ─── Inputs ───────────────────────────────────────────────────────────────────
-lineColor  = input.color(color.new(color.orange, 0), "Line Color")
-lineWidth  = input.int(2, "Line Width", minval=1, maxval=4)
-lineStyle  = input.string("Solid", "Line Style", options=["Solid","Dashed","Dotted"])
-showLabel  = input.bool(true, "Show Label")
+grpHigh        = "52-Week High"
+lineColorHigh  = input.color(color.new(color.orange, 0), "Line Color",         group=grpHigh)
+lineWidth      = input.int(2,      "Line Width",    minval=1, maxval=4,         group=grpHigh)
+lineStyle      = input.string("Solid", "Line Style", options=["Solid","Dashed","Dotted"], group=grpHigh)
+showLabel      = input.bool(true,  "Show Label",                                group=grpHigh)
+showDist       = input.bool(true,  "Show Distance %",                           group=grpHigh)
+showPriceLabel = input.bool(true,  "Show Price on Axis",                        group=grpHigh)
+alertProxPct   = input.float(2.0,  "Proximity Alert (%)", minval=0.0, step=0.1, group=grpHigh)
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-BARS_IN_52W = 252
+// ─── Adaptive Lookback ────────────────────────────────────────────────────────
+IDEAL_BARS = 252
+adaptedLen = math.min(bar_index + 1, IDEAL_BARS)
 
 // ─── Logic ────────────────────────────────────────────────────────────────────
-// Rolling 52-week highest high
-weekHigh52 = ta.highest(high, BARS_IN_52W)
+weekHigh52 = ta.highest(high, adaptedLen)
+distPct    = (close - weekHigh52) / weekHigh52 * 100
+isNearHigh = math.abs(distPct) <= alertProxPct
 
-// ─── Draw line and label (updated every bar) ──────────────────────────────────
+// ─── Helper ───────────────────────────────────────────────────────────────────
+_lineStyle(s) =>
+    if s == "Dashed"
+        line.style_dashed
+    else if s == "Dotted"
+        line.style_dotted
+    else
+        line.style_solid
+
+// ─── Price axis label via plot + plotchar trick ───────────────────────────────
+// This is the native way to get a coloured price tag on the right axis
+plot(showPriceLabel ? weekHigh52 : na, "52W High Level",
+     color     = lineColorHigh,
+     linewidth = 1,
+     style     = plot.style_linebr,
+     display   = display.price_scale)
+
+// ─── Drawing ──────────────────────────────────────────────────────────────────
 var line  highLine  = na
 var label highLabel = na
 
-_style = lineStyle == "Dashed" ? line.style_dashed :
-         lineStyle == "Dotted" ? line.style_dotted :
-         line.style_solid
+if barstate.islast
+    line.delete(highLine)
+    label.delete(highLabel)
 
-// On every bar, delete and redraw so the line always reflects current 52W high
-// Line starts from exactly 252 bars ago (the start of the 52-week window)
-if barstate.islast or barstate.isrealtime
-    if not na(highLine)
-        line.delete(highLine)
-    if not na(highLabel)
-        label.delete(highLabel)
-
-    startBar = bar_index - BARS_IN_52W + 1
+    startBar = bar_index - adaptedLen + 1
 
     highLine := line.new(
          x1     = startBar,
@@ -39,21 +54,31 @@ if barstate.islast or barstate.isrealtime
          y2     = weekHigh52,
          xloc   = xloc.bar_index,
          extend = extend.right,
-         color  = lineColor,
-         style  = _style,
+         color  = lineColorHigh,
+         style  = _lineStyle(lineStyle),
          width  = lineWidth)
 
+    // ── Chart label (left side of line) ──
     if showLabel
+        distStr  = showDist ? " (" + (distPct >= 0 ? "+" : "") + str.tostring(distPct, "#.##") + "%)" : ""
+        barsNote = adaptedLen < IDEAL_BARS ? " [" + str.tostring(adaptedLen) + "d]" : ""
+        labelTxt = "52W High: " + str.tostring(weekHigh52, format.mintick) + distStr + barsNote
+
         highLabel := label.new(
              x         = startBar,
              y         = weekHigh52,
-             text      = "52W High: " + str.tostring(weekHigh52, format.mintick),
+             text      = labelTxt,
              xloc      = xloc.bar_index,
              yloc      = yloc.price,
              style     = label.style_label_right,
-             color     = color.new(lineColor, 80),
-             textcolor = lineColor,
+             color     = color.new(lineColorHigh, 80),
+             textcolor = lineColorHigh,
              size      = size.small)
 
-// Plot for reference
-plot(weekHigh52, "52W High Value", color=color.new(color.orange, 100))
+// ─── Data Window only ─────────────────────────────────────────────────────────
+plot(weekHigh52, "52W High",            display=display.data_window)
+plot(distPct,    "Dist% from 52W High", display=display.data_window)
+
+// ─── Alerts ───────────────────────────────────────────────────────────────────
+alertcondition(isNearHigh,                      "Near 52W High",  "Price is near the 52-Week High!")
+alertcondition(ta.crossover(close, weekHigh52), "Broke 52W High", "Price broke above the 52-Week High!")
