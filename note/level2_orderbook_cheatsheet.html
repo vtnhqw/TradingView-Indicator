@@ -1,0 +1,66 @@
+
+<style>
+  .sheet { padding: 1rem 0; font-family: var(--font-sans); }
+  .title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 1rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 14px; }
+  .card-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .row:last-child { margin-bottom: 0; }
+  .key { font-size: 13px; color: var(--color-text-secondary); }
+  .val { font-size: 13px; color: var(--color-text-primary); text-align: right; max-width: 55%; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--border-radius-md); }
+  .b-green { background: #EAF3DE; color: #3B6D11; }
+  .b-red { background: #FCEBEB; color: #A32D2D; }
+  .b-amber { background: #FAEEDA; color: #854F0B; }
+  .signal-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .signal-row:last-child { margin-bottom: 0; }
+  .signal-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+  .signal-text strong { color: var(--color-text-primary); font-weight: 500; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .dot-green { background: #639922; }
+  .dot-red { background: #E24B4A; }
+  .dot-amber { background: #BA7517; }
+  .warn { font-size: 12px; color: var(--color-text-secondary); border-top: 0.5px solid var(--color-border-tertiary); padding-top: 10px; margin-top: 2px; line-height: 1.6; }
+</style>
+<div class="sheet">
+  <p class="title">Level 2 order book — quick reference</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-label" style="color: #3B6D11;">Bid side (buyers)</div>
+      <div class="row"><span class="key">What it shows</span><span class="val">Prices buyers will pay</span></div>
+      <div class="row"><span class="key">Direction</span><span class="val">Prices go down ↓</span></div>
+      <div class="row"><span class="key">Big order = </span><span class="val">Support / floor</span></div>
+      <div class="row"><span class="key">Stacking fast =</span><span class="badge b-green">Bullish</span></div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color: #A32D2D;">Ask side (sellers)</div>
+      <div class="row"><span class="key">What it shows</span><span class="val">Prices sellers accept</span></div>
+      <div class="row"><span class="key">Direction</span><span class="val">Prices go up ↑</span></div>
+      <div class="row"><span class="key">Big order =</span><span class="val">Resistance / ceiling</span></div>
+      <div class="row"><span class="key">Stacking fast =</span><span class="badge b-red">Bearish</span></div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color: #854F0B;">The spread</div>
+      <div class="row"><span class="key">Formula</span><span class="val">Ask − Bid</span></div>
+      <div class="row"><span class="key">Tight (&lt;$0.10)</span><span class="badge b-green">Liquid</span></div>
+      <div class="row"><span class="key">Wide (&gt;$1.00)</span><span class="badge b-red">Risky</span></div>
+      <div class="row"><span class="key">Cost of market order</span><span class="val">= spread</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 10px;">
+    <div class="card-label" style="color: #185FA5;">Signals to watch</div>
+    <div class="signal-row"><div class="dot dot-green"></div><div class="signal-text"><strong>Big bid wall below price</strong> — downside protected, safer to buy</div></div>
+    <div class="signal-row"><div class="dot dot-red"></div><div class="signal-text"><strong>Big ask wall above price</strong> — wait for it to break before entering</div></div>
+    <div class="signal-row"><div class="dot dot-green"></div><div class="signal-text"><strong>Ask wall disappears</strong> — price often surges, possible breakout</div></div>
+    <div class="signal-row"><div class="dot dot-red"></div><div class="signal-text"><strong>Bid wall disappears</strong> — price may drop fast, possible breakdown</div></div>
+    <div class="signal-row"><div class="dot dot-amber"></div><div class="signal-text"><strong>Wall vanishes as price nears it</strong> — likely spoofing, be cautious</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label" style="color: var(--color-text-secondary);">Limitations</div>
+    <div class="warn">Dark pool trades are hidden · Data changes every millisecond · Always combine with chart + volume · Best for short-term / day trading, not long-term investing</div>
+  </div>
+</div>
