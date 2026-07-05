@@ -236,4 +236,4 @@ Combining these three indicators creates a powerful, systematic trading framewor
 * **MCDX Smart Money** is a Pine Script v6 recreation of the MCDX formula originally conceptualized by *Mango2Juice* and *kgiap123* on TradingView.
 * Subject to the **Mozilla Public License 2.0**.
 
-latest update
+latest updateyolo-update
