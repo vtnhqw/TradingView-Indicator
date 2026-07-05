@@ -235,5 +235,3 @@ Combining these three indicators creates a powerful, systematic trading framewor
 * **52-Week High & Pink Candle** are developed and maintained in this repository.
 * **MCDX Smart Money** is a Pine Script v6 recreation of the MCDX formula originally conceptualized by *Mango2Juice* and *kgiap123* on TradingView.
 * Subject to the **Mozilla Public License 2.0**.
-
-latest update
