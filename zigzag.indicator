@@ -1,0 +1,127 @@
+//@version=6
+indicator("ZigZag [ZZ]", shorttitle="ZZ", overlay=true, max_lines_count=500, max_labels_count=500)
+
+// ============================================================================
+// ZigZag [ZZ] — Swing High/Low Wave Indicator
+// Connects confirmed swing highs/lows with trend-colored lines, with optional
+// price/% labels and a live "developing leg" preview toward the current bar.
+// ============================================================================
+
+// ── Inputs ──────────────────────────────────────────────────────────────
+depth      = input.int(10, "Depth (Pivot Strength)", minval=1, tooltip="Bars required on each side of a bar to confirm it as a swing point. Higher = fewer, larger swings. Lower = more, smaller swings.", group="ZigZag Settings")
+srcMode    = input.string("High/Low", "Pivot Source", options=["High/Low", "Close"], group="ZigZag Settings")
+
+showLabels = input.bool(true, "Show Price Labels", group="Labels")
+showPct    = input.bool(true, "Show % Change", group="Labels")
+labelSize  = input.string(size.small, "Label Size", options=[size.tiny, size.small, size.normal, size.large], group="Labels")
+
+lineWidth  = input.int(2, "Line Width", minval=1, maxval=6, group="Style")
+upColor    = input.color(#089981, "Up Leg Color", group="Style")
+dnColor    = input.color(#f23645, "Down Leg Color", group="Style")
+showDev    = input.bool(true, "Show Live Developing Leg", group="Style")
+bgShade    = input.bool(false, "Shade Background by Trend", group="Style")
+
+// ── Pivot detection ─────────────────────────────────────────────────────
+useClose = srcMode == "Close"
+float ph = useClose ? ta.pivothigh(close, depth, depth) : ta.pivothigh(high, depth, depth)
+float pl = useClose ? ta.pivotlow(close, depth, depth)  : ta.pivotlow(low, depth, depth)
+
+pivotBar = bar_index - depth
+
+// ── State (persists across bars) ────────────────────────────────────────
+var int   p2Dir   = 0     // 0 = no pivot yet, 1 = last point is a HIGH, -1 = last point is a LOW
+var int   p1Bar   = na
+var float p1Price = na
+var int   p2Bar   = na
+var float p2Price = na
+var line  zzLine  = na
+var label zzLabel = na
+var line  devLine = na
+
+newHighConfirmed = false
+newLowConfirmed  = false
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+buildLabelText(_price, _prevPrice) =>
+    txt = str.tostring(_price, format.mintick)
+    if showPct and not na(_prevPrice) and _prevPrice != 0
+        pct = (_price - _prevPrice) / _prevPrice * 100
+        txt := txt + "\n" + (pct >= 0 ? "+" : "") + str.tostring(pct, "#.##") + "%"
+    txt
+
+makeLabel(_bar, _price, _isHigh, _prevPrice) =>
+    label lbl = na
+    if showLabels
+        lbl := label.new(_bar, _price, buildLabelText(_price, _prevPrice),
+                          style=_isHigh ? label.style_label_down : label.style_label_up,
+                          color=color.new(color.white, 100),
+                          textcolor=_isHigh ? dnColor : upColor,
+                          size=labelSize)
+    lbl
+
+// ── Process a new pivot HIGH ──────────────────────────────────────────────
+if not na(ph)
+    if p2Dir <= 0
+        // Reversal: previous point becomes fixed (p1); this high starts the new point (p2)
+        if not na(p2Bar)
+            p1Bar   := p2Bar
+            p1Price := p2Price
+            zzLine  := line.new(p1Bar, p1Price, pivotBar, ph, color=upColor, width=lineWidth)
+            zzLabel := makeLabel(pivotBar, ph, true, p1Price)
+        p2Bar   := pivotBar
+        p2Price := ph
+        p2Dir   := 1
+        newHighConfirmed := true
+    else if ph > p2Price
+        // Continuation: extend the current up-leg to the new, higher high
+        p2Bar   := pivotBar
+        p2Price := ph
+        if not na(zzLine)
+            line.set_x2(zzLine, p2Bar)
+            line.set_y2(zzLine, p2Price)
+        if not na(zzLabel)
+            label.set_x(zzLabel, p2Bar)
+            label.set_y(zzLabel, p2Price)
+            label.set_text(zzLabel, buildLabelText(p2Price, p1Price))
+
+// ── Process a new pivot LOW ───────────────────────────────────────────────
+if not na(pl)
+    if p2Dir >= 0
+        // Reversal: previous point becomes fixed (p1); this low starts the new point (p2)
+        if not na(p2Bar)
+            p1Bar   := p2Bar
+            p1Price := p2Price
+            zzLine  := line.new(p1Bar, p1Price, pivotBar, pl, color=dnColor, width=lineWidth)
+            zzLabel := makeLabel(pivotBar, pl, false, p1Price)
+        p2Bar   := pivotBar
+        p2Price := pl
+        p2Dir   := -1
+        newLowConfirmed := true
+    else if pl < p2Price
+        // Continuation: extend the current down-leg to the new, lower low
+        p2Bar   := pivotBar
+        p2Price := pl
+        if not na(zzLine)
+            line.set_x2(zzLine, p2Bar)
+            line.set_y2(zzLine, p2Price)
+        if not na(zzLabel)
+            label.set_x(zzLabel, p2Bar)
+            label.set_y(zzLabel, p2Price)
+            label.set_text(zzLabel, buildLabelText(p2Price, p1Price))
+
+// ── Live developing leg (dotted preview from last confirmed point to now) ──
+if showDev and not na(p2Bar)
+    if na(devLine)
+        devLine := line.new(p2Bar, p2Price, bar_index, close, color=color.gray, style=line.style_dotted, width=1)
+    else
+        line.set_x1(devLine, p2Bar)
+        line.set_y1(devLine, p2Price)
+        line.set_x2(devLine, bar_index)
+        line.set_y2(devLine, close)
+
+// ── Optional trend background shading ──────────────────────────────────────
+bgcolor(bgShade ? (p2Dir == 1 ? color.new(upColor, 92) : p2Dir == -1 ? color.new(dnColor, 92) : na) : na)
+
+// ── Alerts ──────────────────────────────────────────────────────────────
+alertcondition(newHighConfirmed, title="ZZ New Swing High", message="ZZ: new confirmed swing HIGH")
+alertcondition(newLowConfirmed,  title="ZZ New Swing Low",  message="ZZ: new confirmed swing LOW")
