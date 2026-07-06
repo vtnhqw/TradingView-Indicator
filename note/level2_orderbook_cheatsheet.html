@@ -1,66 +1,2035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level II Order Book - Interactive Reference Guide & Simulator</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Styling variables and custom css */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      /* Dark Theme (Default) Variables */
+      --color-background-primary: #0c0f17;
+      --color-background-secondary: #131722;
+      --color-background-card: rgba(20, 24, 38, 0.65);
+      
+      --color-border-primary: rgba(255, 255, 255, 0.08);
+      --color-border-secondary: rgba(255, 255, 255, 0.04);
+      --color-border-tertiary: #2a2e39;
+      
+      --color-text-primary: #f0f3fa;
+      --color-text-secondary: #848e9c;
+      --color-text-muted: #4b5563;
+      
+      /* Order book specific colors */
+      --color-bid: #00c076;
+      --color-bid-light: rgba(0, 192, 118, 0.08);
+      
+      --color-ask: #ff3b30;
+      --color-ask-light: rgba(255, 59, 48, 0.08);
+      
+      --color-warning: #ffb700;
+      --color-warning-light: rgba(255, 183, 0, 0.1);
+      --color-info: #007aff;
+      
+      --color-console-bg: rgba(6, 8, 13, 0.85);
+      --color-console-text: #f0f3fa;
+      --color-controls-bg: rgba(255, 255, 255, 0.01);
+      
+      /* Opaque select background for dropdown contrast readability */
+      --color-select-bg: rgba(19, 23, 34, 0.9);
+      --color-select-border: rgba(255, 255, 255, 0.08);
+      --color-select-options-bg: #161925;
+      
+      --color-table-header-bg: rgba(0, 0, 0, 0.25);
+      
+      --border-radius-lg: 12px;
+      --border-radius-md: 6px;
+      --box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      --glass-blur: blur(12px) saturate(180%);
+      
+      --bg-gradient: radial-gradient(circle at top, #1e2235 0%, #0c0f17 70%);
+      --glow-shadow-green: 0 0 10px rgba(0, 192, 118, 0.25);
+      --glow-shadow-red: 0 0 10px rgba(255, 59, 48, 0.25);
+    }
 
-<style>
-  .sheet { padding: 1rem 0; font-family: var(--font-sans); }
-  .title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 1rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px; }
-  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 14px; }
-  .card-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-  .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-  .row:last-child { margin-bottom: 0; }
-  .key { font-size: 13px; color: var(--color-text-secondary); }
-  .val { font-size: 13px; color: var(--color-text-primary); text-align: right; max-width: 55%; }
-  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--border-radius-md); }
-  .b-green { background: #EAF3DE; color: #3B6D11; }
-  .b-red { background: #FCEBEB; color: #A32D2D; }
-  .b-amber { background: #FAEEDA; color: #854F0B; }
-  .signal-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
-  .signal-row:last-child { margin-bottom: 0; }
-  .signal-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
-  .signal-text strong { color: var(--color-text-primary); font-weight: 500; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-  .dot-green { background: #639922; }
-  .dot-red { background: #E24B4A; }
-  .dot-amber { background: #BA7517; }
-  .warn { font-size: 12px; color: var(--color-text-secondary); border-top: 0.5px solid var(--color-border-tertiary); padding-top: 10px; margin-top: 2px; line-height: 1.6; }
-</style>
+    body.light-theme {
+      /* Light Theme Variables */
+      --color-background-primary: #f4f6fa;
+      --color-background-secondary: #ffffff;
+      --color-background-card: rgba(255, 255, 255, 0.65);
+      
+      --color-border-primary: rgba(0, 0, 0, 0.08);
+      --color-border-secondary: rgba(0, 0, 0, 0.04);
+      --color-border-tertiary: #d1d4dc;
+      
+      --color-text-primary: #131722;
+      --color-text-secondary: #5d606b;
+      --color-text-muted: #9598a1;
+      
+      /* Order book specific colors */
+      --color-bid: #008f56;
+      --color-bid-light: rgba(0, 143, 86, 0.07);
+      
+      --color-ask: #d92b2b;
+      --color-ask-light: rgba(217, 43, 43, 0.07);
+      
+      --color-warning: #b26a00;
+      --color-warning-light: rgba(178, 106, 0, 0.08);
+      --color-info: #0066cc;
+      
+      --color-console-bg: rgba(255, 255, 255, 0.85);
+      --color-console-text: #131722;
+      --color-controls-bg: rgba(0, 0, 0, 0.02);
+      
+      /* Opaque select background in Light mode */
+      --color-select-bg: rgba(255, 255, 255, 0.95);
+      --color-select-border: rgba(0, 0, 0, 0.12);
+      --color-select-options-bg: #ffffff;
+      
+      --color-table-header-bg: rgba(0, 0, 0, 0.04);
+      
+      --box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+      --bg-gradient: radial-gradient(circle at top, #e3e8f4 0%, #f4f6fa 70%);
+      --glow-shadow-green: none;
+      --glow-shadow-red: none;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--color-background-primary);
+      background-image: var(--bg-gradient);
+      color: var(--color-text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+      min-height: 100vh;
+      line-height: 1.5;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* Container */
+    .sheet {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 10px 0;
+    }
+
+    /* Header styling */
+    .header-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--color-border-primary);
+      padding-bottom: 20px;
+    }
+
+    .title-group h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .title-group p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+
+    /* Theme Toggle Button */
+    .btn-theme-toggle {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--color-border-primary);
+      color: var(--color-text-primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.light-theme .btn-theme-toggle {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: var(--color-border-primary);
+    }
+
+    body.light-theme .btn-theme-toggle:hover {
+      background: rgba(0, 0, 0, 0.08);
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Live Indicator */
+    .live-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 192, 118, 0.1);
+      border: 1px solid rgba(0, 192, 118, 0.2);
+      color: var(--color-bid);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 192, 118, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    body.light-theme .live-status {
+      background: rgba(0, 143, 86, 0.08);
+      border-color: rgba(0, 143, 86, 0.18);
+    }
+
+    .live-status.paused {
+      background: rgba(132, 142, 156, 0.08);
+      border-color: rgba(132, 142, 156, 0.2);
+      color: var(--color-text-secondary);
+      box-shadow: none;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--color-bid);
+      animation: pulse 1.5s infinite;
+    }
+
+    .live-status.paused .status-dot {
+      background-color: var(--color-text-secondary);
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.5; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.5; }
+    }
+
+    /* Dashboard Layout Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Glassmorphism Cards */
+    .card {
+      background: var(--color-background-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--color-border-primary);
+      border-radius: var(--border-radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--box-shadow);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 20px;
+    }
+
+    .simulator-card {
+      position: relative;
+      z-index: 10;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+    
+    body.light-theme .card:hover {
+      border-color: rgba(0, 0, 0, 0.12);
+      box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12);
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Cheatsheet Grid inside right column */
+    .cheatsheet-subgrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .cheatsheet-card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: 12px 14px;
+      transition: border-color 0.2s ease, background-color 0.3s ease;
+    }
+
+    body.light-theme .cheatsheet-card {
+      background: rgba(0, 0, 0, 0.01);
+    }
+
+    .cheatsheet-card:hover {
+      border-color: var(--color-border-primary);
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .row:last-child {
+      margin-bottom: 0;
+    }
+
+    .key {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .val {
+      font-size: 13px;
+      color: var(--color-text-primary);
+      text-align: right;
+      font-weight: 500;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: var(--border-radius-md);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .b-green {
+      background: var(--color-bid-light);
+      color: var(--color-bid);
+      border: 1px solid var(--color-bid-light);
+    }
+
+    .b-red {
+      background: var(--color-ask-light);
+      color: var(--color-ask);
+      border: 1px solid var(--color-ask-light);
+    }
+
+    .b-amber {
+      background: var(--color-warning-light);
+      color: var(--color-warning);
+      border: 1px solid var(--color-warning-light);
+    }
+
+    /* Order Book Simulator Panel */
+    .orderbook-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .orderbook-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--color-border-secondary);
+      padding-bottom: 10px;
+    }
+
+    .symbol-info {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .symbol-badge {
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--color-text-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: normal;
+    }
+
+    body.light-theme .symbol-badge {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    /* Order Book Table */
+    .ob-table-container {
+      background: rgba(13, 16, 23, 0.35);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    body.light-theme .ob-table-container {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .ob-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .ob-table th {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: right;
+      padding: 8px 12px;
+      background: var(--color-table-header-bg);
+      border-bottom: 1px solid var(--color-border-secondary);
+    }
+
+    .ob-table th:first-child, .ob-table td:first-child {
+      text-align: left;
+    }
+
+    .ob-table td {
+      padding: 6px 12px;
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border-secondary);
+      position: relative;
+      transition: color 0.4s ease;
+    }
+
+    .ob-table tr {
+      transition: background 0.1s ease;
+    }
+
+    /* Wall highlighting */
+    .ob-table tr.wall-row {
+      font-weight: bold;
+      border-left: 3px solid var(--color-info);
+    }
+
+    .ob-table tr.wall-row.ask-wall {
+      border-left-color: var(--color-ask);
+      box-shadow: inset 4px 0 0 -2px rgba(255, 59, 48, 0.15);
+    }
+
+    .ob-table tr.wall-row.bid-wall {
+      border-left-color: var(--color-bid);
+      box-shadow: inset 4px 0 0 -2px rgba(0, 192, 118, 0.15);
+    }
+
+    /* Colors */
+    .color-ask {
+      color: var(--color-ask);
+    }
+
+    .color-bid {
+      color: var(--color-bid);
+    }
+
+    /* Mid Price Row */
+    .mid-price-tr {
+      background: rgba(0, 0, 0, 0.15);
+      border-top: 1px solid var(--color-border-secondary);
+      border-bottom: 1px solid var(--color-border-secondary);
+    }
+
+    body.light-theme .mid-price-tr {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .mid-price-cell {
+      padding: 12px 12px !important;
+      text-align: center !important;
+    }
+
+    .mid-price-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mid-price-value {
+      font-size: 20px;
+      font-weight: 600;
+      transition: color 0.15s ease;
+    }
+
+    .mid-price-value.up {
+      color: var(--color-bid);
+      text-shadow: var(--glow-shadow-green);
+    }
+
+    .mid-price-value.down {
+      color: var(--color-ask);
+      text-shadow: var(--glow-shadow-red);
+    }
+
+    .mid-price-dir {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .mid-price-dir.up { color: var(--color-bid); }
+    .mid-price-dir.down { color: var(--color-ask); }
+
+    .spread-info {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+      font-family: var(--font-sans);
+    }
+
+    /* Flashing cell values on size changes */
+    .flash-green-text {
+      color: var(--color-bid) !important;
+      font-weight: bold;
+      transition: none;
+    }
+
+    .flash-red-text {
+      color: var(--color-ask) !important;
+      font-weight: bold;
+      transition: none;
+    }
+
+    /* Live Terminal Console Log */
+    .console-container {
+      margin-top: 14px;
+    }
+
+    .console-header {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-secondary);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .console-box {
+      background: var(--color-console-bg);
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      height: 150px;
+      overflow-y: auto;
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--color-console-text);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+      scroll-behavior: smooth;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+    }
+
+    body.light-theme .console-box {
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .console-line {
+      margin-bottom: 5px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .console-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .log-time {
+      color: #3b4252;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    body.light-theme .log-time {
+      color: #8c96a5;
+    }
+
+    .log-info { color: var(--color-text-primary); }
+    .log-bullish { color: var(--color-bid); }
+    .log-bearish { color: var(--color-ask); }
+    .log-warning { color: var(--color-warning); }
+    .log-system { color: var(--color-info); }
+
+    /* Control Panel Form Elements */
+    .simulator-controls {
+      background: var(--color-controls-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: 14px 16px;
+    }
+
+    .controls-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .control-input-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* CUSTOM DROPDOWN SELECT STYLING */
+    .custom-select {
+      position: relative;
+      width: 100%;
+    }
+
+    /* Elevate active dropdown options above terminal cards */
+    .custom-select.active {
+      z-index: 105;
+    }
+
+    .select-trigger {
+      background: var(--color-select-bg);
+      border: 1px solid var(--color-select-border);
+      color: var(--color-text-primary);
+      padding: 8px 12px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .select-trigger:hover {
+      border-color: var(--color-info);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    body.light-theme .select-trigger:hover {
+      background: rgba(0, 0, 0, 0.01);
+    }
+
+    .custom-select.active .select-trigger {
+      border-color: var(--color-info);
+      box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.15);
+    }
+
+    .select-arrow {
+      font-size: 9px;
+      color: var(--color-text-secondary);
+      transition: transform 0.2s ease;
+      margin-left: 8px;
+    }
+
+    .custom-select.active .select-arrow {
+      transform: rotate(180deg);
+    }
+
+    .select-options-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-select-options-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--color-border-primary);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--box-shadow);
+      margin-top: 6px;
+      z-index: 150;
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .custom-select.active .select-options-panel {
+      display: block;
+      animation: slideDown 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .select-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--color-text-primary);
+      transition: all 0.15s ease;
+      border-bottom: 1px solid var(--color-border-secondary);
+    }
+
+    .select-option:last-child {
+      border-bottom: none;
+    }
+
+    .select-option:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--color-info);
+    }
+
+    body.light-theme .select-option:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .select-option.selected {
+      background: rgba(0, 122, 255, 0.1) !important;
+      color: var(--color-info);
+      font-weight: 600;
+    }
+
+    body.light-theme .select-option.selected {
+      background: rgba(0, 122, 255, 0.06) !important;
+    }
+
+    /* Buttons */
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--color-border-primary);
+      color: var(--color-text-primary);
+      padding: 8px 14px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    body.light-theme .btn {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.light-theme .btn:hover {
+      background: rgba(0, 0, 0, 0.08);
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary {
+      background: var(--color-info);
+      color: white;
+      border-color: transparent;
+    }
+
+    .btn-primary:hover {
+      background: #0062cc;
+    }
+
+    /* Interactive Signals Section */
+    .interactive-signals-card {
+      margin-bottom: 12px;
+    }
+
+    .signal-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--border-radius-md);
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .signal-row:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-left-color: var(--color-border-primary);
+    }
+
+    body.light-theme .signal-row:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .signal-row.active-signal {
+      background: rgba(0, 122, 255, 0.1);
+      border-left-color: var(--color-info);
+      box-shadow: inset 2px 0 10px rgba(0, 122, 255, 0.05);
+    }
+
+    body.light-theme .signal-row.active-signal {
+      background: rgba(0, 122, 255, 0.06);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    .dot-green { background: var(--color-bid); }
+    .dot-red { background: var(--color-ask); }
+    .dot-amber { background: var(--color-warning); }
+
+    .signal-text {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .signal-text strong {
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    .signal-row.active-signal .signal-text {
+      color: var(--color-text-primary);
+    }
+
+    .signal-row.active-signal .signal-text strong {
+      color: var(--color-info);
+    }
+
+    .warn-container {
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+    }
+
+    body.light-theme .warn-container {
+      background: rgba(0, 0, 0, 0.01);
+    }
+
+    .warn {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    .warn-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .warn-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .warn-bullet {
+      color: var(--color-warning);
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* Custom scrollbar for console */
+    .console-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    .console-box::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .console-box::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    body.light-theme .console-box::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.12);
+    }
+    .console-box::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
 <div class="sheet">
-  <p class="title">Level 2 order book — quick reference</p>
+  <!-- Header -->
+  <div class="header-panel">
+    <div class="title-group">
+      <h1>Level II Order Book Dashboard</h1>
+      <p>A real-time interactive reference guide to master order flow and market depth analysis</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      
+      <!-- Theme Toggle Switch -->
+      <button class="btn-theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span class="toggle-text">Light Mode</span>
+      </button>
 
-  <div class="grid">
-    <div class="card">
-      <div class="card-label" style="color: #3B6D11;">Bid side (buyers)</div>
-      <div class="row"><span class="key">What it shows</span><span class="val">Prices buyers will pay</span></div>
-      <div class="row"><span class="key">Direction</span><span class="val">Prices go down ↓</span></div>
-      <div class="row"><span class="key">Big order = </span><span class="val">Support / floor</span></div>
-      <div class="row"><span class="key">Stacking fast =</span><span class="badge b-green">Bullish</span></div>
-    </div>
-    <div class="card">
-      <div class="card-label" style="color: #A32D2D;">Ask side (sellers)</div>
-      <div class="row"><span class="key">What it shows</span><span class="val">Prices sellers accept</span></div>
-      <div class="row"><span class="key">Direction</span><span class="val">Prices go up ↑</span></div>
-      <div class="row"><span class="key">Big order =</span><span class="val">Resistance / ceiling</span></div>
-      <div class="row"><span class="key">Stacking fast =</span><span class="badge b-red">Bearish</span></div>
-    </div>
-    <div class="card">
-      <div class="card-label" style="color: #854F0B;">The spread</div>
-      <div class="row"><span class="key">Formula</span><span class="val">Ask − Bid</span></div>
-      <div class="row"><span class="key">Tight (&lt;$0.10)</span><span class="badge b-green">Liquid</span></div>
-      <div class="row"><span class="key">Wide (&gt;$1.00)</span><span class="badge b-red">Risky</span></div>
-      <div class="row"><span class="key">Cost of market order</span><span class="val">= spread</span></div>
+      <!-- Live Status -->
+      <div class="live-status" id="live-indicator">
+        <div class="status-dot"></div>
+        <span id="live-indicator-text">Simulator Live</span>
+      </div>
     </div>
   </div>
 
-  <div class="card" style="margin-bottom: 10px;">
-    <div class="card-label" style="color: #185FA5;">Signals to watch</div>
-    <div class="signal-row"><div class="dot dot-green"></div><div class="signal-text"><strong>Big bid wall below price</strong> — downside protected, safer to buy</div></div>
-    <div class="signal-row"><div class="dot dot-red"></div><div class="signal-text"><strong>Big ask wall above price</strong> — wait for it to break before entering</div></div>
-    <div class="signal-row"><div class="dot dot-green"></div><div class="signal-text"><strong>Ask wall disappears</strong> — price often surges, possible breakout</div></div>
-    <div class="signal-row"><div class="dot dot-red"></div><div class="signal-text"><strong>Bid wall disappears</strong> — price may drop fast, possible breakdown</div></div>
-    <div class="signal-row"><div class="dot dot-amber"></div><div class="signal-text"><strong>Wall vanishes as price nears it</strong> — likely spoofing, be cautious</div></div>
-  </div>
+  <!-- Dashboard Grid -->
+  <div class="dashboard-grid">
+    
+    <!-- Left Column: Interactive Order Book Simulator -->
+    <div>
+      <div class="card simulator-card">
+        <div class="card-label">
+          <span>Live Order Book Simulator</span>
+          <span style="color: var(--color-text-secondary); font-size: 11px; font-weight: normal; text-transform: none;">Level II Depth</span>
+        </div>
+        
+        <div class="orderbook-panel">
+          <div class="orderbook-header">
+            <div class="symbol-info" id="ob-symbol-name">
+              BTC/USDT <span class="symbol-badge">Crypto</span>
+            </div>
+            <div class="spread-info" id="top-spread-indicator" style="font-family: var(--font-mono); font-size: 12px;">
+              Spread: $1.00 (0.01%)
+            </div>
+          </div>
+          
+          <div class="ob-table-container">
+            <table class="ob-table">
+              <thead>
+                <tr>
+                  <th style="width: 35%;">Price (USD)</th>
+                  <th id="ob-size-header" style="width: 30%;">Size (BTC)</th>
+                  <th id="ob-total-header" style="width: 35%;">Total (BTC)</th>
+                </tr>
+              </thead>
+              <tbody id="ob-tbody">
+                <!-- Javascript will inject order book rows here -->
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Simulator Controls -->
+          <div class="simulator-controls">
+            <div class="controls-grid">
+              
+              <!-- Custom Dropdown: Asset Class -->
+              <div class="control-row">
+                <span class="control-label">Asset Class</span>
+                <div class="custom-select" id="custom-select-symbol">
+                  <div class="select-trigger" onclick="toggleDropdown('custom-select-symbol', event)">
+                    <span class="trigger-text">BTC/USDT (Crypto)</span>
+                    <span class="select-arrow">▼</span>
+                  </div>
+                  <div class="select-options-panel">
+                    <div class="select-option selected" data-value="BTC" onclick="selectOption('custom-select-symbol', 'BTC', 'BTC/USDT (Crypto)', changeSymbol)">BTC/USDT (Crypto)</div>
+                    <div class="select-option" data-value="AAPL" onclick="selectOption('custom-select-symbol', 'AAPL', 'AAPL (Stock)', changeSymbol)">AAPL (Stock)</div>
+                    <div class="select-option" data-value="EURUSD" onclick="selectOption('custom-select-symbol', 'EURUSD', 'EUR/USD (Forex)', changeSymbol)">EUR/USD (Forex)</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Custom Dropdown: Scenario Mode -->
+              <div class="control-row">
+                <span class="control-label">Scenario Mode</span>
+                <div class="custom-select" id="custom-select-scenario">
+                  <div class="select-trigger" onclick="toggleDropdown('custom-select-scenario', event)">
+                    <span class="trigger-text">Normal Market (Balanced)</span>
+                    <span class="select-arrow">▼</span>
+                  </div>
+                  <div class="select-options-panel">
+                    <div class="select-option selected" data-value="normal" onclick="selectOption('custom-select-scenario', 'normal', 'Normal Market (Balanced)', selectScenario)">Normal Market (Balanced)</div>
+                    <div class="select-option" data-value="bid_wall" onclick="selectOption('custom-select-scenario', 'bid_wall', 'Bid Wall (Support)', selectScenario)">Bid Wall (Support)</div>
+                    <div class="select-option" data-value="ask_wall" onclick="selectOption('custom-select-scenario', 'ask_wall', 'Ask Wall (Resistance)', selectScenario)">Ask Wall (Resistance)</div>
+                    <div class="select-option" data-value="breakout" onclick="selectOption('custom-select-scenario', 'breakout', 'Breakout (Ask Wall Eaten)', selectScenario)">Breakout (Ask Wall Eaten)</div>
+                    <div class="select-option" data-value="breakdown" onclick="selectOption('custom-select-scenario', 'breakdown', 'Breakdown (Bid Wall Eaten)', selectScenario)">Breakdown (Bid Wall Eaten)</div>
+                    <div class="select-option" data-value="spoofing" onclick="selectOption('custom-select-scenario', 'spoofing', 'Spoofing (Fake Wall Canceled)', selectScenario)">Spoofing (Fake Wall Canceled)</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Custom Dropdown: Update Speed -->
+              <div class="control-row">
+                <span class="control-label">Update Speed</span>
+                <div class="custom-select" id="custom-select-speed">
+                  <div class="select-trigger" onclick="toggleDropdown('custom-select-speed', event)">
+                    <span class="trigger-text">Normal (0.75s)</span>
+                    <span class="select-arrow">▼</span>
+                  </div>
+                  <div class="select-options-panel">
+                    <div class="select-option" data-value="1200" onclick="selectOption('custom-select-speed', '1200', 'Slow (1.2s)', changeSpeed)">Slow (1.2s)</div>
+                    <div class="select-option selected" data-value="750" onclick="selectOption('custom-select-speed', '750', 'Normal (0.75s)', changeSpeed)">Normal (0.75s)</div>
+                    <div class="select-option" data-value="400" onclick="selectOption('custom-select-speed', '400', 'Fast (0.4s)', changeSpeed)">Fast (0.4s)</div>
+                  </div>
+                </div>
+              </div>
 
-  <div class="card">
-    <div class="card-label" style="color: var(--color-text-secondary);">Limitations</div>
-    <div class="warn">Dark pool trades are hidden · Data changes every millisecond · Always combine with chart + volume · Best for short-term / day trading, not long-term investing</div>
+              <!-- Button actions -->
+              <div class="control-row">
+                <span class="control-label">Action</span>
+                <div class="control-input-wrapper" style="width: 100%;">
+                  <button class="btn btn-primary" id="play-btn" onclick="togglePlayPause()" style="flex: 1;">Pause Simulator</button>
+                  <button class="btn btn-secondary" onclick="resetSimulator()" style="flex: 0 0 auto;">Reset Book</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Live Console -->
+      <div class="card" style="margin-bottom: 0;">
+        <div class="console-container">
+          <div class="console-header">
+            <span>Order Flow Mechanics Explainer</span>
+            <span style="color: var(--color-info); font-family: var(--font-mono);">TERMINAL // L2_LOG</span>
+          </div>
+          <div class="console-box" id="console-box">
+            <!-- Logs will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Column: Cheatsheet Cards & Interactive Signal Linker -->
+    <div>
+      <!-- Core Cheatsheet Cards -->
+      <div class="cheatsheet-subgrid">
+        
+        <!-- Bid Side Card -->
+        <div class="cheatsheet-card" style="border-top: 3px solid var(--color-bid);">
+          <div class="card-label" style="color: var(--color-bid); margin-bottom: 8px;">Bid Side (Buyers)</div>
+          <div class="row">
+            <span class="key">Shows</span>
+            <span class="val">Prices buyers will pay</span>
+          </div>
+          <div class="row">
+            <span class="key">Direction</span>
+            <span class="val">Prices go down ↓</span>
+          </div>
+          <div class="row">
+            <span class="key">Big Order</span>
+            <span class="val" style="color: var(--color-bid);">Support / Floor</span>
+          </div>
+          <div class="row">
+            <span class="key">Stacking</span>
+            <span class="badge b-green">Bullish</span>
+          </div>
+        </div>
+        
+        <!-- Ask Side Card -->
+        <div class="cheatsheet-card" style="border-top: 3px solid var(--color-ask);">
+          <div class="card-label" style="color: var(--color-ask); margin-bottom: 8px;">Ask Side (Sellers)</div>
+          <div class="row">
+            <span class="key">Shows</span>
+            <span class="val">Prices sellers accept</span>
+          </div>
+          <div class="row">
+            <span class="key">Direction</span>
+            <span class="val">Prices go up ↑</span>
+          </div>
+          <div class="row">
+            <span class="key">Big Order</span>
+            <span class="val" style="color: var(--color-ask);">Resistance / Ceiling</span>
+          </div>
+          <div class="row">
+            <span class="key">Stacking</span>
+            <span class="badge b-red">Bearish</span>
+          </div>
+        </div>
+        
+      </div>
+      
+      <!-- Spread Card -->
+      <div class="card" style="padding: 12px 16px; margin-bottom: 16px;">
+        <div class="card-label" style="color: var(--color-warning); margin-bottom: 8px;">The Spread (Midpoint Gap)</div>
+        <div class="cheatsheet-subgrid" style="grid-template-columns: 1fr 1.2fr; gap: 15px; margin-bottom: 0;">
+          <div>
+            <div class="row">
+              <span class="key">Formula</span>
+              <span class="val" style="font-family: var(--font-mono);">Ask − Bid</span>
+            </div>
+            <div class="row">
+              <span class="key">Market Cost</span>
+              <span class="val">= Spread</span>
+            </div>
+          </div>
+          <div>
+            <div class="row">
+              <span class="key">Tight (&lt;$0.10)</span>
+              <span class="badge b-green">Liquid / Safe</span>
+            </div>
+            <div class="row">
+              <span class="key">Wide (&gt;$1.00)</span>
+              <span class="badge b-red">Illiquid / Risky</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Interactive Signals to Watch Card -->
+      <div class="card interactive-signals-card">
+        <div class="card-label" style="color: var(--color-info);">
+          <span>Signals to Watch</span>
+          <span style="font-size: 11px; font-weight: normal; text-transform: none; color: var(--color-text-secondary);">Click a signal to simulate ⚡</span>
+        </div>
+        
+        <!-- Signal Rows -->
+        <div class="signal-row" id="signal-bid_wall" onclick="triggerSignal('bid_wall')">
+          <div class="dot dot-green"></div>
+          <div class="signal-text">
+            <strong>Big bid wall below price</strong> — heavy buying support; protects downside, making it safer to enter long positions.
+          </div>
+        </div>
+        
+        <div class="signal-row" id="signal-ask_wall" onclick="triggerSignal('ask_wall')">
+          <div class="dot dot-red"></div>
+          <div class="signal-text">
+            <strong>Big ask wall above price</strong> — heavy selling resistance; wait for buyers to clear it before chasing breakouts.
+          </div>
+        </div>
+        
+        <div class="signal-row" id="signal-breakout" onclick="triggerSignal('breakout')">
+          <div class="dot dot-green"></div>
+          <div class="signal-text">
+            <strong>Ask wall disappears / clears</strong> — buying volume completely eats the wall, causing a rapid breakout surge.
+          </div>
+        </div>
+        
+        <div class="signal-row" id="signal-breakdown" onclick="triggerSignal('breakdown')">
+          <div class="dot dot-red"></div>
+          <div class="signal-text">
+            <strong>Bid wall disappears / cracks</strong> — selling volume breaches the support, resulting in a sudden panic drop.
+          </div>
+        </div>
+        
+        <div class="signal-row" id="signal-spoofing" onclick="triggerSignal('spoofing')">
+          <div class="dot dot-amber"></div>
+          <div class="signal-text">
+            <strong>Wall vanishes as price nears it</strong> — fake orders placed to manipulate price and canceled right before fills.
+          </div>
+        </div>
+      </div>
+      
+      <!-- Limitations Card -->
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-label" style="color: var(--color-text-secondary);">Market Limitations</div>
+        <div class="warn-container">
+          <div class="warn">
+            <div class="warn-item">
+              <span class="warn-bullet">✦</span>
+              <span><strong>Dark Pools:</strong> Huge institutional orders are often processed off-exchange and do not show up in the public order book.</span>
+            </div>
+            <div class="warn-item">
+              <span class="warn-bullet">✦</span>
+              <span><strong>High Latency:</strong> L2 order book updates happen in milliseconds; real-time manual analysis requires high concentration.</span>
+            </div>
+            <div class="warn-item">
+              <span class="warn-bullet">✦</span>
+              <span><strong>Combine Tools:</strong> Always combine order book depth analysis with price action charts and aggregate volume profiles.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
   </div>
 </div>
+
+<!-- Simulation Script -->
+<script>
+  // Symbol Parameters Config
+  const SYMBOLS = {
+    BTC: { 
+      name: "BTC/USDT", 
+      class: "Crypto",
+      basePrice: 95200.00, 
+      step: 0.50, 
+      decimal: 2, 
+      unit: "BTC", 
+      defaultSpread: 1.00, 
+      normalVol: 1.5,
+      multiplier: 1 
+    },
+    AAPL: { 
+      name: "AAPL (Apple Inc.)", 
+      class: "Stock",
+      basePrice: 182.50, 
+      step: 0.02, 
+      decimal: 2, 
+      unit: "Shares", 
+      defaultSpread: 0.04, 
+      normalVol: 450,
+      multiplier: 100 
+    },
+    EURUSD: { 
+      name: "EUR/USD", 
+      class: "Forex",
+      basePrice: 1.08540, 
+      step: 0.00005, 
+      decimal: 5, 
+      unit: "Lots", 
+      defaultSpread: 0.00010, 
+      normalVol: 12,
+      multiplier: 1
+    }
+  };
+
+  // State Variables
+  let currentSymbol = "BTC";
+  let midPrice = SYMBOLS.BTC.basePrice;
+  let activeScenario = "normal";
+  let stepIndex = 0;
+  let isPaused = false;
+  let updateIntervalMs = 750;
+  let timerId = null;
+
+  // Book Arrays
+  let asks = [];
+  let bids = [];
+  let lastAsks = [];
+  let lastBids = [];
+  let lastPrice = midPrice;
+
+  // Wall State
+  let wallPrice = null;
+  let wallSize = 0;
+  let wallSide = null; // 'bid' or 'ask'
+
+  // Initialize Book on page load
+  window.onload = function() {
+    checkThemePreference();
+    initBook();
+    logMessage("SYSTEM: Level II Simulator Initialized. Loaded asset: BTC/USDT.", "system");
+    logMessage("TIPS: Click on any 'Signal to Watch' card to view its live animated simulation.", "info");
+    startTimer();
+    
+    // Close dropdowns on outside click
+    document.addEventListener("click", function(event) {
+      document.querySelectorAll(".custom-select").forEach(select => {
+        if (!select.contains(event.target)) {
+          select.classList.remove("active");
+        }
+      });
+    });
+  };
+
+  // Custom Dropdowns Handlers
+  function toggleDropdown(containerId, event) {
+    event.stopPropagation();
+    const target = document.getElementById(containerId);
+    const isActive = target.classList.contains("active");
+    
+    // Close all other dropdowns
+    document.querySelectorAll(".custom-select").forEach(el => {
+      el.classList.remove("active");
+    });
+    
+    if (!isActive) {
+      target.classList.add("active");
+    }
+  }
+
+  function selectOption(containerId, value, text, callback) {
+    updateCustomSelectValue(containerId, value, text);
+    
+    // Close dropdown
+    const target = document.getElementById(containerId);
+    if (target) target.classList.remove("active");
+    
+    // Trigger original callback
+    if (callback) {
+      callback(value);
+    }
+  }
+
+  function updateCustomSelectValue(containerId, value, text) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Update trigger text
+    const triggerText = container.querySelector(".trigger-text");
+    if (triggerText) {
+      triggerText.innerText = text;
+    }
+    
+    // Update selected class on options
+    const options = container.querySelectorAll(".select-option");
+    options.forEach(opt => {
+      if (opt.getAttribute("data-value") === value) {
+        opt.classList.add("selected");
+      } else {
+        opt.classList.remove("selected");
+      }
+    });
+  }
+
+  // Theme Management
+  function toggleTheme() {
+    const body = document.body;
+    const isLight = body.classList.toggle("light-theme");
+    localStorage.setItem("theme-preference", isLight ? "light" : "dark");
+    updateThemeButtonUI(isLight);
+    logMessage(`SYSTEM: Switched to ${isLight ? 'Light' : 'Dark'} visual theme.`, "system");
+  }
+
+  function updateThemeButtonUI(isLight) {
+    const btn = document.getElementById("theme-toggle-btn");
+    const sunIcon = btn.querySelector(".sun-icon");
+    const moonIcon = btn.querySelector(".moon-icon");
+    const text = btn.querySelector(".toggle-text");
+    
+    if (isLight) {
+      sunIcon.style.display = "none";
+      moonIcon.style.display = "inline-block";
+      text.innerText = "Dark Mode";
+    } else {
+      sunIcon.style.display = "inline-block";
+      moonIcon.style.display = "none";
+      text.innerText = "Light Mode";
+    }
+  }
+
+  function checkThemePreference() {
+    const saved = localStorage.getItem("theme-preference");
+    const systemPrefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    
+    const isLight = saved === "light" || (!saved && systemPrefersLight);
+    if (isLight) {
+      document.body.classList.add("light-theme");
+    } else {
+      document.body.classList.remove("light-theme");
+    }
+    updateThemeButtonUI(isLight);
+  }
+
+  // Generate initial levels
+  function initBook() {
+    const sym = SYMBOLS[currentSymbol];
+    asks = [];
+    bids = [];
+    wallPrice = null;
+    wallSide = null;
+    wallSize = 0;
+    
+    const spread = sym.defaultSpread;
+    const startAsk = midPrice + (spread / 2);
+    const startBid = midPrice - (spread / 2);
+    
+    for (let i = 0; i < 5; i++) {
+      asks.push({
+        price: startAsk + i * sym.step,
+        size: getRandomNormalSize(),
+        cumulative: 0,
+        isWall: false
+      });
+      
+      bids.push({
+        price: startBid - i * sym.step,
+        size: getRandomNormalSize(),
+        cumulative: 0,
+        isWall: false
+      });
+    }
+    
+    // Sort and compute
+    calculateCumulative();
+    renderOrderBook();
+  }
+
+  // Helper size generator
+  function getRandomNormalSize() {
+    const sym = SYMBOLS[currentSymbol];
+    const base = sym.normalVol;
+    // Generate right variation
+    const variation = (Math.random() * 0.9) + 0.1;
+    let size = base * variation;
+    
+    if (currentSymbol === "BTC") {
+      return Number(size.toFixed(2));
+    } else if (currentSymbol === "EURUSD") {
+      return Number(size.toFixed(1));
+    } else {
+      return Math.floor(size);
+    }
+  }
+
+  // Calculate Cumulative Depth
+  function calculateCumulative() {
+    let cumAsk = 0;
+    for (let i = 0; i < asks.length; i++) {
+      cumAsk += asks[i].size;
+      asks[i].cumulative = Number(cumAsk.toFixed(2));
+    }
+
+    let cumBid = 0;
+    for (let i = 0; i < bids.length; i++) {
+      cumBid += bids[i].size;
+      bids[i].cumulative = Number(cumBid.toFixed(2));
+    }
+  }
+
+  // Master Timer Functions
+  function startTimer() {
+    if (timerId) clearInterval(timerId);
+    timerId = setInterval(tick, updateIntervalMs);
+  }
+
+  // Stop Timer
+  function stopTimer() {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+  }
+
+  function togglePlayPause() {
+    const btn = document.getElementById("play-btn");
+    const indicator = document.getElementById("live-indicator");
+    const indicatorText = document.getElementById("live-indicator-text");
+    
+    isPaused = !isPaused;
+    if (isPaused) {
+      stopTimer();
+      btn.innerText = "Resume Simulator";
+      btn.classList.remove("btn-primary");
+      btn.classList.add("btn-secondary");
+      indicator.classList.add("paused");
+      indicatorText.innerText = "Simulator Paused";
+      logMessage("SYSTEM: Simulation paused.", "system");
+    } else {
+      startTimer();
+      btn.innerText = "Pause Simulator";
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-primary");
+      indicator.classList.remove("paused");
+      indicatorText.innerText = "Simulator Live";
+      logMessage("SYSTEM: Simulation resumed.", "system");
+    }
+  }
+
+  function changeSpeed(val) {
+    updateIntervalMs = parseInt(val);
+    logMessage(`SYSTEM: Update speed set to ${val}ms.`, "system");
+    if (!isPaused) {
+      startTimer();
+    }
+  }
+
+  function resetSimulator() {
+    const sym = SYMBOLS[currentSymbol];
+    midPrice = sym.basePrice;
+    lastPrice = midPrice;
+    activeScenario = "normal";
+    stepIndex = 0;
+    
+    updateCustomSelectValue("custom-select-scenario", "normal", "Normal Market (Balanced)");
+    updateActiveSignalHighlight();
+    initBook();
+    logMessage("SYSTEM: Order book completely reset to baseline parameters.", "system");
+  }
+
+  // Ticks Handler
+  function tick() {
+    // Save last states for flash compare
+    lastAsks = asks.map(a => ({...a}));
+    lastBids = bids.map(b => ({...b}));
+    lastPrice = midPrice;
+
+    const sym = SYMBOLS[currentSymbol];
+
+    if (activeScenario === "normal") {
+      // Balanced price drift
+      const rand = Math.random();
+      if (rand < 0.25) {
+        midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+      } else if (rand < 0.50) {
+        midPrice = Number((midPrice - sym.step).toFixed(sym.decimal));
+      }
+      
+      // Update normal books
+      fluctuateBookSizes();
+    } else {
+      // Run Scenario Sequence
+      runScenarioStep();
+    }
+
+    realignBookPrices();
+    calculateCumulative();
+    renderOrderBook();
+  }
+
+  // Re-align order book levels around current midPrice
+  function realignBookPrices() {
+    const sym = SYMBOLS[currentSymbol];
+    const spread = sym.defaultSpread;
+    const startAsk = midPrice + (spread / 2);
+    const startBid = midPrice - (spread / 2);
+
+    // Realign ask prices
+    asks.forEach((a, i) => {
+      a.price = Number((startAsk + i * sym.step).toFixed(sym.decimal));
+      
+      // Check if wall exists at this price
+      if (wallPrice !== null && Math.abs(a.price - wallPrice) < 0.000001 && wallSide === 'ask') {
+        a.isWall = true;
+        a.size = wallSize;
+      } else {
+        a.isWall = false;
+        // If it was just converted back from a wall, give it a normal size
+        if (a.size > sym.normalVol * 3) {
+          a.size = getRandomNormalSize();
+        }
+      }
+    });
+
+    // Realign bid prices
+    bids.forEach((b, i) => {
+      b.price = Number((startBid - i * sym.step).toFixed(sym.decimal));
+      
+      // Check if wall exists at this price
+      if (wallPrice !== null && Math.abs(b.price - wallPrice) < 0.000001 && wallSide === 'bid') {
+        b.isWall = true;
+        b.size = wallSize;
+      } else {
+        b.isWall = false;
+        // Reset if it was a wall before
+        if (b.size > sym.normalVol * 3) {
+          b.size = getRandomNormalSize();
+        }
+      }
+    });
+  }
+
+  // Size fluctuation generator
+  function fluctuateBookSizes() {
+    const sym = SYMBOLS[currentSymbol];
+    const decimals = currentSymbol === "BTC" ? 2 : (currentSymbol === "EURUSD" ? 1 : 0);
+    
+    asks.forEach(a => {
+      if (!a.isWall) {
+        const change = (Math.random() - 0.5) * 0.15; // +/- 7.5%
+        a.size = Number(Math.max(sym.normalVol * 0.15, a.size + a.size * change).toFixed(decimals));
+      }
+    });
+
+    bids.forEach(b => {
+      if (!b.isWall) {
+        const change = (Math.random() - 0.5) * 0.15;
+        b.size = Number(Math.max(sym.normalVol * 0.15, b.size + b.size * change).toFixed(decimals));
+      }
+    });
+  }
+
+  // Generate wall size depending on Symbol
+  function getScenarioWallSize() {
+    const sym = SYMBOLS[currentSymbol];
+    if (currentSymbol === "BTC") return 125.50;
+    if (currentSymbol === "AAPL") return 35000;
+    if (currentSymbol === "EURUSD") return 1500;
+  }
+
+  // Trigger from UI Select Option
+  function selectScenario(val) {
+    activeScenario = val;
+    stepIndex = 0;
+    wallPrice = null;
+    wallSide = null;
+    wallSize = 0;
+    updateActiveSignalHighlight();
+    logMessage(`SYSTEM: Changed scenario mode to '${val.toUpperCase()}'.`, "system");
+  }
+
+  // Highlight active signal card
+  function updateActiveSignalHighlight() {
+    // Clear all active highlights
+    document.querySelectorAll(".signal-row").forEach(el => {
+      el.classList.remove("active-signal");
+    });
+    
+    // Set active highlight if exists
+    if (activeScenario !== "normal") {
+      const activeEl = document.getElementById(`signal-${activeScenario}`);
+      if (activeEl) {
+        activeEl.classList.add("active-signal");
+      }
+    }
+  }
+
+  // Trigger from Signal Click (Bidirectional integration)
+  function triggerSignal(scenarioName) {
+    if (isPaused) {
+      togglePlayPause(); // Unpause automatically if paused
+    }
+    
+    let scenarioText = "";
+    switch(scenarioName) {
+      case "normal": scenarioText = "Normal Market (Balanced)"; break;
+      case "bid_wall": scenarioText = "Bid Wall (Support)"; break;
+      case "ask_wall": scenarioText = "Ask Wall (Resistance)"; break;
+      case "breakout": scenarioText = "Breakout (Ask Wall Eaten)"; break;
+      case "breakdown": scenarioText = "Breakdown (Bid Wall Eaten)"; break;
+      case "spoofing": scenarioText = "Spoofing (Fake Wall Canceled)"; break;
+    }
+    
+    updateCustomSelectValue("custom-select-scenario", scenarioName, scenarioText);
+    selectScenario(scenarioName);
+  }
+
+  // Action log formatter
+  function logMessage(text, type = "info") {
+    const consoleBox = document.getElementById("console-box");
+    const d = new Date();
+    const timeStr = d.toTimeString().split(' ')[0];
+    
+    const line = document.createElement("div");
+    line.className = `console-line log-${type}`;
+    line.innerHTML = `<span class="log-time">[${timeStr}]</span> <span>${text}</span>`;
+    
+    consoleBox.appendChild(line);
+    consoleBox.scrollTop = consoleBox.scrollHeight;
+    
+    // Cap log lines
+    while (consoleBox.children.length > 50) {
+      consoleBox.removeChild(consoleBox.firstChild);
+    }
+  }
+
+  // Dropdown symbol switcher
+  function changeSymbol(val) {
+    currentSymbol = val;
+    const sym = SYMBOLS[val];
+    
+    // Update labels
+    document.getElementById("ob-symbol-name").innerHTML = `${sym.name} <span class="symbol-badge">${sym.class}</span>`;
+    document.getElementById("ob-size-header").innerText = `Size (${sym.unit})`;
+    document.getElementById("ob-total-header").innerText = `Total (${sym.unit})`;
+    
+    resetSimulator();
+    logMessage(`SYSTEM: Switched symbol to ${sym.name}.`, "system");
+  }
+
+  // Render HTML structures
+  function renderOrderBook() {
+    const tbody = document.getElementById("ob-tbody");
+    const sym = SYMBOLS[currentSymbol];
+    
+    // Calculate max size for visual depth percentage bars
+    const maxBookVal = Math.max(
+      ...asks.map(a => a.size),
+      ...bids.map(b => b.size),
+      sym.normalVol * 2 // minimum baseline
+    );
+    
+    let html = "";
+    
+    // 1. Asks (Render in reverse order so highest price is at top)
+    for (let i = asks.length - 1; i >= 0; i--) {
+      html += getRowMarkup('ask', asks[i], maxBookVal);
+    }
+    
+    // 2. Mid Price Row
+    const spread = (asks[0].price - bids[0].price);
+    const spreadPercent = ((spread / midPrice) * 100).toFixed(2);
+    
+    let priceDirection = "→";
+    let dirClass = "";
+    let valClass = "";
+    
+    if (midPrice > lastPrice) {
+      priceDirection = "▲";
+      dirClass = "up";
+      valClass = "up";
+    } else if (midPrice < lastPrice) {
+      priceDirection = "▼";
+      dirClass = "down";
+      valClass = "down";
+    }
+    
+    html += `
+      <tr class="mid-price-tr">
+        <td colspan="3" class="mid-price-cell">
+          <div class="mid-price-wrapper">
+            <div class="mid-price-value ${valClass}" id="mid-price-val">
+              ${midPrice.toFixed(sym.decimal)}
+            </div>
+            <div class="mid-price-dir ${dirClass}" id="mid-price-dir">
+              ${priceDirection}
+            </div>
+          </div>
+          <div class="spread-info" id="spread-val">
+            Spread: $${spread.toFixed(sym.decimal)} (${spreadPercent}%)
+          </div>
+        </td>
+      </tr>
+    `;
+    
+    // 3. Bids (Render in index order: bids[0] is highest price, bids[4] is lowest)
+    for (let i = 0; i < bids.length; i++) {
+      html += getRowMarkup('bid', bids[i], maxBookVal);
+    }
+    
+    tbody.innerHTML = html;
+    
+    // Update top header spread
+    document.getElementById("top-spread-indicator").innerText = `Spread: $${spread.toFixed(sym.decimal)} (${spreadPercent}%)`;
+  }
+
+  // Row Markup generator
+  function getRowMarkup(type, level, maxBookVal) {
+    const sym = SYMBOLS[currentSymbol];
+    const decimals = sym.decimal;
+    
+    const percentage = Math.min((level.size / maxBookVal) * 100, 100).toFixed(0);
+    const priceStr = level.price.toFixed(decimals);
+    
+    // Format size
+    let sizeStr = "";
+    let totalStr = "";
+    if (currentSymbol === "AAPL") {
+      sizeStr = level.size.toLocaleString();
+      totalStr = level.cumulative.toLocaleString();
+    } else if (currentSymbol === "EURUSD") {
+      sizeStr = level.size.toFixed(1);
+      totalStr = level.cumulative.toFixed(1);
+    } else {
+      sizeStr = level.size.toFixed(2);
+      totalStr = level.cumulative.toFixed(2);
+    }
+    
+    // Check for size flashes
+    let sizeClass = "";
+    const prevBook = type === 'ask' ? lastAsks : lastBids;
+    const prevLevel = prevBook.find(l => Math.abs(l.price - level.price) < 0.000001);
+    if (prevLevel) {
+      if (level.size > prevLevel.size) {
+        sizeClass = "flash-green-text";
+      } else if (level.size < prevLevel.size) {
+        sizeClass = "flash-red-text";
+      }
+    }
+    
+    const isWall = level.isWall;
+    const wallClass = isWall ? `wall-row ${type}-wall` : '';
+    const colorClass = type === 'ask' ? 'color-ask' : 'color-bid';
+    const bgGradient = type === 'ask'
+      ? `linear-gradient(to left, var(--color-ask-light) ${percentage}%, transparent ${percentage}%)`
+      : `linear-gradient(to left, var(--color-bid-light) ${percentage}%, transparent ${percentage}%)`;
+      
+    return `
+      <tr class="${wallClass}" style="background: ${bgGradient}">
+        <td class="${colorClass}">${priceStr}</td>
+        <td class="${sizeClass}">${sizeStr}${isWall ? ' 🧱' : ''}</td>
+        <td style="color: var(--color-text-secondary);">${totalStr}</td>
+      </tr>
+    `;
+  }
+
+  // ==========================================
+  //     SCENARIOS STATE MACHINE
+  // ==========================================
+  
+  function runScenarioStep() {
+    const sym = SYMBOLS[currentSymbol];
+    stepIndex++;
+    
+    switch (activeScenario) {
+      
+      case "bid_wall": // Buy Support Wall
+        if (stepIndex === 1) {
+          // Initialize Wall
+          wallPrice = Number((midPrice - (sym.defaultSpread / 2) - 3 * sym.step).toFixed(sym.decimal));
+          wallSide = "bid";
+          wallSize = getScenarioWallSize();
+          logMessage("🧱 SUPPORT WALL PLACED: Institutional buy order of " + wallSize.toLocaleString() + " " + sym.unit + " detected at $" + wallPrice.toFixed(sym.decimal) + ". This creates a price floor.", "bullish");
+        } 
+        else if (stepIndex === 2) {
+          midPrice = Number((midPrice - sym.step).toFixed(sym.decimal));
+          logMessage("📉 Market selling pressure ticks price down to $" + midPrice.toFixed(sym.decimal) + ", sliding closer to the support wall.", "info");
+        } 
+        else if (stepIndex === 3) {
+          midPrice = Number((midPrice - sym.step).toFixed(sym.decimal));
+          logMessage("📉 Price ticks down to $" + midPrice.toFixed(sym.decimal) + ". The buy wall is now only one step away!", "info");
+        } 
+        else if (stepIndex === 4) {
+          // Wall is tested
+          wallSize = Number((wallSize * 0.94).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("🛡️ WALL DEFENDED: Sellers hit the wall at $" + wallPrice.toFixed(sym.decimal) + ". Big buyers are absorbing all market sells. Wall size drops slightly.", "bullish");
+        } 
+        else if (stepIndex === 5) {
+          // Rebound
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          wallSize = Number((wallSize * 0.98).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("🚀 REBOUND: Selling force is exhausted at the wall. Buyers step in aggressively, pushing price up to $" + midPrice.toFixed(sym.decimal) + ".", "bullish");
+        } 
+        else if (stepIndex === 6) {
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          logMessage("📈 Upward trajectory continues. The support floor successfully prevented a price drop.", "bullish");
+          // Clear wall
+          wallPrice = null;
+          wallSide = null;
+          wallSize = 0;
+          activeScenario = "normal";
+          updateCustomSelectValue("custom-select-scenario", "normal", "Normal Market (Balanced)");
+          updateActiveSignalHighlight();
+          stepIndex = 0;
+        }
+        break;
+
+      case "ask_wall": // Sell Resistance Wall
+        if (stepIndex === 1) {
+          wallPrice = Number((midPrice + (sym.defaultSpread / 2) + 3 * sym.step).toFixed(sym.decimal));
+          wallSide = "ask";
+          wallSize = getScenarioWallSize();
+          logMessage("🧱 RESISTANCE WALL PLACED: Institutional sell order of " + wallSize.toLocaleString() + " " + sym.unit + " detected at $" + wallPrice.toFixed(sym.decimal) + ". This creates a price ceiling.", "bearish");
+        } 
+        else if (stepIndex === 2) {
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          logMessage("📈 Buying volume pushes price up to $" + midPrice.toFixed(sym.decimal) + ", heading towards the sell wall.", "info");
+        } 
+        else if (stepIndex === 3) {
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          logMessage("📈 Price rises to $" + midPrice.toFixed(sym.decimal) + ". The sell wall is now only one tick away!", "info");
+        } 
+        else if (stepIndex === 4) {
+          // Wall is tested
+          wallSize = Number((wallSize * 0.94).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("🛑 CEILING HIT: Buyers test the sell wall at $" + wallPrice.toFixed(sym.decimal) + ". Supply absorbs all buying volume. Wall size declines.", "bearish");
+        } 
+        else if (stepIndex === 5) {
+          // Rejection
+          midPrice = Number((midPrice - sym.step).toFixed(sym.decimal));
+          wallSize = Number((wallSize * 0.98).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("📉 REJECTION: Buyers fail to crack the wall. Sellers regain control, forcing price down to $" + midPrice.toFixed(sym.decimal) + ".", "bearish");
+        } 
+        else if (stepIndex === 6) {
+          midPrice = Number((midPrice - sym.step).toFixed(sym.decimal));
+          logMessage("📉 Rejection completed. The sell wall effectively capped the market.", "bearish");
+          // Clear wall
+          wallPrice = null;
+          wallSide = null;
+          wallSize = 0;
+          activeScenario = "normal";
+          updateCustomSelectValue("custom-select-scenario", "normal", "Normal Market (Balanced)");
+          updateActiveSignalHighlight();
+          stepIndex = 0;
+        }
+        break;
+
+      case "breakout": // Ask Wall Eaten & Surge
+        if (stepIndex === 1) {
+          wallPrice = Number((midPrice + (sym.defaultSpread / 2) + 2 * sym.step).toFixed(sym.decimal));
+          wallSide = "ask";
+          wallSize = Number((getScenarioWallSize() * 0.6).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("🧱 RESISTANCE BLOCKED: A medium-large sell wall of " + wallSize.toLocaleString() + " " + sym.unit + " is standing at $" + wallPrice.toFixed(sym.decimal) + ".", "info");
+        } 
+        else if (stepIndex === 2) {
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          wallSize = Number((wallSize * 0.5).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("⚔️ ABSORPTION: Buyers hit the resistance wall at $" + wallPrice.toFixed(sym.decimal) + ". Market buy orders eat 50% of the wall! Remaining: " + wallSize.toLocaleString() + " " + sym.unit + ".", "info");
+        } 
+        else if (stepIndex === 3) {
+          wallSize = Number((wallSize * 0.2).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("⚔️ CHEWING DEPTH: Buying pressure continues. Wall is thinned down to " + wallSize.toLocaleString() + " " + sym.unit + ". Sellers are capitulating.", "info");
+        } 
+        else if (stepIndex === 4) {
+          // Eat the rest
+          wallPrice = null;
+          wallSide = null;
+          wallSize = 0;
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          logMessage("🔥 WALL CLEARED: The resistance wall at $" + midPrice.toFixed(sym.decimal) + " has been completely consumed by buyers. Supply is exhausted!", "bullish");
+        } 
+        else if (stepIndex === 5) {
+          // Surge
+          midPrice = Number((midPrice + sym.step * 3).toFixed(sym.decimal));
+          // Stack bids
+          bids[0].size = Number((sym.normalVol * 4.5).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("⚡ BREAKOUT RALLY: Price surges violently to $" + midPrice.toFixed(sym.decimal) + "! Short-sellers cover in panic (market buys) and FOMO traders jump in.", "bullish");
+        } 
+        else if (stepIndex === 6) {
+          midPrice = Number((midPrice + sym.step * 2).toFixed(sym.decimal));
+          logMessage("🚀 MOMENTUM: Breakout extends to $" + midPrice.toFixed(sym.decimal) + ". Heavy buying size is now stacking on the bid side as a new floor.", "bullish");
+          activeScenario = "normal";
+          updateCustomSelectValue("custom-select-scenario", "normal", "Normal Market (Balanced)");
+          updateActiveSignalHighlight();
+          stepIndex = 0;
+        }
+        break;
+
+      case "breakdown": // Bid Wall Cleared & Crash
+        if (stepIndex === 1) {
+          wallPrice = Number((midPrice - (sym.defaultSpread / 2) - 2 * sym.step).toFixed(sym.decimal));
+          wallSide = "bid";
+          wallSize = Number((getScenarioWallSize() * 0.6).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("🧱 SUPPORT ZONE: A support wall of " + wallSize.toLocaleString() + " " + sym.unit + " is holding the bid side at $" + wallPrice.toFixed(sym.decimal) + ".", "info");
+        } 
+        else if (stepIndex === 2) {
+          midPrice = Number((midPrice - sym.step).toFixed(sym.decimal));
+          wallSize = Number((wallSize * 0.5).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("⚔️ ABSORPTION: Sellers hit the support wall at $" + wallPrice.toFixed(sym.decimal) + ". Heavy selling volume consumes 50% of the buy orders. Remaining: " + wallSize.toLocaleString() + " " + sym.unit + ".", "info");
+        } 
+        else if (stepIndex === 3) {
+          wallSize = Number((wallSize * 0.2).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("⚔️ FLOODING CHEATSHEET: Selling volume increases. Support is thin: only " + wallSize.toLocaleString() + " " + sym.unit + " left on the floor.", "info");
+        } 
+        else if (stepIndex === 4) {
+          wallPrice = null;
+          wallSide = null;
+          wallSize = 0;
+          midPrice = Number((midPrice - sym.step).toFixed(sym.decimal));
+          logMessage("🔥 WALL CRACKED: The support floor at $" + midPrice.toFixed(sym.decimal) + " has been completely cleared. Buyers are wiped out!", "bearish");
+        } 
+        else if (stepIndex === 5) {
+          // Panic Drop
+          midPrice = Number((midPrice - sym.step * 3).toFixed(sym.decimal));
+          // Stack asks
+          asks[0].size = Number((sym.normalVol * 4.5).toFixed(currentSymbol === "AAPL" ? 0 : 2));
+          logMessage("⚡ PANIC BREAKDOWN: Price plummets to $" + midPrice.toFixed(sym.decimal) + "! Stop-losses are triggered, causing a waterfall of market sells.", "bearish");
+        } 
+        else if (stepIndex === 6) {
+          midPrice = Number((midPrice - sym.step * 2).toFixed(sym.decimal));
+          logMessage("📉 SELL-OFF: Panic extends price down to $" + midPrice.toFixed(sym.decimal) + ". Asks stack heavily as traders rush to exit.", "bearish");
+          activeScenario = "normal";
+          updateCustomSelectValue("custom-select-scenario", "normal", "Normal Market (Balanced)");
+          updateActiveSignalHighlight();
+          stepIndex = 0;
+        }
+        break;
+
+      case "spoofing": // Spoofing (Fake Wall vanishes)
+        if (stepIndex === 1) {
+          wallPrice = Number((midPrice + (sym.defaultSpread / 2) + 3 * sym.step).toFixed(sym.decimal));
+          wallSide = "ask";
+          wallSize = Number((getScenarioWallSize() * 1.5).toFixed(currentSymbol === "AAPL" ? 0 : 2)); // Massive spoof wall
+          logMessage("⚠️ SPOOF WALL PLACED: A massive sell order of " + wallSize.toLocaleString() + " " + sym.unit + " appears at $" + wallPrice.toFixed(sym.decimal) + ", blocking the upside.", "warning");
+        } 
+        else if (stepIndex === 2) {
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          logMessage("📈 Price rises to $" + midPrice.toFixed(sym.decimal) + ". Buyers are slowly stepping up, attempting to test the wall.", "info");
+        } 
+        else if (stepIndex === 3) {
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          logMessage("🔍 Price ticks up to $" + midPrice.toFixed(sym.decimal) + ". Only one step away from the massive wall! Watch if they execute.", "warning");
+        } 
+        else if (stepIndex === 4) {
+          // SPOOF! Wall disappears
+          wallPrice = null;
+          wallSide = null;
+          wallSize = 0;
+          logMessage("💨 SPOOF ALARM: The massive wall at $" + (midPrice + sym.defaultSpread/2 + sym.step).toFixed(sym.decimal) + " has VANISHED! The order was canceled right before execution. It was a bluff.", "warning");
+        } 
+        else if (stepIndex === 5) {
+          // Easy breakout
+          midPrice = Number((midPrice + sym.step * 2).toFixed(sym.decimal));
+          logMessage("⚡ EASY SURGE: With the fake resistance barrier removed, price easily surges up to $" + midPrice.toFixed(sym.decimal) + " due to lack of supply.", "bullish");
+        } 
+        else if (stepIndex === 6) {
+          midPrice = Number((midPrice + sym.step).toFixed(sym.decimal));
+          logMessage("ℹ️ Spoofing occurs when manipulators place huge orders to influence retail behavior (e.g. force them to sell), then pull the order.", "system");
+          activeScenario = "normal";
+          updateCustomSelectValue("custom-select-scenario", "normal", "Normal Market (Balanced)");
+          updateActiveSignalHighlight();
+          stepIndex = 0;
+        }
+        break;
+        
+      default:
+        activeScenario = "normal";
+        stepIndex = 0;
+    }
+  }
+</script>
+
+</body>
+</html>
