@@ -8,9 +8,9 @@ Welcome to this professional TradingView Indicator suite written in **Pine Scrip
 
 This workspace contains the following indicator scripts:
 
-1. **[52_week_high_line_v2.pine](file:///Users/adam/Downloads/TradingView-Indicator/52_week_high_line_v2.pine)**: A dynamic, breakout-oriented indicator that plots the 52-week high, shows the percentage distance, and raises proximity alerts.
-2. **[MCDX_SmartMoney.pine](file:///Users/adam/Downloads/TradingView-Indicator/MCDX_SmartMoney.pine)**: An RSI-based momentum classifier that segments market participants into Bankers (Smart Money), Hot Money (speculators), and Retailers.
-3. **[PinkCandle_Indicator_v6.pine](file:///Users/adam/Downloads/TradingView-Indicator/PinkCandle_Indicator_v6.pine)**: A complete trend and reversal system featuring dynamic Pillow Support, institutional Shark Zones, and climax volume coloring.
+1. **[52-week-high-line-v2.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/52-week-high-line-v2.pine)**: A dynamic, breakout-oriented indicator that plots the 52-week high, shows the percentage distance, and raises proximity alerts.
+2. **[MCDX-SmartMoney.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/MCDX-SmartMoney.pine)**: An RSI-based momentum classifier that segments market participants into Bankers (Smart Money), Hot Money (speculators), and Retailers.
+3. **[PinkCandle-Indicator-v1.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/PinkCandle-Indicator-v1.pine)**: A complete trend and reversal system featuring dynamic Pillow Support, institutional Shark Zones, and climax volume coloring.
 
 ---
 
@@ -20,9 +20,9 @@ Follow these step-by-step instructions to load and run these indicators on any T
 
 ### 1. Copy the Pine Script Code
 * Open the indicator file you want to use from this workspace:
-  * Open [52_week_high_line_v2.pine](file:///Users/adam/Downloads/TradingView-Indicator/52_week_high_line_v2.pine)
-  * Open [MCDX_SmartMoney.pine](file:///Users/adam/Downloads/TradingView-Indicator/MCDX_SmartMoney.pine)
-  * Open [PinkCandle_Indicator_v6.pine](file:///Users/adam/Downloads/TradingView-Indicator/PinkCandle_Indicator_v6.pine)
+  * Open [52-week-high-line-v2.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/52-week-high-line-v2.pine)
+  * Open [MCDX-SmartMoney.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/MCDX-SmartMoney.pine)
+  * Open [PinkCandle-Indicator-v1.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/PinkCandle-Indicator-v1.pine)
 * Select the entire code (Ctrl+A / Cmd+A) and copy it (Ctrl+C / Cmd+C).
 
 ### 2. Open TradingView's Pine Editor
@@ -51,9 +51,9 @@ Follow these step-by-step instructions to load and run these indicators on any T
 
 ---
 
-### 1. 52-Week High (`52_week_high_line_v2.pine`)
+### 1. 52-Week High (`52-week-high-line-v2.pine`)
 
-[52_week_high_line_v2.pine](file:///Users/adam/Downloads/TradingView-Indicator/52_week_high_line_v2.pine) is designed to track one of the most critical resistance levels used by institutional investors: the **52-Week High**. When an asset breaks through its 52-week high, it often signals the beginning of a powerful momentum extension.
+[52-week-high-line-v2.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/52-week-high-line-v2.pine) is designed to track one of the most critical resistance levels used by institutional investors: the **52-Week High**. When an asset breaks through its 52-week high, it often signals the beginning of a powerful momentum extension.
 
 ```
        52W High Level Line (e.g., Orange dashed/solid line extending right)
@@ -83,9 +83,9 @@ Follow these step-by-step instructions to load and run these indicators on any T
 
 ---
 
-### 2. MCDX Smart Money (`MCDX_SmartMoney.pine`)
+### 2. MCDX Smart Money (`MCDX-SmartMoney.pine`)
 
-[MCDX_SmartMoney.pine](file:///Users/adam/Downloads/TradingView-Indicator/MCDX_SmartMoney.pine) is an open-source recreation of the popular MCDX (Multi-Color Direction Index) indicator. It uses an RSI-based momentum classification formula to estimate the ratio of institutional ("Banker") capital versus retail capital.
+[MCDX-SmartMoney.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/MCDX-SmartMoney.pine) is an open-source recreation of the popular MCDX (Multi-Color Direction Index) indicator. It uses an RSI-based momentum classification formula to estimate the ratio of institutional ("Banker") capital versus retail capital.
 
 #### 📊 Market Composition Color Codes
 * 🔴 **Bankers (Smart Money)**: Represents institutional accumulation. When Bankers occupy a large portion of the bar, it indicates big money is buying or supporting the price. **Highly Bullish**.
@@ -125,9 +125,9 @@ $$\text{Retailer Value} = 20 - \max(\text{Banker Value}, \text{Hot Money Value})
 
 ---
 
-### 3. Pink Candle Indicator (`PinkCandle_Indicator_v6.pine`)
+### 3. Pink Candle Indicator (`PinkCandle-Indicator-v1.pine`)
 
-[PinkCandle_Indicator_v6.pine](file:///Users/adam/Downloads/TradingView-Indicator/PinkCandle_Indicator_v6.pine) is a full-featured "Buy-on-Dip" execution system. It identifies exact entry and exit coordinates by analyzing oversold momentum, volume climaxes, dynamic support, and overhead supply.
+[PinkCandle-Indicator-v1.pine](file:///Users/adam/Downloads/TradingView-Indicator/indicators/PinkCandle-Indicator-v1.pine) is a full-featured "Buy-on-Dip" execution system. It identifies exact entry and exit coordinates by analyzing oversold momentum, volume climaxes, dynamic support, and overhead supply.
 
 ```
        [ Shark Zone / Tory Box - Institutional Sell/TP Zone ]  (Red Ribbon)
