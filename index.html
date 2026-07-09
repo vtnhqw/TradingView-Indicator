@@ -1,0 +1,3180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vtnhqw's TradingView</title>
+  <meta name="description" content="Showcase and guide for institutional-grade TradingView indicators, featuring Smart Money, breakout lines, buy-on-dip trend signals, and an interactive Level II Order Book simulator.">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://github.com/vtnhqw/TradingView-Indicator">
+  <meta property="og:title" content="vtnhqw's TradingView">
+  <meta property="og:description" content="Showcase and guide for institutional-grade TradingView indicators, featuring Smart Money, breakout lines, buy-on-dip trend signals, and an interactive Level II Order Book simulator.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/adam/TradingView-Indicator/main/assets/cover-preview.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="vtnhqw's TradingView">
+  <meta property="twitter:description" content="Showcase and guide for institutional-grade TradingView indicators, featuring Smart Money, breakout lines, buy-on-dip trend signals, and an interactive Level II Order Book simulator.">
+  <meta property="twitter:image" content="https://raw.githubusercontent.com/adam/TradingView-Indicator/main/assets/cover-preview.png">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Prism.js Code highlighting CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  
+  <style>
+    /* ─────────────────────────────────────────────────────────────────────────────
+       1. DESIGN SYSTEM & ROOT VARIABLES
+       ───────────────────────────────────────────────────────────────────────────── */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      
+      color-scheme: light dark;
+      
+      /* Light Mode Tokens */
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-glass: rgba(255, 255, 255, 0.7);
+      --border-color: #e2e8f0;
+      --border-glass: rgba(226, 232, 240, 0.5);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-glow: rgba(37, 99, 235, 0.15);
+      --accent: #d946ef;
+      --accent-glow: rgba(217, 70, 239, 0.15);
+      
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      
+      --blur-glass: 16px;
+      --transition-speed: 0.25s;
+      --bg-grid-major: rgba(148, 163, 184, 0.12);
+      --bg-grid-minor: rgba(148, 163, 184, 0.05);
+    }
+
+    /* Dark Mode Theme Overrides */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-base: #090d16;
+        --bg-surface: #111827;
+        --bg-surface-glass: rgba(17, 24, 39, 0.75);
+        --border-color: #1f2937;
+        --border-glass: rgba(31, 41, 55, 0.5);
+        --text-main: #f8fafc;
+        --text-muted: #9ca3af;
+        
+        --primary: #3b82f6;
+        --primary-hover: #60a5fa;
+        --primary-glow: rgba(59, 130, 246, 0.25);
+        --accent: #f472b6;
+        --accent-glow: rgba(244, 114, 182, 0.25);
+        
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+        --bg-grid-major: rgba(255, 255, 255, 0.04);
+        --bg-grid-minor: rgba(255, 255, 255, 0.015);
+      }
+    }
+
+    /* Explicit Attribute Overrides (Light Mode Manual) */
+    html[data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-glass: rgba(255, 255, 255, 0.7);
+      --border-color: #e2e8f0;
+      --border-glass: rgba(226, 232, 240, 0.5);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-glow: rgba(37, 99, 235, 0.15);
+      --accent: #d946ef;
+      --accent-glow: rgba(217, 70, 239, 0.15);
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      --bg-grid-major: rgba(148, 163, 184, 0.12);
+      --bg-grid-minor: rgba(148, 163, 184, 0.05);
+    }
+
+    /* Explicit Attribute Overrides (Dark Mode Manual) */
+    html[data-theme="dark"] {
+      --bg-base: #090d16;
+      --bg-surface: #111827;
+      --bg-surface-glass: rgba(17, 24, 39, 0.75);
+      --border-color: #1f2937;
+      --border-glass: rgba(31, 41, 55, 0.5);
+      --text-main: #f8fafc;
+      --text-muted: #9ca3af;
+      
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --accent: #f472b6;
+      --accent-glow: rgba(244, 114, 182, 0.25);
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+      --bg-grid-major: rgba(255, 255, 255, 0.04);
+      --bg-grid-minor: rgba(255, 255, 255, 0.015);
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       2. RESET & BASE STYLE
+       ───────────────────────────────────────────────────────────────────────────── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Smooth animations, unless user prefers reduced motion */
+    @media (prefers-reduced-motion: no-preference) {
+      * {
+        transition: background-color var(--transition-speed) ease, 
+                    border-color var(--transition-speed) ease, 
+                    color var(--transition-speed) ease, 
+                    box-shadow var(--transition-speed) ease, 
+                    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      
+      html {
+        scroll-behavior: smooth;
+      }
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      background-image: 
+        linear-gradient(var(--bg-grid-major) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid-major) 1px, transparent 1px),
+        linear-gradient(var(--bg-grid-minor) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid-minor) 1px, transparent 1px);
+      background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+      background-attachment: fixed;
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-top: 80px; /* Spacer for fixed top header */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--primary-hover);
+    }
+
+    /* Screen reader class for accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus States */
+    *:focus-visible {
+      outline: 3px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Custom Webkit scrollbar for premium theme matching */
+    @supports not (scrollbar-color: auto) {
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-base);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 5px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+      }
+    }
+    @supports (scrollbar-color: auto) {
+      * {
+        scrollbar-color: var(--border-color) var(--bg-base);
+        scrollbar-width: thin;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       3. LAYOUT SHELL (HEADER, HERO & WRAPPER)
+       ───────────────────────────────────────────────────────────────────────────── */
+    .header-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background-color: var(--bg-surface-glass);
+      backdrop-filter: blur(var(--blur-glass));
+      -webkit-backdrop-filter: blur(var(--blur-glass));
+      border-bottom: 1px solid var(--border-glass);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .brand svg {
+      width: 28px;
+      height: 28px;
+      color: var(--primary);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle, .btn-icon {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem;
+      cursor: pointer;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover, .btn-icon:hover {
+      background-color: var(--border-glass);
+      border-color: var(--text-muted);
+    }
+
+    .theme-toggle .sun-icon,
+    html[data-theme="dark"] .theme-toggle .moon-icon {
+      display: none;
+    }
+    
+    html[data-theme="dark"] .theme-toggle .sun-icon {
+      display: block;
+    }
+    
+    .theme-toggle .moon-icon {
+      display: block;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      flex-grow: 1;
+    }
+
+    /* Compact Hero Section */
+    .hero {
+      margin-bottom: 2.5rem;
+      padding: 2.5rem;
+      background: radial-gradient(circle at 90% 10%, var(--primary-glow) 0%, transparent 40%),
+                  radial-gradient(circle at 10% 90%, var(--accent-glow) 0%, transparent 40%),
+                  var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--text-main) 30%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      border: 1px solid transparent;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff !important;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-base);
+      color: var(--text-main) !important;
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--border-glass);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    .badge-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--border-glass);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .badge-group svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       4. ACCESSIBLE TAB COMPONENT
+       ───────────────────────────────────────────────────────────────────────────── */
+    .tab-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .tab-list {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      position: relative;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      border-radius: var(--radius-sm);
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background-color: var(--border-glass);
+    }
+
+    .tab-btn[aria-selected="true"] {
+      color: var(--primary);
+    }
+
+    /* Elegant active underline */
+    .tab-btn[aria-selected="true"]::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--primary);
+      border-radius: 3px 3px 0 0;
+      animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    .tab-panel {
+      display: none;
+      animation: tabFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes tabFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       5. TAB 1 CONTENT - HOME SETUP GUIDE
+       ───────────────────────────────────────────────────────────────────────────── */
+    .setup-flow {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      margin-top: 1rem;
+    }
+
+    .setup-card {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .setup-card {
+        grid-template-columns: 1fr;
+      }
+      .setup-card:nth-child(even) .setup-media {
+        order: -1;
+      }
+    }
+
+    .setup-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .step-number {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background-color: var(--accent-glow);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      align-self: flex-start;
+    }
+
+    .setup-info h3 {
+      font-size: 1.5rem;
+      color: var(--text-main);
+    }
+
+    .setup-info p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .setup-info ul {
+      margin-left: 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    /* Locked aspect ratio media block for Cumulative Layout Shift prevention */
+    .setup-media {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: var(--bg-base);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .setup-media img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Fallback layout when image is not present */
+    .setup-media-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .setup-media-placeholder svg {
+      width: 48px;
+      height: 48px;
+      color: var(--border-color);
+      stroke-width: 1.5px;
+    }
+
+    .setup-media-placeholder span {
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      background-color: var(--border-glass);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       6. TAB 2 CONTENT - INDICATOR CATALOG
+       ───────────────────────────────────────────────────────────────────────────── */
+    .indicator-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .indicator-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .indicator-header {
+      padding: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(180deg, var(--border-glass), transparent);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .indicator-title-desc h3 {
+      font-size: 1.8rem;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .indicator-title-desc p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 750px;
+    }
+
+    .badge-pine-version {
+      background-color: var(--primary-glow);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .indicator-body {
+      padding: 2rem;
+    }
+
+    /* Nested Tabs Interface (Desktop) / Accordions (Mobile) */
+    .nested-tabs-list {
+      display: flex;
+      gap: 0.25rem;
+      background-color: var(--bg-base);
+      padding: 0.25rem;
+      border-radius: var(--radius-md);
+      align-self: flex-start;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .nested-tab-btn {
+      background: none;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .nested-tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .nested-tab-btn.active {
+      background-color: var(--bg-surface);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nested-panel {
+      display: none;
+    }
+
+    .nested-panel.active {
+      display: block;
+      animation: tabFadeIn 0.3s ease forwards;
+    }
+
+    /* Accordion view (hidden on desktop, display on mobile) */
+    .nested-accordion-item {
+      display: none;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      width: 100%;
+      background-color: var(--bg-base);
+      border: none;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .accordion-header svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.2s ease;
+    }
+
+    .nested-accordion-item.open .accordion-header svg {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      padding: 0 1.25rem;
+      border-top: 1px solid transparent;
+      background-color: var(--bg-surface);
+      transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.25s ease,
+                  padding 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.35s ease;
+    }
+
+    .nested-accordion-item.open .accordion-content {
+      max-height: 1000px;
+      opacity: 1;
+      padding: 1.25rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Grid layout for indicator parameters */
+    .param-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .param-card {
+      background-color: var(--bg-base);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .param-card h4 {
+      font-size: 1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .param-card p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .param-default {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      background-color: var(--accent-glow);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      align-self: flex-start;
+      margin-top: auto;
+    }
+
+    /* Code Display layout */
+    .code-container {
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .code-header-bar {
+      background-color: #1e1e1e; /* Dark header regardless of mode */
+      border-bottom: 1px solid #2d2d2d;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #999;
+      font-size: 0.85rem;
+    }
+
+    .code-header-bar span {
+      font-family: var(--font-mono);
+    }
+
+    .code-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-copy {
+      background-color: #2d2d2d;
+      border: 1px solid #3d3d3d;
+      color: #eee;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-copy:hover {
+      background-color: #3d3d3d;
+      color: #fff;
+    }
+
+    .btn-copy.copied {
+      background-color: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .code-container pre {
+      margin: 0;
+      border-radius: 0;
+      max-height: 480px;
+      overflow-y: auto;
+      font-size: 0.85rem !important;
+      font-family: var(--font-mono) !important;
+      background-color: #121824 !important; /* Premium dark background */
+    }
+
+    .code-container pre code {
+      font-family: var(--font-mono) !important;
+    }
+
+    /* Indicator Breakdown Tables */
+    .table-responsive {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-surface);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    table.data-table th, table.data-table td {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.data-table th {
+      background-color: var(--bg-base);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table td.badge-cell {
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    /* Adapt tabs behavior at mobile breakpoint */
+    @media (max-width: 768px) {
+      .nested-tabs-list {
+        display: none;
+      }
+      .nested-panel {
+        display: none !important; /* Force hide panels on mobile */
+      }
+      .nested-accordion-item {
+        display: block; /* Show accordions instead */
+      }
+      .indicator-header {
+        padding: 1.5rem;
+      }
+      .indicator-body {
+        padding: 1.5rem;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       7. TAB 3 CONTENT - LEVEL II SIMULATOR NOTE
+       ───────────────────────────────────────────────────────────────────────────── */
+    .simulator-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .sim-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sim-header h3 {
+      font-size: 1.8rem;
+    }
+
+    .sim-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 800px;
+    }
+
+    /* Iframe Responsive Wrapper */
+    .iframe-wrapper {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background-color: var(--bg-base);
+      position: relative;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Maximized / Full Screen View style */
+    .iframe-wrapper.maximized {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      border: none;
+      border-radius: 0;
+    }
+
+    .iframe-control-bar {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .iframe-control-bar a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .iframe-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-iframe-act {
+      background: none;
+      border: 1px solid var(--border-color);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-iframe-act:hover {
+      background-color: var(--border-glass);
+      border-color: var(--text-muted);
+    }
+
+    .iframe-wrapper iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      display: block;
+    }
+
+    .iframe-wrapper.maximized iframe {
+      height: calc(100vh - 45px); /* Subtract header bar height */
+    }
+
+    .sim-details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .sim-detail-box {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      background-color: var(--bg-base);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sim-detail-box h4 {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sim-detail-box p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       8. FOOTER & MISC
+       ───────────────────────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-surface);
+      padding: 2rem;
+      text-align: center;
+      margin-top: auto;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    footer p {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Responsive Spacing tweaks */
+    @media (max-width: 600px) {
+      body {
+        padding-top: 70px;
+      }
+      .header-bar {
+        padding: 0 1rem;
+      }
+      .container {
+        padding: 1.5rem 1rem;
+      }
+      .hero {
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+      }
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+      .tab-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Visually hidden announcer for copy feedback -->
+  <div id="aria-announcer" class="sr-only" aria-live="polite"></div>
+
+  <!-- Header Bar -->
+  <header class="header-bar">
+    <div class="brand">
+      <!-- Logo Icon (Line Chart Up) -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 3 7 10 5-5 6 8"/>
+        <path d="M21 16V8h-8"/>
+      </svg>
+      <span>vtnhqw's TradingView</span>
+    </div>
+    
+    <div class="nav-controls">
+      <!-- Dark/Light Theme Switcher -->
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark theme">
+        <!-- Sun Icon (shows in dark theme) -->
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+        <!-- Moon Icon (shows in light theme) -->
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+      </button>
+      
+      <!-- GitHub Project Link -->
+      <a href="https://github.com/vtnhqw/TradingView-Indicator" class="btn-icon" target="_blank" rel="noopener" aria-label="Open GitHub Repository">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+          <path d="M9 18c-4.51 2-5-2-7-2"/>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <!-- Hero Header section -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <h1 id="hero-title">vtnhqw's TradingView</h1>
+        <p>A collection of high-performance, institutional-grade trading indicators built in Pine Script v6. Gain structural insights into market depth, trace Smart Money accumulation ratios, overlay dynamic support zones, and map swing waves.</p>
+        <div class="hero-meta">
+          <a href="#indicators" class="btn btn-primary" onclick="activateTab('indicators');">
+            <!-- Rocket icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.5 16.5c-1.5 1.26-2 2.76-2 3.5 0 0 .5 0 1.5-.5a12.5 12.5 0 0 0 3.5-2M15 9l-6 6M9 9l6 6M22 2s-3 0-5 2-4 4-4 6H7l-3 3v2l4-1 2 2 1 4h2l3-3V11c2 0 4-2 6-4s2-5 2-5Z"/>
+            </svg>
+            Explore Indicators
+          </a>
+          <a href="https://github.com/vtnhqw/TradingView-Indicator" class="btn btn-secondary" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+              <path d="M9 18c-4.51 2-5-2-7-2"/>
+            </svg>
+            View Code on GitHub
+          </a>
+          
+          <div class="badge-group">
+            <!-- Version badge -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8M8 12h8"/>
+            </svg>
+            <span>Pine Script v6 Ready</span>
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1.25rem; display: flex; align-items: center; gap: 0.4rem;">
+          <span style="color: var(--warning); font-size: 1rem;">★</span>
+          <span>If you find these indicators useful, please consider leaving a star on the <a href="https://github.com/vtnhqw/TradingView-Indicator" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline; font-weight: 500;">GitHub Repository</a> to support the project!</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Main Navigation Tabs -->
+    <div class="tab-wrapper">
+      <div class="tab-list" role="tablist" aria-label="Showcase Sections">
+        <button class="tab-btn" role="tab" aria-selected="true" aria-controls="panel-home" id="tab-home" tabindex="0">
+          Home Setup
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-indicators" id="tab-indicators" tabindex="-1">
+          Indicators Catalog
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-note" id="tab-note" tabindex="-1">
+          Notes
+        </button>
+      </div>
+
+      <!-- TAB 1 PANEL: HOME (Setup Instructions) -->
+      <section class="tab-panel active" id="panel-home" role="tabpanel" aria-labelledby="tab-home">
+        <div class="setup-flow">
+          
+          <!-- Step 1 -->
+          <div class="setup-card">
+            <div class="setup-info">
+              <span class="step-number">Step 1</span>
+              <h3>Choose and Copy Indicator Code</h3>
+              <p>Select which indicator script fits your trading style. Each script is pre-assembled in the next tab. Navigate to the catalog, expand the code section, and hit the Copy button.</p>
+              <ul>
+                <li><strong>52-Week High</strong> for breakout identification.</li>
+                <li><strong>MCDX Smart Money</strong> for tracking institutional accumulation.</li>
+                <li><strong>Pink Candle Indicator</strong> for reversal entries.</li>
+                <li><strong>ZigZag ZZ</strong> for noise-filtered swing structures.</li>
+              </ul>
+              <div style="margin-top: 1rem;">
+                <a href="#indicators" class="btn btn-secondary" onclick="activateTab('indicators');" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Go to Catalog →</a>
+              </div>
+            </div>
+            <div class="setup-media">
+              <img src="assets/step1-copy.png" alt="Copy code screenshot" onload="this.style.opacity=1;">
+              <div class="setup-media-placeholder">
+                <!-- Code icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                <span>assets/step1-copy.png</span>
+                <p style="font-size: 0.75rem; max-width: 250px;">Aspect Ratio Lock (16:9)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="setup-card">
+            <div class="setup-info">
+              <span class="step-number">Step 2</span>
+              <h3>Open TradingView's Pine Editor</h3>
+              <p>Navigate to TradingView and open any asset chart (e.g. BTCUSD, AAPL).</p>
+              <ul>
+                <li>At the very bottom of the chart screen, locate and click the <strong>Pine Editor</strong> tab.</li>
+                <li>Click the <strong>Open</strong> dropdown in the top-right of the editor workspace.</li>
+                <li>Select <strong>New indicator</strong> to load a clean template sheet.</li>
+              </ul>
+            </div>
+            <div class="setup-media">
+              <img src="assets/step2-editor.png" alt="Pine editor location screenshot" onload="this.style.opacity=1;">
+              <div class="setup-media-placeholder">
+                <!-- Monitor icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>
+                </svg>
+                <span>assets/step2-editor.png</span>
+                <p style="font-size: 0.75rem;">Aspect Ratio Lock (16:9)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="setup-card">
+            <div class="setup-info">
+              <span class="step-number">Step 3</span>
+              <h3>Paste and Save the Script</h3>
+              <p>Paste the copied script code directly into the code area, replacing all template text completely.</p>
+              <ul>
+                <li>Press <kbd>Ctrl+V</kbd> (or <kbd>Cmd+V</kbd> on macOS) inside the editor.</li>
+                <li>Click the <strong>Save</strong> button in the upper-right corner.</li>
+                <li>Name the indicator in the modal popup box (e.g., <code>Pink Candle Indicator v6</code>) and confirm.</li>
+              </ul>
+            </div>
+            <div class="setup-media">
+              <img src="assets/step3-save.png" alt="Saving pine script screenshot" onload="this.style.opacity=1;">
+              <div class="setup-media-placeholder">
+                <!-- Save icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+                </svg>
+                <span>assets/step3-save.png</span>
+                <p style="font-size: 0.75rem;">Aspect Ratio Lock (16:9)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="setup-card">
+            <div class="setup-info">
+              <span class="step-number">Step 4</span>
+              <h3>Add Indicator to the Chart</h3>
+              <p>Load the saved script overlay to start tracking real-time signals.</p>
+              <ul>
+                <li>Click the <strong>Add to Chart</strong> button adjacent to the Save button in the editor toolbar.</li>
+                <li><strong>Overlays:</strong> 52-Week High, Pink Candle, and ZigZag draw lines/color directly on the price candlesticks.</li>
+                <li><strong>Panes:</strong> MCDX Smart Money opens in a lower dedicated indicator pane underneath the asset.</li>
+              </ul>
+            </div>
+            <div class="setup-media">
+              <img src="assets/step4-add.png" alt="Add indicator to chart screenshot" onload="this.style.opacity=1;">
+              <div class="setup-media-placeholder">
+                <!-- PlusCircle icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/>
+                </svg>
+                <span>assets/step4-add.png</span>
+                <p style="font-size: 0.75rem;">Aspect Ratio Lock (16:9)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="setup-card">
+            <div class="setup-info">
+              <span class="step-number">Step 5</span>
+              <h3>Configure Inputs & Set Alerts</h3>
+              <p>Customize settings and establish real-time push alerts to never miss a setup.</p>
+              <ul>
+                <li><strong>Settings:</strong> Hover over the indicator name on the chart and click the **Gear Icon** (⚙️) to adjust parameters.</li>
+                <li><strong>Alerts:</strong> Click the **Three Dots** (...) next to the indicator name, select **Add Alert**, and select your custom trigger states.</li>
+              </ul>
+            </div>
+            <div class="setup-media">
+              <img src="assets/step5-settings.png" alt="Settings & alerts configurations screenshot" onload="this.style.opacity=1;">
+              <div class="setup-media-placeholder">
+                <!-- Settings/Bell icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                </svg>
+                <span>assets/step5-settings.png</span>
+                <p style="font-size: 0.75rem;">Aspect Ratio Lock (16:9)</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2 PANEL: INDICATORS CATALOG -->
+      <section class="tab-panel" id="panel-indicators" role="tabpanel" aria-labelledby="tab-indicators">
+        <div class="indicator-grid">
+
+          <!-- Indicator 1: 52-Week High -->
+          <article class="indicator-card" id="ind-52w">
+            <div class="indicator-header">
+              <div class="indicator-title-desc">
+                <h3>52-Week High Line</h3>
+                <p>Plots the critical 52-week resistance boundary line, tracking price breakouts, percentage distances, and proximity thresholds with customizable styling.</p>
+              </div>
+              <span class="badge-pine-version">Pine Script v6</span>
+            </div>
+            
+            <div class="indicator-body">
+              <!-- Desktop Tabs controller (hidden on mobile) -->
+              <div class="nested-tabs-list" role="tablist" aria-label="52W High Details">
+                <button class="nested-tab-btn active" data-panel="52w-overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
+                <button class="nested-tab-btn" data-panel="52w-params" role="tab" aria-selected="false" tabindex="-1">Parameters</button>
+                <button class="nested-tab-btn" data-panel="52w-alerts" role="tab" aria-selected="false" tabindex="-1">Alerts</button>
+                <button class="nested-tab-btn" data-panel="52w-code" role="tab" aria-selected="false" tabindex="-1">Source Code</button>
+              </div>
+
+              <!-- Mobile Accordion Layout (hidden on desktop) -->
+              <!-- Accordion 1: Overview -->
+              <div class="nested-accordion-item open" data-acc-id="52w-overview">
+                <button class="accordion-header" aria-expanded="true">
+                  Overview
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div style="display:flex; flex-direction:column; gap:1rem;">
+                    <p>Standard 52-week highs are vital benchmarks for institutional traders. This indicator draws a clean level axis extending to the right price scale, avoiding visual noise. Includes a proximity check trigger.</p>
+                    <strong>Key Features:</strong>
+                    <ul style="margin-left: 1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
+                      <li><strong>Adaptive Lookback:</strong> Scales down dynamically if the asset listing has fewer than 252 bars, preventing script errors on newer charts.</li>
+                      <li><strong>Distance Tracker:</strong> Computes the exact percentage gap to the 52-week high, helping to assess breakouts.</li>
+                      <li><strong>Right Axis Plot:</strong> Plugs directly into TradingView's scale.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion 2: Parameters -->
+              <div class="nested-accordion-item" data-acc-id="52w-params">
+                <button class="accordion-header" aria-expanded="false">
+                  Parameters
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="param-list">
+                    <div class="param-card">
+                      <h4>Line Color</h4>
+                      <p>Color of the level line on the chart.</p>
+                      <span class="param-default">Default: Orange</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Line Style</h4>
+                      <p>Visual texture of the drawn high line.</p>
+                      <span class="param-default">Options: Solid, Dashed, Dotted</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Show Distance %</h4>
+                      <p>Toggles showing the percentage proximity label.</p>
+                      <span class="param-default">Default: True</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Proximity Alert (%)</h4>
+                      <p>Margin distance threshold triggering warnings.</p>
+                      <span class="param-default">Default: 2.0%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion 3: Alerts -->
+              <div class="nested-accordion-item" data-acc-id="52w-alerts">
+                <button class="accordion-header" aria-expanded="false">
+                  Alert Conditions
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Alert Name</th>
+                          <th>Trigger Event</th>
+                          <th>Message Payload</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--warning);">Near 52W High</td>
+                          <td>Fires when the asset close price reaches the warning threshold (e.g. within 2%).</td>
+                          <td><code>Price is near the 52-Week High!</code></td>
+                        </tr>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--success);">Broke 52W High</td>
+                          <td>Fires on a cross above the 52-week high level.</td>
+                          <td><code>Price broke above the 52-Week High!</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion 4: Code -->
+              <div class="nested-accordion-item" data-acc-id="52w-code">
+                <button class="accordion-header" aria-expanded="false">
+                  Source Code
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="code-container">
+                    <div class="code-header-bar">
+                      <span>52-week-high-line-v2.pine</span>
+                      <div class="code-actions">
+                        <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/52-week-high-line-v2.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                        <button class="btn-copy" onclick="copyIndicatorCode('high52', this)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                          <span>Copy Code</span>
+                        </button>
+                      </div>
+                    </div>
+                    <pre><code class="language-javascript" id="code-high52">Loading script...</code></pre>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Desktop nested panels (controlled by JS, visible only on desktop) -->
+              <div class="nested-panel active" id="panel-52w-overview">
+                <!-- Content same as Overview accordion -->
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                  <p>Standard 52-week highs are vital benchmarks for institutional traders. This indicator draws a clean level axis extending to the right price scale, avoiding visual noise. Includes a proximity check trigger.</p>
+                  <strong>Key Features:</strong>
+                  <ul style="margin-left: 1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
+                    <li><strong>Adaptive Lookback:</strong> Scales down dynamically if the asset listing has fewer than 252 bars, preventing script errors on newer charts.</li>
+                    <li><strong>Distance Tracker:</strong> Computes the exact percentage gap to the 52-week high, helping to assess breakouts.</li>
+                    <li><strong>Right Axis Plot:</strong> Plugs directly into TradingView's scale.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-52w-params">
+                <!-- Content same as Parameters accordion -->
+                <div class="param-list">
+                  <div class="param-card">
+                    <h4>Line Color</h4>
+                    <p>Color of the level line on the chart.</p>
+                    <span class="param-default">Default: Orange</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Line Style</h4>
+                    <p>Visual texture of the drawn high line.</p>
+                    <span class="param-default">Options: Solid, Dashed, Dotted</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Show Distance %</h4>
+                    <p>Toggles showing the percentage proximity label.</p>
+                    <span class="param-default">Default: True</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Proximity Alert (%)</h4>
+                    <p>Margin distance threshold triggering warnings.</p>
+                    <span class="param-default">Default: 2.0%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-52w-alerts">
+                <!-- Content same as Alerts accordion -->
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Alert Name</th>
+                        <th>Trigger Event</th>
+                        <th>Message Payload</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--warning);">Near 52W High</td>
+                        <td>Fires when the asset close price reaches the warning threshold (e.g. within 2%).</td>
+                        <td><code>Price is near the 52-Week High!</code></td>
+                      </tr>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--success);">Broke 52W High</td>
+                        <td>Fires on a cross above the 52-week high level.</td>
+                        <td><code>Price broke above the 52-Week High!</code></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-52w-code">
+                <!-- Content same as Code accordion -->
+                <div class="code-container">
+                  <div class="code-header-bar">
+                    <span>52-week-high-line-v2.pine</span>
+                    <div class="code-actions">
+                      <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/52-week-high-line-v2.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                      <button class="btn-copy" onclick="copyIndicatorCode('high52', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy Code</span>
+                      </button>
+                    </div>
+                  </div>
+                  <pre><code class="language-javascript" id="code-desk-high52">Loading script...</code></pre>
+                </div>
+              </div>
+
+            </div>
+          </article>
+
+          <!-- Indicator 2: MCDX Smart Money -->
+          <article class="indicator-card" id="ind-mcdx">
+            <div class="indicator-header">
+              <div class="indicator-title-desc">
+                <h3>MCDX Smart Money</h3>
+                <p>An RSI-based momentum classifier that segments market participants into Bankers (Smart Money), Hot Money (speculators), and Retailers.</p>
+              </div>
+              <span class="badge-pine-version">Pine Script v6</span>
+            </div>
+            
+            <div class="indicator-body">
+              <!-- Desktop Tabs -->
+              <div class="nested-tabs-list" role="tablist" aria-label="MCDX Details">
+                <button class="nested-tab-btn active" data-panel="mcdx-overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
+                <button class="nested-tab-btn" data-panel="mcdx-params" role="tab" aria-selected="false" tabindex="-1">Parameters</button>
+                <button class="nested-tab-btn" data-panel="mcdx-alerts" role="tab" aria-selected="false" tabindex="-1">Alerts</button>
+                <button class="nested-tab-btn" data-panel="mcdx-code" role="tab" aria-selected="false" tabindex="-1">Source Code</button>
+              </div>
+
+              <!-- Mobile Accordions -->
+              <div class="nested-accordion-item open" data-acc-id="mcdx-overview">
+                <button class="accordion-header" aria-expanded="true">
+                  Overview
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div style="display:flex; flex-direction:column; gap:1rem;">
+                    <p>Recreation of the popular MCDX indicator. It estimates the volume concentration of different participant tiers, presenting them as colored histogram columns. Dominance shifts trigger background signals.</p>
+                    <strong>Composition Levels:</strong>
+                    <ul style="margin-left: 1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
+                      <li><strong style="color:var(--danger);">🔴 Bankers (Smart Money):</strong> Institutional accumulation. Large columns indicate major support. Very Bullish.</li>
+                      <li><strong style="color:var(--warning);">🟡 Hot Money:</strong> Short-term speculative velocity and momentum. Transitional state.</li>
+                      <li><strong style="color:var(--success);">🟢 Retailers:</strong> Small retail accounts. High retail dominance suggests risk of dumps or tops.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="mcdx-params">
+                <button class="accordion-header" aria-expanded="false">
+                  Parameters
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="param-list">
+                    <div class="param-card">
+                      <h4>Banker RSI Base</h4>
+                      <p>Centerline baseline offset for Banker calculation.</p>
+                      <span class="param-default">Default: 50</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Banker RSI Period</h4>
+                      <p>Lookback length for Banker RSI calculation.</p>
+                      <span class="param-default">Default: 50</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Banker Sensitivity</h4>
+                      <p>Multiplication scale factor for Banker momentum growth.</p>
+                      <span class="param-default">Default: 1.5</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Show % Labels Table</h4>
+                      <p>Displays real-time panel stats in the top-right corner.</p>
+                      <span class="param-default">Default: True</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="mcdx-alerts">
+                <button class="accordion-header" aria-expanded="false">
+                  Alert Conditions
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Alert Name</th>
+                          <th>Trigger Event</th>
+                          <th>Message Payload</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--danger);">Banker Crossover Hot Money</td>
+                          <td>Banker value crosses above Hot Money.</td>
+                          <td><code>MCDX: Banker crossed above Hot Money — Bullish signal 🔴</code></td>
+                        </tr>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--danger);">Banker Crossover Retail</td>
+                          <td>Banker value crosses above Retailer.</td>
+                          <td><code>MCDX: Banker crossed above Retailer — Strong Bullish 🔴🔴</code></td>
+                        </tr>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--warning);">Strong Banker Zone (>= 15)</td>
+                          <td>Banker value sits at or above 15 of 20.</td>
+                          <td><code>MCDX: Banker in Strong Zone (≥15) — Institutional accumulation 🏦</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="mcdx-code">
+                <button class="accordion-header" aria-expanded="false">
+                  Source Code
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="code-container">
+                    <div class="code-header-bar">
+                      <span>MCDX-SmartMoney.pine</span>
+                      <div class="code-actions">
+                        <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/MCDX-SmartMoney.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                        <button class="btn-copy" onclick="copyIndicatorCode('mcdx', this)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                          <span>Copy Code</span>
+                        </button>
+                      </div>
+                    </div>
+                    <pre><code class="language-javascript" id="code-mcdx">Loading script...</code></pre>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Desktop nested panels -->
+              <div class="nested-panel active" id="panel-mcdx-overview">
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                  <p>Recreation of the popular MCDX indicator. It estimates the volume concentration of different participant tiers, presenting them as colored histogram columns. Dominance shifts trigger background signals.</p>
+                  <strong>Composition Levels:</strong>
+                  <ul style="margin-left: 1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
+                    <li><strong style="color:var(--danger);">🔴 Bankers (Smart Money):</strong> Institutional accumulation. Large columns indicate major support. Very Bullish.</li>
+                    <li><strong style="color:var(--warning);">🟡 Hot Money:</strong> Short-term speculative velocity and momentum. Transitional state.</li>
+                    <li><strong style="color:var(--success);">🟢 Retailers:</strong> Small retail accounts. High retail dominance suggests risk of dumps or tops.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-mcdx-params">
+                <div class="param-list">
+                  <div class="param-card">
+                    <h4>Banker RSI Base</h4>
+                    <p>Centerline baseline offset for Banker calculation.</p>
+                    <span class="param-default">Default: 50</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Banker RSI Period</h4>
+                    <p>Lookback length for Banker RSI calculation.</p>
+                    <span class="param-default">Default: 50</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Banker Sensitivity</h4>
+                    <p>Multiplication scale factor for Banker momentum growth.</p>
+                    <span class="param-default">Default: 1.5</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Show % Labels Table</h4>
+                    <p>Displays real-time panel stats in the top-right corner.</p>
+                    <span class="param-default">Default: True</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-mcdx-alerts">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Alert Name</th>
+                        <th>Trigger Event</th>
+                        <th>Message Payload</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--danger);">Banker Crossover Hot Money</td>
+                        <td>Banker value crosses above Hot Money.</td>
+                        <td><code>MCDX: Banker crossed above Hot Money — Bullish signal 🔴</code></td>
+                      </tr>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--danger);">Banker Crossover Retail</td>
+                        <td>Banker value crosses above Retailer.</td>
+                        <td><code>MCDX: Banker crossed above Retailer — Strong Bullish 🔴🔴</code></td>
+                      </tr>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--warning);">Strong Banker Zone (>= 15)</td>
+                        <td>Banker value sits at or above 15 of 20.</td>
+                        <td><code>MCDX: Banker in Strong Zone (≥15) — Institutional accumulation 🏦</code></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-mcdx-code">
+                <div class="code-container">
+                  <div class="code-header-bar">
+                    <span>MCDX-SmartMoney.pine</span>
+                    <div class="code-actions">
+                      <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/MCDX-SmartMoney.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                      <button class="btn-copy" onclick="copyIndicatorCode('mcdx', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy Code</span>
+                      </button>
+                    </div>
+                  </div>
+                  <pre><code class="language-javascript" id="code-desk-mcdx">Loading script...</code></pre>
+                </div>
+              </div>
+
+            </div>
+          </article>
+
+          <!-- Indicator 3: Pink Candle Indicator -->
+          <article class="indicator-card" id="ind-pink">
+            <div class="indicator-header">
+              <div class="indicator-title-desc">
+                <h3>Pink Candle Reversal System</h3>
+                <p>A multi-condition "Buy-on-Dip" execution system that identifies key entry coordinates via oversold parameters, volume climaxes, and support channels.</p>
+              </div>
+              <span class="badge-pine-version">Pine Script v6</span>
+            </div>
+            
+            <div class="indicator-body">
+              <!-- Desktop Tabs -->
+              <div class="nested-tabs-list" role="tablist" aria-label="Pink Candle Details">
+                <button class="nested-tab-btn active" data-panel="pink-overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
+                <button class="nested-tab-btn" data-panel="pink-params" role="tab" aria-selected="false" tabindex="-1">Parameters</button>
+                <button class="nested-tab-btn" data-panel="pink-alerts" role="tab" aria-selected="false" tabindex="-1">Alerts</button>
+                <button class="nested-tab-btn" data-panel="pink-code" role="tab" aria-selected="false" tabindex="-1">Source Code</button>
+              </div>
+
+              <!-- Mobile Accordions -->
+              <div class="nested-accordion-item open" data-acc-id="pink-overview">
+                <button class="accordion-header" aria-expanded="true">
+                  Overview
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div style="display:flex; flex-direction:column; gap:1rem;">
+                    <p>Designed for systematic executions. Overwrites default chart candle coloring based on momentum stages. Features a dynamic dynamic support ribbon (Pillow Support) and institutional overhead resistance (Shark Zone).</p>
+                    <strong>Candle Signal Legend:</strong>
+                    <div class="table-responsive" style="margin-top: 0.5rem;">
+                      <table class="data-table" style="font-size:0.85rem;">
+                        <thead>
+                          <tr>
+                            <th>Color</th>
+                            <th>Signal Name</th>
+                            <th>Meaning / Trader Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td style="color:var(--accent); font-weight:700;">🌸 Pink</td>
+                            <td><strong>Standby Buy</strong></td>
+                            <td>Oversold bottom/reversal wick. Do not buy yet, stand by.</td>
+                          </tr>
+                          <tr>
+                            <td style="color:var(--text-main); font-weight:700;">⚪ White</td>
+                            <td><strong>White Knight</strong></td>
+                            <td><strong>CONFIRMED BUY.</strong> Bullish momentum breaking back up.</td>
+                          </tr>
+                          <tr>
+                            <td style="color:var(--warning); font-weight:700;">🟡 Yellow</td>
+                            <td><strong>Standby Sell</strong></td>
+                            <td>Overbought topping range. Scale out / book profits.</td>
+                          </tr>
+                          <tr>
+                            <td style="color:var(--primary); font-weight:700;">🔵 Blue</td>
+                            <td><strong>Breakout</strong></td>
+                            <td>High volume breakout close above Pillow upper boundary.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="pink-params">
+                <button class="accordion-header" aria-expanded="false">
+                  Parameters
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="param-list">
+                    <div class="param-card">
+                      <h4>Pillow EMA Length</h4>
+                      <p>Base center EMA for the support channel.</p>
+                      <span class="param-default">Default: 21</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Band Width Multiplier</h4>
+                      <p>ATR deviation scale determining Pillow width.</p>
+                      <span class="param-default">Default: 0.5</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Shark Lookback Period</h4>
+                      <p>Lookback length checking for highest swing resistances.</p>
+                      <span class="param-default">Default: 50 bars</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Selling Climax Vol Mult</h4>
+                      <p>Volume multiplier to trigger Selling Climax (SC) tags.</p>
+                      <span class="param-default">Default: 2.0x Average</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="pink-alerts">
+                <button class="accordion-header" aria-expanded="false">
+                  Alert Conditions
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Alert Name</th>
+                          <th>Trigger State</th>
+                          <th>Message Payload</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--accent);">PINK Candle — Standby Buy</td>
+                          <td>Reversal wick/exhaustion in oversold channel.</td>
+                          <td><code>Pink Candle detected on {{ticker}}. Standby to buy — wait for confirmation.</code></td>
+                        </tr>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--text-main); text-shadow:0 0 2px rgba(255,255,255,0.5);">WHITE Candle — Enter Now</td>
+                          <td>Bullish volume confirmation following a Pink zone.</td>
+                          <td><code>White Knight candle on {{ticker}} ({{interval}}). ENTRY SIGNAL — buy-on-dip confirmed.</code></td>
+                        </tr>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--warning);">YELLOW Candle — Standby Sell</td>
+                          <td>Overbought or Shark Zone resistance touch.</td>
+                          <td><code>Yellow Candle on {{ticker}}. Take profit zone. Consider booking gains.</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="pink-code">
+                <button class="accordion-header" aria-expanded="false">
+                  Source Code
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="code-container">
+                    <div class="code-header-bar">
+                      <span>PinkCandle-Indicator-v1.pine</span>
+                      <div class="code-actions">
+                        <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/PinkCandle-Indicator-v1.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                        <button class="btn-copy" onclick="copyIndicatorCode('pink', this)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                          <span>Copy Code</span>
+                        </button>
+                      </div>
+                    </div>
+                    <pre><code class="language-javascript" id="code-pink">Loading script...</code></pre>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Desktop nested panels -->
+              <div class="nested-panel active" id="panel-pink-overview">
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                  <p>Designed for systematic executions. Overwrites default chart candle coloring based on momentum stages. Features a dynamic dynamic support ribbon (Pillow Support) and institutional overhead resistance (Shark Zone).</p>
+                  <strong>Candle Signal Legend:</strong>
+                  <div class="table-responsive" style="margin-top: 0.5rem;">
+                    <table class="data-table" style="font-size:0.85rem;">
+                      <thead>
+                        <tr>
+                          <th>Color</th>
+                          <th>Signal Name</th>
+                          <th>Meaning / Trader Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="color:var(--accent); font-weight:700;">🌸 Pink</td>
+                          <td><strong>Standby Buy</strong></td>
+                          <td>Oversold bottom/reversal wick. Do not buy yet, stand by.</td>
+                        </tr>
+                        <tr>
+                          <td style="color:var(--text-main); font-weight:700;">⚪ White</td>
+                          <td><strong>White Knight</strong></td>
+                          <td><strong>CONFIRMED BUY.</strong> Bullish momentum breaking back up.</td>
+                        </tr>
+                        <tr>
+                          <td style="color:var(--warning); font-weight:700;">🟡 Yellow</td>
+                          <td><strong>Standby Sell</strong></td>
+                          <td>Overbought topping range. Scale out / book profits.</td>
+                        </tr>
+                        <tr>
+                          <td style="color:var(--primary); font-weight:700;">🔵 Blue</td>
+                          <td><strong>Breakout</strong></td>
+                          <td>High volume breakout close above Pillow upper boundary.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-pink-params">
+                <div class="param-list">
+                  <div class="param-card">
+                    <h4>Pillow EMA Length</h4>
+                    <p>Base center EMA for the support channel.</p>
+                    <span class="param-default">Default: 21</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Band Width Multiplier</h4>
+                    <p>ATR deviation scale determining Pillow width.</p>
+                    <span class="param-default">Default: 0.5</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Shark Lookback Period</h4>
+                    <p>Lookback length checking for highest swing resistances.</p>
+                    <span class="param-default">Default: 50 bars</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Selling Climax Vol Mult</h4>
+                    <p>Volume multiplier to trigger Selling Climax (SC) tags.</p>
+                    <span class="param-default">Default: 2.0x Average</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-pink-alerts">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Alert Name</th>
+                        <th>Trigger State</th>
+                        <th>Message Payload</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--accent);">PINK Candle — Standby Buy</td>
+                        <td>Reversal wick/exhaustion in oversold channel.</td>
+                        <td><code>Pink Candle detected on {{ticker}}. Standby to buy — wait for confirmation.</code></td>
+                      </tr>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--text-main); text-shadow:0 0 2px rgba(255,255,255,0.5);">WHITE Candle — Enter Now</td>
+                        <td>Bullish volume confirmation following a Pink zone.</td>
+                        <td><code>White Knight candle on {{ticker}} ({{interval}}). ENTRY SIGNAL — buy-on-dip confirmed.</code></td>
+                      </tr>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--warning);">YELLOW Candle — Standby Sell</td>
+                        <td>Overbought or Shark Zone resistance touch.</td>
+                        <td><code>Yellow Candle on {{ticker}}. Take profit zone. Consider booking gains.</code></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-pink-code">
+                <div class="code-container">
+                  <div class="code-header-bar">
+                    <span>PinkCandle-Indicator-v1.pine</span>
+                    <div class="code-actions">
+                      <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/PinkCandle-Indicator-v1.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                      <button class="btn-copy" onclick="copyIndicatorCode('pink', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy Code</span>
+                      </button>
+                    </div>
+                  </div>
+                  <pre><code class="language-javascript" id="code-desk-pink">Loading script...</code></pre>
+                </div>
+              </div>
+
+            </div>
+          </article>
+
+          <!-- Indicator 4: ZigZag ZZ -->
+          <article class="indicator-card" id="ind-zigzag">
+            <div class="indicator-header">
+              <div class="indicator-title-desc">
+                <h3>ZigZag Swing Wave Indicator</h3>
+                <p>Traces core market structure by filtering out short-term fluctuations, connecting verified pivot highs and lows with percentage changes.</p>
+              </div>
+              <span class="badge-pine-version">Pine Script v6</span>
+            </div>
+            
+            <div class="indicator-body">
+              <!-- Desktop Tabs -->
+              <div class="nested-tabs-list" role="tablist" aria-label="ZigZag Details">
+                <button class="nested-tab-btn active" data-panel="zz-overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
+                <button class="nested-tab-btn" data-panel="zz-params" role="tab" aria-selected="false" tabindex="-1">Parameters</button>
+                <button class="nested-tab-btn" data-panel="zz-alerts" role="tab" aria-selected="false" tabindex="-1">Alerts</button>
+                <button class="nested-tab-btn" data-panel="zz-code" role="tab" aria-selected="false" tabindex="-1">Source Code</button>
+              </div>
+
+              <!-- Mobile Accordions -->
+              <div class="nested-accordion-item open" data-acc-id="zz-overview">
+                <button class="accordion-header" aria-expanded="true">
+                  Overview
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div style="display:flex; flex-direction:column; gap:1rem;">
+                    <p>Removes market noise to clearly reveal higher highs and lower lows. Connects pivot points with trend-colored lines (bullish/bearish) and provides optional price tags detailing percentage differences.</p>
+                    <strong>Key Features:</strong>
+                    <ul style="margin-left: 1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
+                      <li><strong>Live Developing Leg:</strong> Draws a dotted preview line from the last confirmed pivot point to the current active close price.</li>
+                      <li><strong>Directional Coloring:</strong> Up-waves are painted emerald, down-waves crimson.</li>
+                      <li><strong>Percentage Metrics:</strong> Shows structural extension magnitudes directly on chart labels.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="zz-params">
+                <button class="accordion-header" aria-expanded="false">
+                  Parameters
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="param-list">
+                    <div class="param-card">
+                      <h4>Depth (Pivot Strength)</h4>
+                      <p>Required bars on either side of a point to confirm a structural swing high/low.</p>
+                      <span class="param-default">Default: 10</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Pivot Source</h4>
+                      <p>Data stream checked for pivots.</p>
+                      <span class="param-default">Options: High/Low, Close</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Show Price Labels</h4>
+                      <p>Toggles numerical labels on confirmed structural peaks.</p>
+                      <span class="param-default">Default: True</span>
+                    </div>
+                    <div class="param-card">
+                      <h4>Show Live Developing Leg</h4>
+                      <p>Toggles rendering the dotted trailing preview leg.</p>
+                      <span class="param-default">Default: True</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="zz-alerts">
+                <button class="accordion-header" aria-expanded="false">
+                  Alert Conditions
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Alert Name</th>
+                          <th>Trigger State</th>
+                          <th>Message Payload</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--success);">ZZ New Swing High</td>
+                          <td>A new pivot high is established and locked behind the lookback depth window.</td>
+                          <td><code>ZZ: new confirmed swing HIGH</code></td>
+                        </tr>
+                        <tr>
+                          <td class="badge-cell" style="color:var(--danger);">ZZ New Swing Low</td>
+                          <td>A new pivot low is established and locked behind the lookback depth window.</td>
+                          <td><code>ZZ: new confirmed swing LOW</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-accordion-item" data-acc-id="zz-code">
+                <button class="accordion-header" aria-expanded="false">
+                  Source Code
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="accordion-content">
+                  <div class="code-container">
+                    <div class="code-header-bar">
+                      <span>zigzag-indicator.pine</span>
+                      <div class="code-actions">
+                        <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/zigzag-indicator.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                        <button class="btn-copy" onclick="copyIndicatorCode('zigzag', this)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                          <span>Copy Code</span>
+                        </button>
+                      </div>
+                    </div>
+                    <pre><code class="language-javascript" id="code-zigzag">Loading script...</code></pre>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Desktop nested panels -->
+              <div class="nested-panel active" id="panel-zz-overview">
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                  <p>Removes market noise to clearly reveal higher highs and lower lows. Connects pivot points with trend-colored lines (bullish/bearish) and provides optional price tags detailing percentage differences.</p>
+                  <strong>Key Features:</strong>
+                  <ul style="margin-left: 1.25rem; display:flex; flex-direction:column; gap:0.25rem;">
+                    <li><strong>Live Developing Leg:</strong> Draws a dotted preview line from the last confirmed pivot point to the current active close price.</li>
+                    <li><strong>Directional Coloring:</strong> Up-waves are painted emerald, down-waves crimson.</li>
+                    <li><strong>Percentage Metrics:</strong> Shows structural extension magnitudes directly on chart labels.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-zz-params">
+                <div class="param-list">
+                  <div class="param-card">
+                    <h4>Depth (Pivot Strength)</h4>
+                    <p>Required bars on either side of a point to confirm a structural swing high/low.</p>
+                    <span class="param-default">Default: 10</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Pivot Source</h4>
+                    <p>Data stream checked for pivots.</p>
+                    <span class="param-default">Options: High/Low, Close</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Show Price Labels</h4>
+                    <p>Toggles numerical labels on confirmed structural peaks.</p>
+                    <span class="param-default">Default: True</span>
+                  </div>
+                  <div class="param-card">
+                    <h4>Show Live Developing Leg</h4>
+                    <p>Toggles rendering the dotted trailing preview leg.</p>
+                    <span class="param-default">Default: True</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-zz-alerts">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Alert Name</th>
+                        <th>Trigger State</th>
+                        <th>Message Payload</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--success);">ZZ New Swing High</td>
+                        <td>A new pivot high is established and locked behind the lookback depth window.</td>
+                        <td><code>ZZ: new confirmed swing HIGH</code></td>
+                      </tr>
+                      <tr>
+                        <td class="badge-cell" style="color:var(--danger);">ZZ New Swing Low</td>
+                        <td>A new pivot low is established and locked behind the lookback depth window.</td>
+                        <td><code>ZZ: new confirmed swing LOW</code></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="nested-panel" id="panel-zz-code">
+                <div class="code-container">
+                  <div class="code-header-bar">
+                    <span>zigzag-indicator.pine</span>
+                    <div class="code-actions">
+                      <a href="https://github.com/vtnhqw/TradingView-Indicator/blob/main/zigzag-indicator.pine" target="_blank" rel="noopener">View on GitHub ↗</a>
+                      <button class="btn-copy" onclick="copyIndicatorCode('zigzag', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy Code</span>
+                      </button>
+                    </div>
+                  </div>
+                  <pre><code class="language-javascript" id="code-desk-zigzag">Loading script...</code></pre>
+                </div>
+              </div>
+
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- TAB 3 PANEL: NOTES & SIMULATORS -->
+      <section class="tab-panel" id="panel-note" role="tabpanel" aria-labelledby="tab-note">
+        <div style="display: flex; flex-direction: column; gap: 3rem;">
+          
+          <!-- Note 1: Level II Simulator Card -->
+          <div class="simulator-card">
+            <div class="sim-header">
+              <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); background-color: var(--accent-glow); padding: 0.25rem 0.6rem; border-radius: 4px; align-self: flex-start; margin-bottom: 0.75rem;">Note 1 — Live Interactive Tool</span>
+              <h3>Level II Order Book Simulator</h3>
+              <p>An interactive, educational terminal detailing live order flow dynamics. Observe spread changes, bid/ask depth wall formations, order spoofing, breakouts, and breakdowns with a real-time event console explainer.</p>
+            </div>
+
+            <!-- Interactive Simulator Wrapper -->
+            <div class="iframe-wrapper" id="simulator-wrapper">
+              <div class="iframe-control-bar">
+                <span>📍 note/level2_orderbook_cheatsheet.html</span>
+                <div class="iframe-actions">
+                  <button class="btn-iframe-act" id="btn-maximize-iframe" aria-label="Toggle full screen simulator">
+                    <!-- Maximize / Resize icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/>
+                    </svg>
+                    <span id="max-btn-text">Maximize</span>
+                  </button>
+                  <a href="./note/level2_orderbook_cheatsheet.html" target="_blank" rel="noopener" class="btn-iframe-act">
+                    <!-- External link icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                    </svg>
+                    New Tab
+                  </a>
+                </div>
+              </div>
+              
+              <iframe src="./note/level2_orderbook_cheatsheet.html" title="Level II Order Book Simulator"></iframe>
+            </div>
+
+            <!-- Educational Details Grid -->
+            <div class="sim-details-grid">
+              
+              <!-- Signal 1 -->
+              <div class="sim-detail-box">
+                <h4>
+                  <!-- ShieldAlert icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--danger);">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12" y1="16" y2="16"/>
+                  </svg>
+                  Understanding Order Book Spoofing
+                </h4>
+                <p>Spoofing is a manipulative practice where market participants place large orders that they have no intention of executing. These fake walls are set up to pressure retail traders into panic buying or selling, only to be canceled when the price gets close.</p>
+              </div>
+
+              <!-- Signal 2 -->
+              <div class="sim-detail-box">
+                <h4>
+                  <!-- TrendingUp icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--success);">
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+                  </svg>
+                  Breakouts vs Breakdowns
+                </h4>
+                <p>When the price eats through a heavy ask wall, it triggers momentum buy stops, generating a strong bullish breakout. Conversely, collapsing bid support walls trigger automated sell stops, leading to immediate price breakdowns.</p>
+              </div>
+
+              <!-- Signal 3 -->
+              <div class="sim-detail-box">
+                <h4>
+                  <!-- Activity icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary);">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  The Bid-Ask Spread Dynamics
+                </h4>
+                <p>The spread represents the gap between the highest buyer bid and lowest seller ask. Low spreads indicate deep market liquidity and heavy trading volume. Wide spreads usually occur during low liquidity or high-volatility news events.</p>
+              </div>
+
+            </div>
+          </div>
+
+
+
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>vtnhqw's TradingView &copy; 2026. Published as GitHub Pages.</p>
+    <p>Designed for professional chart overlay. Use with caution. None of this code constitutes financial advice.</p>
+  </footer>
+
+  <!-- PrismJS Core and Javascript module -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  
+  <script>
+    /* ─────────────────────────────────────────────────────────────────────────────
+       9. PINE SCRIPTS EMBEDDED STRING DATABASE (Offline Safe)
+       ───────────────────────────────────────────────────────────────────────────── */
+    const PINE_SCRIPTS = {
+      high52: `//@version=6
+indicator(title="52-Week High", shorttitle="52W High", overlay=true, max_bars_back=300)
+
+// ─── Inputs ───────────────────────────────────────────────────────────────────
+grpHigh        = "52-Week High"
+lineColorHigh  = input.color(color.new(color.orange, 0), "Line Color",         group=grpHigh)
+lineWidth      = input.int(2,      "Line Width",    minval=1, maxval=4,         group=grpHigh)
+lineStyle      = input.string("Solid", "Line Style", options=["Solid","Dashed","Dotted"], group=grpHigh)
+showLabel      = input.bool(true,  "Show Label",                                group=grpHigh)
+showDist       = input.bool(true,  "Show Distance %",                           group=grpHigh)
+showPriceLabel = input.bool(true,  "Show Price on Axis",                        group=grpHigh)
+alertProxPct   = input.float(2.0,  "Proximity Alert (%)", minval=0.0, step=0.1, group=grpHigh)
+
+// ─── Adaptive Lookback ────────────────────────────────────────────────────────
+IDEAL_BARS = 252
+adaptedLen = math.min(bar_index + 1, IDEAL_BARS)
+
+// ─── Logic ────────────────────────────────────────────────────────────────────
+weekHigh52 = ta.highest(high, adaptedLen)
+distPct    = (close - weekHigh52) / weekHigh52 * 100
+isNearHigh = math.abs(distPct) <= alertProxPct
+
+// ─── Helper ───────────────────────────────────────────────────────────────────
+_lineStyle(s) =>
+    if s == "Dashed"
+        line.style_dashed
+    else if s == "Dotted"
+        line.style_dotted
+    else
+        line.style_solid
+
+// ─── Price axis label via plot + plotchar trick ───────────────────────────────
+plot(showPriceLabel ? weekHigh52 : na, "52W High Level",
+     color     = lineColorHigh,
+     linewidth = 1,
+     style     = plot.style_linebr,
+     display   = display.price_scale)
+
+// ─── Drawing ──────────────────────────────────────────────────────────────────
+var line  highLine  = na
+var label highLabel = na
+
+if barstate.islast
+    line.delete(highLine)
+    label.delete(highLabel)
+
+    startBar = bar_index - adaptedLen + 1
+
+    highLine := line.new(
+         x1     = startBar,
+         y1     = weekHigh52,
+         x2     = bar_index,
+         y2     = weekHigh52,
+         xloc   = xloc.bar_index,
+         extend = extend.right,
+         color  = lineColorHigh,
+         style  = _lineStyle(lineStyle),
+         width  = lineWidth)
+
+    if showLabel
+        distStr  = showDist ? " (" + (distPct >= 0 ? "+" : "") + str.tostring(distPct, "#.##") + "%)" : ""
+        barsNote = adaptedLen < IDEAL_BARS ? " [" + str.tostring(adaptedLen) + "d]" : ""
+        labelTxt = "52W High: " + str.tostring(weekHigh52, format.mintick) + distStr + barsNote
+
+        highLabel := label.new(
+             x         = startBar,
+             y         = weekHigh52,
+             text      = labelTxt,
+             xloc      = xloc.bar_index,
+             yloc      = yloc.price,
+             style     = label.style_label_right,
+             color     = color.new(lineColorHigh, 80),
+             textcolor = lineColorHigh,
+             size      = size.small)
+
+// ─── Data Window only ─────────────────────────────────────────────────────────
+plot(weekHigh52, "52W High",            display=display.data_window)
+plot(distPct,    "Dist% from 52W High", display=display.data_window)
+
+// ─── Alerts ───────────────────────────────────────────────────────────────────
+alertcondition(isNearHigh,                      "Near 52W High",  "Price is near the 52-Week High!")
+alertcondition(ta.crossover(close, weekHigh52), "Broke 52W High", "Price broke above the 52-Week High!")`,
+      
+      mcdx: `// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0
+// © MCDX Smart Money Indicator - Pine Script v6 Recreation
+
+//@version=6
+indicator(title="MCDX Smart Money", shorttitle="MCDX", overlay=false, max_bars_back=500)
+
+// ─── INPUTS ───────────────────────────────────────────────────────────────────
+var string GRP1 = "🔴 Banker (Smart Money) Settings"
+bankerBase    = input.int(50,  "Banker RSI Base",    minval=10, maxval=90, group=GRP1)
+bankerPeriod  = input.int(50,  "Banker RSI Period",  minval=5,  maxval=200, group=GRP1)
+bankerSens    = input.float(1.5, "Banker Sensitivity", minval=0.1, maxval=10.0, step=0.1, group=GRP1)
+
+var string GRP2 = "🟡 Hot Money Settings"
+hotBase       = input.int(30,  "Hot Money RSI Base",   minval=10, maxval=90, group=GRP2)
+hotPeriod     = input.int(40,  "Hot Money RSI Period",  minval=5,  maxval=200, group=GRP2)
+hotSens       = input.float(0.7, "Hot Money Sensitivity", minval=0.1, maxval=10.0, step=0.1, group=GRP2)
+
+var string GRP3 = "📊 Display Settings"
+showMA        = input.bool(true,  "Show Moving Averages", group=GRP3)
+maPeriod      = input.int(10,  "MA Period", minval=2, maxval=50, group=GRP3)
+showBg        = input.bool(true,  "Show Background Signal", group=GRP3)
+showLabels    = input.bool(true,  "Show % Labels", group=GRP3)
+
+// ─── COLORS ──────────────────────────────────────────────────────────────────
+COLOR_BANKER   = color.new(color.red,    0)
+COLOR_HOT      = color.new(#D4AC0D,      0)
+COLOR_RETAIL   = color.new(color.green,  0)
+COLOR_BANKER_MA = color.new(#FF6B6B,    20)
+COLOR_HOT_MA   = color.new(#F7DC6F,     20)
+COLOR_RETAIL_MA = color.new(#58D68D,    20)
+
+// ─── MCDX CALCULATION ────────────────────────────────────────────────────────
+mcdx_calc(sens, period, base) =>
+    r = ta.rsi(close, period)
+    raw = sens * (r - base)
+    math.max(0.0, math.min(20.0, raw))
+
+bankerVal  = mcdx_calc(bankerSens, bankerPeriod, bankerBase)
+hotVal     = mcdx_calc(hotSens,    hotPeriod,    hotBase)
+retailVal  = math.max(0.0, 20.0 - math.max(bankerVal, hotVal))
+
+// ─── MOVING AVERAGES ─────────────────────────────────────────────────────────
+bankerMA  = ta.sma(bankerVal, maPeriod)
+hotMA     = ta.sma(hotVal,    maPeriod)
+retailMA  = ta.sma(retailVal, maPeriod)
+
+// ─── PERCENTAGE LABELS ───────────────────────────────────────────────────────
+total = bankerVal + hotVal + retailVal
+bankerPct  = total > 0 ? (bankerVal  / total) * 100 : 0.0
+hotPct     = total > 0 ? (hotVal     / total) * 100 : 0.0
+retailPct  = total > 0 ? (retailVal  / total) * 100 : 0.0
+
+// ─── BACKGROUND SIGNAL ───────────────────────────────────────────────────────
+bgColor = bankerVal > hotVal and bankerVal > retailVal ? color.new(color.green, 92) :
+          retailVal > bankerVal and retailVal > hotVal  ? color.new(color.red,   92) :
+          color.new(color.yellow, 95)
+
+bgcolor(showBg ? bgColor : na, title="Background Signal")
+
+// ─── PLOTS ───────────────────────────────────────────────────────────────────
+hline(20, "Max Level",  color=color.new(color.gray, 70), linestyle=hline.style_dashed)
+hline(10, "Mid Level",  color=color.new(color.gray, 80), linestyle=hline.style_dotted)
+hline(0,  "Zero Level", color=color.new(color.gray, 60), linestyle=hline.style_solid)
+
+plot(20,        title="Retailer Base",  style=plot.style_columns, color=COLOR_RETAIL,  linewidth=1)
+plot(hotVal > 0 or bankerVal > 0 ? math.max(hotVal, bankerVal) : na,
+                title="Hot Money",      style=plot.style_columns, color=COLOR_HOT,      linewidth=1)
+plot(bankerVal > 0 ? bankerVal : na,
+                title="Banker",         style=plot.style_columns, color=COLOR_BANKER,   linewidth=1)
+
+plot(showMA ? bankerMA  : na, title="Banker MA",  color=COLOR_BANKER_MA,  linewidth=2)
+plot(showMA ? hotMA     : na, title="Hot MA",     color=COLOR_HOT_MA,     linewidth=2)
+plot(showMA ? retailMA  : na, title="Retail MA",  color=COLOR_RETAIL_MA,  linewidth=2)
+
+// ─── INFO TABLE ───────────────────────────────────────────────────────────────
+if showLabels and barstate.islast
+    var table infoTable = table.new(position.top_right, 2, 4,
+         bgcolor=color.new(color.black, 70),
+         border_color=color.new(color.gray, 50),
+         border_width=1, frame_color=color.new(color.gray, 50), frame_width=1)
+
+    table.cell(infoTable, 0, 0, "MCDX",        text_color=color.white,  text_size=size.small, bgcolor=color.new(color.navy, 30))
+    table.cell(infoTable, 1, 0, "Value / %",   text_color=color.silver, text_size=size.small, bgcolor=color.new(color.navy, 30))
+
+    table.cell(infoTable, 0, 1, "🔴 Banker",   text_color=color.red,    text_size=size.small)
+    table.cell(infoTable, 1, 1, str.tostring(bankerVal, "#.##") + "  (" + str.tostring(bankerPct, "#.#") + "%)",
+               text_color=color.red, text_size=size.small)
+
+    table.cell(infoTable, 0, 2, "🟡 Hot Money", text_color=#D4AC0D,     text_size=size.small)
+    table.cell(infoTable, 1, 2, str.tostring(hotVal, "#.##") + "  (" + str.tostring(hotPct, "#.#") + "%)",
+               text_color=#D4AC0D, text_size=size.small)
+
+    table.cell(infoTable, 0, 3, "🟢 Retailer",  text_color=color.green,  text_size=size.small)
+    table.cell(infoTable, 1, 3, str.tostring(retailVal, "#.##") + "  (" + str.tostring(retailPct, "#.#") + "%)",
+               text_color=color.green, text_size=size.small)
+
+// ─── ALERTS ──────────────────────────────────────────────────────────────────
+alertcondition(ta.crossover(bankerVal, hotVal),   title="Banker Crossover Hot Money",   message="MCDX: Banker crossed above Hot Money — Bullish signal 🔴")
+alertcondition(ta.crossover(bankerVal, retailVal), title="Banker Crossover Retail",     message="MCDX: Banker crossed above Retailer — Strong Bullish 🔴🔴")
+alertcondition(ta.crossunder(bankerVal, hotVal),  title="Banker Crossunder Hot Money",  message="MCDX: Banker fell below Hot Money — Caution ⚠️")
+alertcondition(bankerVal >= 15,                   title="Strong Banker Zone (>= 15)",   message="MCDX: Banker in Strong Zone (≥15) — Institutional accumulation 🏦")
+alertcondition(retailVal >= 18,                   title="Retailer Dominant (>= 18)",    message="MCDX: Retailer dominant — Avoid long, possible distribution 🟢")`,
+      
+      pink: `//@version=6
+indicator("Pink Candle Indicator [v6]", overlay=true, max_bars_back=500, max_lines_count=10, max_labels_count=200)
+
+// ─────────────────────────────────────────────
+// GROUP: PILLOW (Dynamic Support Band)
+// ─────────────────────────────────────────────
+grp_pillow = "Pillow Support (Dynamic EMA Band)"
+pillow_len    = input.int(21,    "Pillow EMA Length",         group=grp_pillow, minval=5, maxval=200)
+pillow_mult   = input.float(0.5, "Band Width Multiplier",     group=grp_pillow, minval=0.1, maxval=3.0, step=0.1)
+show_pillow   = input.bool(true, "Show Pillow Band",          group=grp_pillow)
+
+// ─────────────────────────────────────────────
+// GROUP: SHARK ZONE (Tory Box — Institutional Resistance)
+// ─────────────────────────────────────────────
+grp_shark = "Shark Zone / Tory Box (Institutional Resistance)"
+shark_len     = input.int(50,    "Lookback Period (bars)",    group=grp_shark, minval=10, maxval=300)
+shark_offset  = input.float(0.5, "Zone Thickness (%)",       group=grp_shark, minval=0.1, maxval=5.0, step=0.1)
+show_shark    = input.bool(true, "Show Shark Zone",           group=grp_shark)
+
+// ─────────────────────────────────────────────
+// GROUP: VOLUME CLIMAX
+// ─────────────────────────────────────────────
+grp_vol = "Volume Climax Settings"
+vol_len       = input.int(20,   "Volume MA Length",           group=grp_vol, minval=5, maxval=100)
+vol_mult_sc   = input.float(2.0,"Selling Climax Threshold (x avg)", group=grp_vol, minval=1.0, maxval=10.0, step=0.1)
+vol_mult_bc   = input.float(2.0,"Buying Climax Threshold (x avg)",  group=grp_vol, minval=1.0, maxval=10.0, step=0.1)
+show_climax   = input.bool(true,"Show Climax Labels",         group=grp_vol)
+
+// ─────────────────────────────────────────────
+// GROUP: CANDLE SIGNAL SENSITIVITY
+// ─────────────────────────────────────────────
+grp_sig = "Candle Signal Sensitivity"
+rsi_len       = input.int(14,   "RSI Length",                 group=grp_sig, minval=2, maxval=50)
+rsi_os        = input.int(35,   "RSI Oversold Level (Pink)",  group=grp_sig, minval=10, maxval=50)
+rsi_ob        = input.int(65,   "RSI Overbought Level (Yellow)", group=grp_sig, minval=50, maxval=90)
+stoch_len     = input.int(14,   "Stoch Length",               group=grp_sig, minval=5, maxval=50)
+stoch_smooth  = input.int(3,    "Stoch Smooth",               group=grp_sig, minval=1, maxval=10)
+body_pct      = input.float(0.4,"Min Body Size (% of range)", group=grp_sig, minval=0.1, maxval=0.9, step=0.05)
+
+// ─────────────────────────────────────────────
+// GROUP: DISPLAY
+// ─────────────────────────────────────────────
+grp_disp = "Display Options"
+show_labels   = input.bool(true, "Show Signal Labels on Chart", group=grp_disp)
+show_bg       = input.bool(true, "Colour Candle Backgrounds",   group=grp_disp)
+show_table    = input.bool(true, "Show Signal Dashboard Table",  group=grp_disp)
+label_size    = input.string("small", "Label Size", options=["tiny","small","normal","large"], group=grp_disp)
+
+// ─────────────────────────────────────────────
+// COLOURS
+// ─────────────────────────────────────────────
+col_pink   = color.new(color.fuchsia,  10)
+col_white  = color.new(color.white,    10)
+col_yellow = color.new(color.yellow,   10)
+col_blue   = color.new(color.blue,     10)
+col_green  = color.new(color.lime,     30)
+col_red    = color.new(color.red,      30)
+col_shark  = color.new(color.red,      80)
+col_pillow = color.new(color.aqua,     80)
+col_sc     = color.new(color.red,      0)
+col_bc     = color.new(color.orange,   0)
+
+// ─────────────────────────────────────────────
+// CORE CALCULATIONS
+// ─────────────────────────────────────────────
+pillow_mid   = ta.ema(close, pillow_len)
+atr_val      = ta.atr(pillow_len)
+pillow_upper = pillow_mid + atr_val * pillow_mult
+pillow_lower = pillow_mid - atr_val * pillow_mult
+
+shark_high   = ta.highest(high, shark_len)
+shark_top    = shark_high
+shark_bot    = shark_high * (1.0 - shark_offset / 100.0)
+
+vol_ma       = ta.sma(volume, vol_len)
+vol_ratio    = volume / vol_ma
+rsi_val      = ta.rsi(close, rsi_len)
+stoch_k      = ta.sma(ta.stoch(close, high, low, stoch_len), stoch_smooth)
+
+candle_range = high - low
+candle_body  = math.abs(close - open)
+body_ratio   = candle_range > 0 ? candle_body / candle_range : 0.0
+
+above_pillow = close > pillow_mid
+below_pillow = close < pillow_mid
+bull_candle  = close >= open
+bear_candle  = close < open
+
+// ─────────────────────────────────────────────
+// SIGNAL LOGIC
+// ─────────────────────────────────────────────
+sc_signal = bear_candle
+          and vol_ratio >= vol_mult_sc
+          and rsi_val < rsi_os + 10
+          and body_ratio > body_pct
+
+bc_signal = bull_candle
+          and vol_ratio >= vol_mult_bc
+          and rsi_val > rsi_ob - 10
+          and body_ratio > body_pct
+
+lower_wick   = math.min(open, close) - low
+upper_wick   = high - math.max(open, close)
+reversal_wick = lower_wick > candle_body * 0.8
+
+pink_signal  = below_pillow
+             and rsi_val < rsi_os + 5
+             and stoch_k < 25
+             and (reversal_wick or sc_signal[1] or sc_signal)
+             and not bull_candle[1] == false
+
+white_signal = bull_candle
+             and body_ratio > body_pct
+             and (pink_signal[1] or pink_signal[2] or pink_signal[3])
+             and close > pillow_lower
+             and vol_ratio > 0.8
+             and rsi_val > rsi_val[1]
+
+near_shark   = high >= shark_bot * 0.99
+overbought   = rsi_val > rsi_ob or stoch_k > 75
+upper_wick_dom = upper_wick > candle_body * 0.8
+
+yellow_signal = (near_shark or overbought)
+               and above_pillow
+               and (upper_wick_dom or not bull_candle)
+               and not bc_signal
+
+breakout     = close > pillow_upper
+             and close > ta.highest(close, 10)[1]
+blue_signal  = breakout
+             and bull_candle
+             and body_ratio > body_pct
+             and vol_ratio > 1.2
+             and not near_shark
+
+trend_green  = above_pillow and not pink_signal and not white_signal and not yellow_signal and not blue_signal
+trend_red    = below_pillow and not pink_signal and not white_signal
+
+// ─────────────────────────────────────────────
+// PLOTS & BAR COLORING
+// ─────────────────────────────────────────────
+candle_col = pink_signal   ? col_pink   :
+             white_signal  ? col_white  :
+             yellow_signal ? col_yellow :
+             blue_signal   ? col_blue   :
+             trend_green   ? col_green  :
+             trend_red     ? col_red    :
+             color.new(color.gray, 50)
+
+barcolor(candle_col)
+
+bg_col = show_bg ?
+          (pink_signal   ? color.new(color.fuchsia, 92) :
+           white_signal  ? color.new(color.white,   92) :
+           yellow_signal ? color.new(color.yellow,  92) :
+           blue_signal   ? color.new(color.blue,    92) :
+           na) : na
+
+bgcolor(bg_col)
+
+p_upper = plot(show_pillow ? pillow_upper : na, "Pillow Upper", color=color.new(color.aqua, 70), linewidth=1, style=plot.style_line)
+p_lower = plot(show_pillow ? pillow_lower : na, "Pillow Lower", color=color.new(color.aqua, 70), linewidth=1, style=plot.style_line)
+p_mid   = plot(show_pillow ? pillow_mid   : na, "Pillow Mid",   color=color.new(color.aqua, 50), linewidth=2, style=plot.style_line)
+fill(p_upper, p_lower, color=col_pillow, title="Pillow Fill")
+
+p_shark_top = plot(show_shark ? shark_top : na, "Shark Zone Top", color=color.new(color.red, 60), linewidth=1, style=plot.style_stepline)
+p_shark_bot = plot(show_shark ? shark_bot : na, "Shark Zone Bot", color=color.new(color.red, 60), linewidth=1, style=plot.style_stepline)
+fill(p_shark_top, p_shark_bot, color=col_shark, title="Shark Zone Fill")
+
+// ─────────────────────────────────────────────
+// CHART LABELS & TABLE
+// ─────────────────────────────────────────────
+lbl_sz = label_size == "tiny"   ? size.tiny   :
+         label_size == "small"  ? size.small  :
+         label_size == "normal" ? size.normal : size.large
+
+if show_labels
+    if pink_signal
+        label.new(bar_index, low - atr_val * 0.6, "🌸 PINK\\nStandby Buy", style=label.style_label_up, color=color.new(color.fuchsia, 20), textcolor=color.white, size=lbl_sz)
+    if white_signal
+        label.new(bar_index, low - atr_val * 0.6, "⚪ WHITE\\nEntry!", style=label.style_label_up, color=color.new(color.white, 10), textcolor=color.black, size=lbl_sz)
+    if yellow_signal
+        label.new(bar_index, high + atr_val * 0.6, "🟡 YELLOW\\nStandby Sell", style=label.style_label_down, color=color.new(color.yellow, 20), textcolor=color.black, size=lbl_sz)
+    if blue_signal
+        label.new(bar_index, low - atr_val * 0.6, "🔵 BLUE\\nBreakout", style=label.style_label_up, color=color.new(color.blue, 20), textcolor=color.white, size=lbl_sz)
+
+if show_table and barstate.islast
+    var table dash = table.new(position.top_right, 2, 9, border_width=1, border_color=color.new(color.gray, 60), frame_color=color.new(color.gray, 40), frame_width=1)
+    table.cell(dash, 0, 0, "PINK CANDLE",      text_color=color.fuchsia,  text_size=size.small, bgcolor=color.new(color.black, 70), text_halign=text.align_center)
+    table.cell(dash, 1, 0, "Signal Dashboard", text_color=color.white,    text_size=size.small, bgcolor=color.new(color.black, 70), text_halign=text.align_center)
+    
+    active_sig  = pink_signal ? "🌸 PINK — Standby Buy" : white_signal ? "⚪ WHITE — ENTER" : yellow_signal ? "🟡 YELLOW — TP Zone" : blue_signal ? "🔵 BLUE — Breakout" : sc_signal ? "💥 SELL CLIMAX" : bc_signal ? "🔶 BUY CLIMAX" : above_pillow ? "🟢 Uptrend" : "🔴 Downtrend"
+    sig_col     = pink_signal ? color.fuchsia : white_signal ? color.white : yellow_signal ? color.yellow : blue_signal ? color.blue : sc_signal ? color.red : bc_signal ? color.orange : above_pillow ? color.lime : color.red
+    table.cell(dash, 0, 1, "Active Signal",   text_color=color.gray,  text_size=size.tiny, bgcolor=color.new(color.black, 80))
+    table.cell(dash, 1, 1, active_sig,        text_color=sig_col,     text_size=size.tiny, bgcolor=color.new(color.black, 80))
+
+// ─────────────────────────────────────────────
+// ALERTS
+// ─────────────────────────────────────────────
+alertcondition(pink_signal,   title="PINK Candle — Standby Buy",   message="Pink Candle detected on {{ticker}} ({{interval}}). Potential reversal zone. Standby to buy.")
+alertcondition(white_signal,  title="WHITE Candle — Enter Now",    message="White Knight candle on {{ticker}} ({{interval}}). ENTRY SIGNAL — buy-on-dip confirmed.")
+alertcondition(yellow_signal, title="YELLOW Candle — Standby Sell",message="Yellow Candle on {{ticker}} ({{interval}}). Take profit zone. Consider booking gains.")
+alertcondition(blue_signal,   title="BLUE Candle — Breakout",      message="Blue Breakout candle on {{ticker}} ({{interval}}). Strong momentum with volume.")`,
+      
+      zigzag: `//@version=6
+indicator("ZigZag [ZZ]", shorttitle="ZZ", overlay=true, max_lines_count=500, max_labels_count=500)
+
+// ── Inputs ──────────────────────────────────────────────────────────────
+depth      = input.int(10, "Depth (Pivot Strength)", minval=1, group="ZigZag Settings")
+srcMode    = input.string("High/Low", "Pivot Source", options=["High/Low", "Close"], group="ZigZag Settings")
+
+showLabels = input.bool(true, "Show Price Labels", group="Labels")
+showPct    = input.bool(true, "Show % Change", group="Labels")
+labelSize  = input.string(size.small, "Label Size", options=[size.tiny, size.small, size.normal, size.large], group="Labels")
+
+lineWidth  = input.int(2, "Line Width", minval=1, maxval=6, group="Style")
+upColor    = input.color(#089981, "Up Leg Color", group="Style")
+dnColor    = input.color(#f23645, "Down Leg Color", group="Style")
+showDev    = input.bool(true, "Show Live Developing Leg", group="Style")
+bgShade    = input.bool(false, "Shade Background by Trend", group="Style")
+
+// ── Pivot detection ─────────────────────────────────────────────────────
+useClose = srcMode == "Close"
+float ph = useClose ? ta.pivothigh(close, depth, depth) : ta.pivothigh(high, depth, depth)
+float pl = useClose ? ta.pivotlow(close, depth, depth)  : ta.pivotlow(low, depth, depth)
+
+pivotBar = bar_index - depth
+
+// ── State (persists across bars) ────────────────────────────────────────
+var int   p2Dir   = 0
+var int   p1Bar   = na
+var float p1Price = na
+var int   p2Bar   = na
+var float p2Price = na
+var line  zzLine  = na
+var label zzLabel = na
+var line  devLine = na
+
+newHighConfirmed = false
+newLowConfirmed  = na
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+buildLabelText(_price, _prevPrice) =>
+    txt = str.tostring(_price, format.mintick)
+    if showPct and not na(_prevPrice) and _prevPrice != 0
+        pct = (_price - _prevPrice) / _prevPrice * 100
+        txt := txt + "\\n" + (pct >= 0 ? "+" : "") + str.tostring(pct, "#.##") + "%"
+    txt
+
+makeLabel(_bar, _price, _isHigh, _prevPrice) =>
+    label lbl = na
+    if showLabels
+        lbl := label.new(_bar, _price, buildLabelText(_price, _prevPrice),
+                          style=_isHigh ? label.style_label_down : label.style_label_up,
+                          color=color.new(color.white, 100),
+                          textcolor=_isHigh ? dnColor : upColor,
+                          size=labelSize)
+    lbl
+
+// ── Process a new pivot HIGH ──────────────────────────────────────────────
+if not na(ph)
+    if p2Dir <= 0
+        if not na(p2Bar)
+            p1Bar   := p2Bar
+            p1Price := p2Price
+            zzLine  := line.new(p1Bar, p1Price, pivotBar, ph, color=upColor, width=lineWidth)
+            zzLabel := makeLabel(pivotBar, ph, true, p1Price)
+        p2Bar   := pivotBar
+        p2Price := ph
+        p2Dir   := 1
+        newHighConfirmed := true
+    else if ph > p2Price
+        p2Bar   := pivotBar
+        p2Price := ph
+        if not na(zzLine)
+            line.set_x2(zzLine, p2Bar)
+            line.set_y2(zzLine, p2Price)
+        if not na(zzLabel)
+            label.set_x(zzLabel, p2Bar)
+            label.set_y(zzLabel, p2Price)
+            label.set_text(zzLabel, buildLabelText(p2Price, p1Price))
+
+// ── Process a new pivot LOW ───────────────────────────────────────────────
+if not na(pl)
+    if p2Dir >= 0
+        if not na(p2Bar)
+            p1Bar   := p2Bar
+            p1Price := p2Price
+            zzLine  := line.new(p1Bar, p1Price, pivotBar, pl, color=dnColor, width=lineWidth)
+            zzLabel := makeLabel(pivotBar, pl, false, p1Price)
+        p2Bar   := pivotBar
+        p2Price := pl
+        p2Dir   := -1
+        newLowConfirmed := true
+    else if pl < p2Price
+        p2Bar   := pivotBar
+        p2Price := pl
+        if not na(zzLine)
+            line.set_x2(zzLine, p2Bar)
+            line.set_y2(zzLine, p2Price)
+        if not na(zzLabel)
+            label.set_x(zzLabel, p2Bar)
+            label.set_y(zzLabel, p2Price)
+            label.set_text(zzLabel, buildLabelText(p2Price, p1Price))
+
+// ── Live developing leg ──
+if showDev and not na(p2Bar)
+    if na(devLine)
+        devLine := line.new(p2Bar, p2Price, bar_index, close, color=color.gray, style=line.style_dotted, width=1)
+    else
+        line.set_x1(devLine, p2Bar)
+        line.set_y1(devLine, p2Price)
+        line.set_x2(devLine, bar_index)
+        line.set_y2(devLine, close)
+
+bgcolor(bgShade ? (p2Dir == 1 ? color.new(upColor, 92) : p2Dir == -1 ? color.new(dnColor, 92) : na) : na)
+
+// ── Alerts ──────────────────────────────────────────────────────────────
+alertcondition(newHighConfirmed, title="ZZ New Swing High", message="ZZ: new confirmed swing HIGH")
+alertcondition(newLowConfirmed,  title="ZZ New Swing Low",  message="ZZ: new confirmed swing LOW")`
+    };
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       10. THEME SWITCHER LOGIC
+       ───────────────────────────────────────────────────────────────────────────── */
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    
+    // Check initial local storage or prefers-color-scheme setting
+    const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', currentTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const activeTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      // Update iframe theme if possible (for cross-origin/simulator compatibility)
+      try {
+        const iframe = document.querySelector('.iframe-wrapper iframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ theme: newTheme }, '*');
+        }
+      } catch(e) {
+        // Suppress cross-origin/local permission issues
+      }
+    });
+
+    // Handle system theme updates
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) {
+        const newTheme = e.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+      }
+    });
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       11. GLOBAL ARIA ACCESSIBLE TABS NAVIGATION
+       ───────────────────────────────────────────────────────────────────────────── */
+    const tabs = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    const tabList = document.querySelector('.tab-list');
+
+    // Activate selected tab panel
+    function activateTab(tabId) {
+      const targetBtn = document.getElementById(`tab-${tabId}`);
+      if (!targetBtn) return;
+      
+      tabs.forEach(tab => {
+        tab.setAttribute('aria-selected', 'false');
+        tab.setAttribute('tabindex', '-1');
+      });
+      tabPanels.forEach(panel => panel.classList.remove('active'));
+
+      targetBtn.setAttribute('aria-selected', 'true');
+      targetBtn.setAttribute('tabindex', '0');
+      
+      const targetPanel = document.getElementById(`panel-${tabId}`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+      
+      // Sync browser history location hash
+      if (history.pushState) {
+        history.pushState(null, null, `#${tabId}`);
+      } else {
+        location.hash = `#${tabId}`;
+      }
+    }
+
+    // Set click handlers for main tabs
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        const tabId = e.target.id.replace('tab-', '');
+        activateTab(tabId);
+      });
+    });
+
+    // Keyboard controls for main tab list (Home, End, Left, Right Arrow Keys)
+    tabList.addEventListener('keydown', (e) => {
+      const activeTab = document.activeElement;
+      if (!activeTab.classList.contains('tab-btn')) return;
+
+      const tabIndexArr = Array.from(tabs);
+      const currIdx = tabIndexArr.indexOf(activeTab);
+      let nextIdx;
+
+      switch (e.key) {
+        case 'ArrowRight':
+          nextIdx = (currIdx + 1) % tabs.length;
+          tabs[nextIdx].focus();
+          break;
+        case 'ArrowLeft':
+          nextIdx = (currIdx - 1 + tabs.length) % tabs.length;
+          tabs[nextIdx].focus();
+          break;
+        case 'Home':
+          tabs[0].focus();
+          break;
+        case 'End':
+          tabs[tabs.length - 1].focus();
+          break;
+        default:
+          return; // Exit handler
+      }
+      e.preventDefault();
+    });
+
+    // Deep linking check on page load & hashchange
+    function checkHashDeepLink() {
+      const hash = window.location.hash.replace('#', '');
+      const validTabs = ['home', 'indicators', 'note'];
+      if (hash && validTabs.includes(hash)) {
+        activateTab(hash);
+      }
+    }
+    window.addEventListener('load', checkHashDeepLink);
+    window.addEventListener('hashchange', checkHashDeepLink);
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       12. NESTED TABS / COLLAPSIBLE ACCORDIONS FOR INDICATOR CARDS
+       ───────────────────────────────────────────────────────────────────────────── */
+    
+    // Desktop Tab Switching Logic
+    const indicatorCards = document.querySelectorAll('.indicator-card');
+    indicatorCards.forEach(card => {
+      const nestedTabBtns = card.querySelectorAll('.nested-tab-btn');
+      
+      nestedTabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const targetPanelId = btn.getAttribute('data-panel');
+          
+          // Deactivate other tabs and panels in the scope of this indicator card
+          nestedTabBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          card.querySelectorAll('.nested-panel').forEach(panel => {
+            panel.classList.remove('active');
+          });
+          
+          // Activate selection
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          const targetPanel = card.querySelector(`#panel-${targetPanelId}`);
+          if (targetPanel) {
+            targetPanel.classList.add('active');
+          }
+          
+          // Synchronize desktop tab state into mobile accordions
+          card.querySelectorAll('.nested-accordion-item').forEach(accItem => {
+            const accId = accItem.getAttribute('data-acc-id');
+            if (accId === targetPanelId) {
+              accItem.classList.add('open');
+              accItem.querySelector('.accordion-header').setAttribute('aria-expanded', 'true');
+            } else {
+              accItem.classList.remove('open');
+              accItem.querySelector('.accordion-header').setAttribute('aria-expanded', 'false');
+            }
+          });
+        });
+      });
+      
+      // Mobile Accordion Click Handling Logic
+      const accordionHeaders = card.querySelectorAll('.accordion-header');
+      accordionHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+          const parentItem = header.parentElement;
+          const accId = parentItem.getAttribute('data-acc-id');
+          const isOpen = parentItem.classList.contains('open');
+          
+          // Close other accordion items in this card
+          card.querySelectorAll('.nested-accordion-item').forEach(item => {
+            item.classList.remove('open');
+            item.querySelector('.accordion-header').setAttribute('aria-expanded', 'false');
+          });
+          
+          // Toggle clicked item
+          if (!isOpen) {
+            parentItem.classList.add('open');
+            header.setAttribute('aria-expanded', 'true');
+            
+            // Sync desktop tab active class
+            nestedTabBtns.forEach(b => {
+              if (b.getAttribute('data-panel') === accId) {
+                b.classList.add('active');
+                b.setAttribute('aria-selected', 'true');
+              } else {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+              }
+            });
+            // Sync desktop panel selection
+            card.querySelectorAll('.nested-panel').forEach(panel => {
+              if (panel.id === `panel-${accId}`) {
+                panel.classList.add('active');
+              } else {
+                panel.classList.remove('active');
+              }
+            });
+          }
+        });
+      });
+    });
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       13. COPY TO CLIPBOARD ENGINE & SYNTAX INJECTOR
+       ───────────────────────────────────────────────────────────────────────────── */
+    
+    // Inject source code into blocks and trigger Prism highlight on load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Inject desktop code areas
+      document.getElementById('code-desk-high52').textContent = PINE_SCRIPTS.high52;
+      document.getElementById('code-desk-mcdx').textContent = PINE_SCRIPTS.mcdx;
+      document.getElementById('code-desk-pink').textContent = PINE_SCRIPTS.pink;
+      document.getElementById('code-desk-zigzag').textContent = PINE_SCRIPTS.zigzag;
+
+      // Inject mobile accordion code areas
+      document.getElementById('code-high52').textContent = PINE_SCRIPTS.high52;
+      document.getElementById('code-mcdx').textContent = PINE_SCRIPTS.mcdx;
+      document.getElementById('code-pink').textContent = PINE_SCRIPTS.pink;
+      document.getElementById('code-zigzag').textContent = PINE_SCRIPTS.zigzag;
+
+      // Highlight code blocks with Prism
+      if (typeof Prism !== 'undefined') {
+        Prism.highlightAll();
+      }
+    });
+
+    const announcer = document.getElementById('aria-announcer');
+
+    function copyIndicatorCode(scriptKey, buttonElement) {
+      const codeString = PINE_SCRIPTS[scriptKey];
+      if (!codeString) return;
+
+      const fallbackCopy = (text) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          showCopySuccessState(buttonElement);
+        } catch (err) {
+          alert('Could not copy code. Please select and copy manually.');
+        }
+        document.body.removeChild(textarea);
+      };
+
+      if (!navigator.clipboard) {
+        fallbackCopy(codeString);
+        return;
+      }
+
+      navigator.clipboard.writeText(codeString)
+        .then(() => {
+          showCopySuccessState(buttonElement);
+        })
+        .catch(() => {
+          fallbackCopy(codeString);
+        });
+    }
+
+    function showCopySuccessState(btn) {
+      const originalHtml = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Copied ✓</span>
+      `;
+      
+      announcer.textContent = "Code copied to clipboard successfully.";
+
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = originalHtml;
+        announcer.textContent = "";
+      }, 2000);
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────────────
+       14. IFRAME MAXIMIZE / FULLSCREEN LOGIC
+       ───────────────────────────────────────────────────────────────────────────── */
+    const maximizeBtn = document.getElementById('btn-maximize-iframe');
+    const simWrapper = document.getElementById('simulator-wrapper');
+    const maxBtnText = document.getElementById('max-btn-text');
+
+    maximizeBtn.addEventListener('click', () => {
+      const isMaximized = simWrapper.classList.toggle('maximized');
+      
+      if (isMaximized) {
+        maxBtnText.textContent = "Minimize";
+        document.body.style.overflow = 'hidden';
+        maximizeBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" x2="21" y1="10" y2="3"/><line x1="10" x2="3" y1="14" y2="21"/>
+          </svg>
+          <span>Minimize</span>
+        `;
+      } else {
+        maxBtnText.textContent = "Maximize";
+        document.body.style.overflow = '';
+        maximizeBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/>
+          </svg>
+          <span>Maximize</span>
+        `;
+      }
+    });
+
+  </script>
+</body>
+</html>
