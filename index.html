@@ -11,13 +11,13 @@
   <meta property="og:url" content="https://github.com/vtnhqw/TradingView-Indicator">
   <meta property="og:title" content="vtnhqw's TradingView">
   <meta property="og:description" content="Showcase and guide for institutional-grade TradingView indicators, featuring Smart Money, breakout lines, buy-on-dip trend signals, and an interactive Level II Order Book simulator.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/adam/TradingView-Indicator/main/assets/cover-preview.png">
+  <meta property="og:image" content="https://raw.githubusercontent.com/vtnhqw/TradingView-Indicator/main/assets/cover-preview.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:title" content="vtnhqw's TradingView">
   <meta property="twitter:description" content="Showcase and guide for institutional-grade TradingView indicators, featuring Smart Money, breakout lines, buy-on-dip trend signals, and an interactive Level II Order Book simulator.">
-  <meta property="twitter:image" content="https://raw.githubusercontent.com/adam/TradingView-Indicator/main/assets/cover-preview.png">
+  <meta property="twitter:image" content="https://raw.githubusercontent.com/vtnhqw/TradingView-Indicator/main/assets/cover-preview.png">
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2872,21 +2872,24 @@ alertcondition(newLowConfirmed,  title="ZZ New Swing Low",  message="ZZ: new con
     const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', currentTheme);
 
+    // Sync theme to iframe helper
+    function syncThemeToIframe(theme) {
+      try {
+        const iframe = document.querySelector('.iframe-wrapper iframe');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ theme: theme }, '*');
+        }
+      } catch(e) {
+        // Suppress cross-origin/local permission issues
+      }
+    }
+
     themeToggleBtn.addEventListener('click', () => {
       const activeTheme = document.documentElement.getAttribute('data-theme');
       const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
-      
-      // Update iframe theme if possible (for cross-origin/simulator compatibility)
-      try {
-        const iframe = document.querySelector('.iframe-wrapper iframe');
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage({ theme: newTheme }, '*');
-        }
-      } catch(e) {
-        // Suppress cross-origin/local permission issues
-      }
+      syncThemeToIframe(newTheme);
     });
 
     // Handle system theme updates
@@ -2894,6 +2897,29 @@ alertcondition(newLowConfirmed,  title="ZZ New Swing Low",  message="ZZ: new con
       if (!localStorage.getItem('theme')) {
         const newTheme = e.matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', newTheme);
+        syncThemeToIframe(newTheme);
+      }
+    });
+
+    // Sync theme to iframe on initial load
+    window.addEventListener('DOMContentLoaded', () => {
+      const iframe = document.querySelector('.iframe-wrapper iframe');
+      if (iframe) {
+        iframe.addEventListener('load', () => {
+          const activeTheme = document.documentElement.getAttribute('data-theme');
+          syncThemeToIframe(activeTheme);
+        });
+      }
+    });
+
+    // Listen for theme toggle messages from iframe (bidirectional sync)
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.theme) {
+        const newTheme = event.data.theme;
+        if (document.documentElement.getAttribute('data-theme') !== newTheme) {
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        }
       }
     });
 

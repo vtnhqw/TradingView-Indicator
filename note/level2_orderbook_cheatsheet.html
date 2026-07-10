@@ -681,6 +681,11 @@
       background: rgba(0, 0, 0, 0.01);
     }
 
+    .select-trigger:focus-visible {
+      outline: 2px solid var(--color-info);
+      outline-offset: 2px;
+    }
+
     .custom-select.active .select-trigger {
       border-color: var(--color-info);
       box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.15);
@@ -1006,14 +1011,14 @@
               <div class="control-row">
                 <span class="control-label">Asset Class</span>
                 <div class="custom-select" id="custom-select-symbol">
-                  <div class="select-trigger" onclick="toggleDropdown('custom-select-symbol', event)">
+                  <div class="select-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="symbol-options" onclick="toggleDropdown('custom-select-symbol', event)">
                     <span class="trigger-text">BTC/USDT (Crypto)</span>
                     <span class="select-arrow">▼</span>
                   </div>
-                  <div class="select-options-panel">
-                    <div class="select-option selected" data-value="BTC" onclick="selectOption('custom-select-symbol', 'BTC', 'BTC/USDT (Crypto)', changeSymbol)">BTC/USDT (Crypto)</div>
-                    <div class="select-option" data-value="AAPL" onclick="selectOption('custom-select-symbol', 'AAPL', 'AAPL (Stock)', changeSymbol)">AAPL (Stock)</div>
-                    <div class="select-option" data-value="EURUSD" onclick="selectOption('custom-select-symbol', 'EURUSD', 'EUR/USD (Forex)', changeSymbol)">EUR/USD (Forex)</div>
+                  <div class="select-options-panel" id="symbol-options" role="listbox">
+                    <div class="select-option selected" role="option" aria-selected="true" data-value="BTC" onclick="selectOption('custom-select-symbol', 'BTC', 'BTC/USDT (Crypto)', changeSymbol)">BTC/USDT (Crypto)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="AAPL" onclick="selectOption('custom-select-symbol', 'AAPL', 'AAPL (Stock)', changeSymbol)">AAPL (Stock)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="EURUSD" onclick="selectOption('custom-select-symbol', 'EURUSD', 'EUR/USD (Forex)', changeSymbol)">EUR/USD (Forex)</div>
                   </div>
                 </div>
               </div>
@@ -1022,17 +1027,17 @@
               <div class="control-row">
                 <span class="control-label">Scenario Mode</span>
                 <div class="custom-select" id="custom-select-scenario">
-                  <div class="select-trigger" onclick="toggleDropdown('custom-select-scenario', event)">
+                  <div class="select-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="scenario-options" onclick="toggleDropdown('custom-select-scenario', event)">
                     <span class="trigger-text">Normal Market (Balanced)</span>
                     <span class="select-arrow">▼</span>
                   </div>
-                  <div class="select-options-panel">
-                    <div class="select-option selected" data-value="normal" onclick="selectOption('custom-select-scenario', 'normal', 'Normal Market (Balanced)', selectScenario)">Normal Market (Balanced)</div>
-                    <div class="select-option" data-value="bid_wall" onclick="selectOption('custom-select-scenario', 'bid_wall', 'Bid Wall (Support)', selectScenario)">Bid Wall (Support)</div>
-                    <div class="select-option" data-value="ask_wall" onclick="selectOption('custom-select-scenario', 'ask_wall', 'Ask Wall (Resistance)', selectScenario)">Ask Wall (Resistance)</div>
-                    <div class="select-option" data-value="breakout" onclick="selectOption('custom-select-scenario', 'breakout', 'Breakout (Ask Wall Eaten)', selectScenario)">Breakout (Ask Wall Eaten)</div>
-                    <div class="select-option" data-value="breakdown" onclick="selectOption('custom-select-scenario', 'breakdown', 'Breakdown (Bid Wall Eaten)', selectScenario)">Breakdown (Bid Wall Eaten)</div>
-                    <div class="select-option" data-value="spoofing" onclick="selectOption('custom-select-scenario', 'spoofing', 'Spoofing (Fake Wall Canceled)', selectScenario)">Spoofing (Fake Wall Canceled)</div>
+                  <div class="select-options-panel" id="scenario-options" role="listbox">
+                    <div class="select-option selected" role="option" aria-selected="true" data-value="normal" onclick="selectOption('custom-select-scenario', 'normal', 'Normal Market (Balanced)', selectScenario)">Normal Market (Balanced)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="bid_wall" onclick="selectOption('custom-select-scenario', 'bid_wall', 'Bid Wall (Support)', selectScenario)">Bid Wall (Support)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="ask_wall" onclick="selectOption('custom-select-scenario', 'ask_wall', 'Ask Wall (Resistance)', selectScenario)">Ask Wall (Resistance)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="breakout" onclick="selectOption('custom-select-scenario', 'breakout', 'Breakout (Ask Wall Eaten)', selectScenario)">Breakout (Ask Wall Eaten)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="breakdown" onclick="selectOption('custom-select-scenario', 'breakdown', 'Breakdown (Bid Wall Eaten)', selectScenario)">Breakdown (Bid Wall Eaten)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="spoofing" onclick="selectOption('custom-select-scenario', 'spoofing', 'Spoofing (Fake Wall Canceled)', selectScenario)">Spoofing (Fake Wall Canceled)</div>
                   </div>
                 </div>
               </div>
@@ -1041,14 +1046,14 @@
               <div class="control-row">
                 <span class="control-label">Update Speed</span>
                 <div class="custom-select" id="custom-select-speed">
-                  <div class="select-trigger" onclick="toggleDropdown('custom-select-speed', event)">
+                  <div class="select-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="speed-options" onclick="toggleDropdown('custom-select-speed', event)">
                     <span class="trigger-text">Normal (0.75s)</span>
                     <span class="select-arrow">▼</span>
                   </div>
-                  <div class="select-options-panel">
-                    <div class="select-option" data-value="1200" onclick="selectOption('custom-select-speed', '1200', 'Slow (1.2s)', changeSpeed)">Slow (1.2s)</div>
-                    <div class="select-option selected" data-value="750" onclick="selectOption('custom-select-speed', '750', 'Normal (0.75s)', changeSpeed)">Normal (0.75s)</div>
-                    <div class="select-option" data-value="400" onclick="selectOption('custom-select-speed', '400', 'Fast (0.4s)', changeSpeed)">Fast (0.4s)</div>
+                  <div class="select-options-panel" id="speed-options" role="listbox">
+                    <div class="select-option" role="option" aria-selected="false" data-value="1200" onclick="selectOption('custom-select-speed', '1200', 'Slow (1.2s)', changeSpeed)">Slow (1.2s)</div>
+                    <div class="select-option selected" role="option" aria-selected="true" data-value="750" onclick="selectOption('custom-select-speed', '750', 'Normal (0.75s)', changeSpeed)">Normal (0.75s)</div>
+                    <div class="select-option" role="option" aria-selected="false" data-value="400" onclick="selectOption('custom-select-speed', '400', 'Fast (0.4s)', changeSpeed)">Fast (0.4s)</div>
                   </div>
                 </div>
               </div>
@@ -1287,6 +1292,7 @@
   let wallSide = null; // 'bid' or 'ask'
 
   // Initialize Book on page load
+  // Initialize Book on page load
   window.onload = function() {
     checkThemePreference();
     initBook();
@@ -1299,10 +1305,49 @@
       document.querySelectorAll(".custom-select").forEach(select => {
         if (!select.contains(event.target)) {
           select.classList.remove("active");
+          const trigger = select.querySelector(".select-trigger");
+          if (trigger) trigger.setAttribute("aria-expanded", "false");
         }
       });
     });
   };
+
+  // Keyboard Accessibility for Custom Dropdowns
+  document.addEventListener("keydown", function(event) {
+    const activeEl = document.activeElement;
+    if (!activeEl || !activeEl.classList.contains("select-trigger")) return;
+    
+    const container = activeEl.parentElement;
+    const isOpen = container.classList.contains("active");
+    
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      activeEl.click();
+    } else if (event.key === "Escape" && isOpen) {
+      event.preventDefault();
+      container.classList.remove("active");
+      activeEl.setAttribute("aria-expanded", "false");
+    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!isOpen) {
+        container.classList.add("active");
+        activeEl.setAttribute("aria-expanded", "true");
+        return;
+      }
+      
+      const options = Array.from(container.querySelectorAll(".select-option"));
+      const selectedIdx = options.findIndex(opt => opt.classList.contains("selected"));
+      let nextIdx = selectedIdx;
+      
+      if (event.key === "ArrowDown") {
+        nextIdx = (selectedIdx + 1) % options.length;
+      } else if (event.key === "ArrowUp") {
+        nextIdx = (selectedIdx - 1 + options.length) % options.length;
+      }
+      
+      options[nextIdx].click();
+    }
+  });
 
   // Custom Dropdowns Handlers
   function toggleDropdown(containerId, event) {
@@ -1313,10 +1358,14 @@
     // Close all other dropdowns
     document.querySelectorAll(".custom-select").forEach(el => {
       el.classList.remove("active");
+      const trigger = el.querySelector(".select-trigger");
+      if (trigger) trigger.setAttribute("aria-expanded", "false");
     });
     
     if (!isActive) {
       target.classList.add("active");
+      const trigger = target.querySelector(".select-trigger");
+      if (trigger) trigger.setAttribute("aria-expanded", "true");
     }
   }
 
@@ -1325,7 +1374,11 @@
     
     // Close dropdown
     const target = document.getElementById(containerId);
-    if (target) target.classList.remove("active");
+    if (target) {
+      target.classList.remove("active");
+      const trigger = target.querySelector(".select-trigger");
+      if (trigger) trigger.setAttribute("aria-expanded", "false");
+    }
     
     // Trigger original callback
     if (callback) {
@@ -1343,13 +1396,15 @@
       triggerText.innerText = text;
     }
     
-    // Update selected class on options
+    // Update selected class and aria-selected on options
     const options = container.querySelectorAll(".select-option");
     options.forEach(opt => {
       if (opt.getAttribute("data-value") === value) {
         opt.classList.add("selected");
+        opt.setAttribute("aria-selected", "true");
       } else {
         opt.classList.remove("selected");
+        opt.setAttribute("aria-selected", "false");
       }
     });
   }
@@ -1358,9 +1413,19 @@
   function toggleTheme() {
     const body = document.body;
     const isLight = body.classList.toggle("light-theme");
-    localStorage.setItem("theme-preference", isLight ? "light" : "dark");
+    const newTheme = isLight ? "light" : "dark";
+    localStorage.setItem("theme-preference", newTheme);
     updateThemeButtonUI(isLight);
     logMessage(`SYSTEM: Switched to ${isLight ? 'Light' : 'Dark'} visual theme.`, "system");
+
+    // Notify parent window if embedded in iframe
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ theme: newTheme }, '*');
+      }
+    } catch(e) {
+      // Suppress cross-origin issues
+    }
   }
 
   function updateThemeButtonUI(isLight) {
@@ -1392,6 +1457,20 @@
     }
     updateThemeButtonUI(isLight);
   }
+
+  // Listen for theme toggle messages from parent window
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.theme) {
+      const isLight = event.data.theme === 'light';
+      if (isLight) {
+        document.body.classList.add("light-theme");
+      } else {
+        document.body.classList.remove("light-theme");
+      }
+      localStorage.setItem("theme-preference", event.data.theme);
+      updateThemeButtonUI(isLight);
+    }
+  });
 
   // Generate initial levels
   function initBook() {
