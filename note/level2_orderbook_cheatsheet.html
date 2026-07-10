@@ -12,21 +12,21 @@
   <style>
     /* Styling variables and custom css */
     :root {
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
       
-      /* Dark Theme (Default) Variables */
-      --color-background-primary: #0c0f17;
-      --color-background-secondary: #131722;
-      --color-background-card: rgba(20, 24, 38, 0.65);
+      /* Dark Theme (Default) Variables - Rose-Red Candlestick Inspired */
+      --color-background-primary: #0f090a;
+      --color-background-secondary: #180f11;
+      --color-background-card: rgba(24, 15, 17, 0.65);
       
-      --color-border-primary: rgba(255, 255, 255, 0.08);
-      --color-border-secondary: rgba(255, 255, 255, 0.04);
-      --color-border-tertiary: #2a2e39;
+      --color-border-primary: rgba(244, 63, 94, 0.12);
+      --color-border-secondary: rgba(244, 63, 94, 0.06);
+      --color-border-tertiary: #331c20;
       
-      --color-text-primary: #f0f3fa;
-      --color-text-secondary: #848e9c;
-      --color-text-muted: #4b5563;
+      --color-text-primary: #ffe4e6;
+      --color-text-secondary: #fda4af;
+      --color-text-muted: #8a7074;
       
       /* Order book specific colors */
       --color-bid: #00c076;
@@ -37,42 +37,42 @@
       
       --color-warning: #ffb700;
       --color-warning-light: rgba(255, 183, 0, 0.1);
-      --color-info: #007aff;
+      --color-info: #f43f5e;
       
-      --color-console-bg: rgba(6, 8, 13, 0.85);
-      --color-console-text: #f0f3fa;
-      --color-controls-bg: rgba(255, 255, 255, 0.01);
+      --color-console-bg: rgba(24, 15, 17, 0.85);
+      --color-console-text: #ffe4e6;
+      --color-controls-bg: rgba(244, 63, 94, 0.02);
       
       /* Opaque select background for dropdown contrast readability */
-      --color-select-bg: rgba(19, 23, 34, 0.9);
-      --color-select-border: rgba(255, 255, 255, 0.08);
-      --color-select-options-bg: #161925;
+      --color-select-bg: rgba(24, 15, 17, 0.95);
+      --color-select-border: rgba(244, 63, 94, 0.15);
+      --color-select-options-bg: #1f1315;
       
-      --color-table-header-bg: rgba(0, 0, 0, 0.25);
+      --color-table-header-bg: rgba(0, 0, 0, 0.35);
       
-      --border-radius-lg: 12px;
-      --border-radius-md: 6px;
-      --box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      --border-radius-lg: 24px;
+      --border-radius-md: 14px;
+      --box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
       --glass-blur: blur(12px) saturate(180%);
       
-      --bg-gradient: radial-gradient(circle at top, #1e2235 0%, #0c0f17 70%);
+      --bg-gradient: radial-gradient(circle at top, #3a151b 0%, #0f090a 80%);
       --glow-shadow-green: 0 0 10px rgba(0, 192, 118, 0.25);
       --glow-shadow-red: 0 0 10px rgba(255, 59, 48, 0.25);
     }
 
     body.light-theme {
-      /* Light Theme Variables */
-      --color-background-primary: #f4f6fa;
+      /* Light Theme Variables - Green Candlestick Inspired */
+      --color-background-primary: #f0fdf4;
       --color-background-secondary: #ffffff;
       --color-background-card: rgba(255, 255, 255, 0.65);
       
-      --color-border-primary: rgba(0, 0, 0, 0.08);
-      --color-border-secondary: rgba(0, 0, 0, 0.04);
-      --color-border-tertiary: #d1d4dc;
+      --color-border-primary: rgba(5, 150, 105, 0.12);
+      --color-border-secondary: rgba(5, 150, 105, 0.06);
+      --color-border-tertiary: #d1fae5;
       
-      --color-text-primary: #131722;
-      --color-text-secondary: #5d606b;
-      --color-text-muted: #9598a1;
+      --color-text-primary: #064e3b;
+      --color-text-secondary: #356055;
+      --color-text-muted: #688e84;
       
       /* Order book specific colors */
       --color-bid: #008f56;
@@ -83,21 +83,21 @@
       
       --color-warning: #b26a00;
       --color-warning-light: rgba(178, 106, 0, 0.08);
-      --color-info: #0066cc;
+      --color-info: #10b981;
       
       --color-console-bg: rgba(255, 255, 255, 0.85);
-      --color-console-text: #131722;
-      --color-controls-bg: rgba(0, 0, 0, 0.02);
+      --color-console-text: #064e3b;
+      --color-controls-bg: rgba(5, 150, 105, 0.02);
       
       /* Opaque select background in Light mode */
       --color-select-bg: rgba(255, 255, 255, 0.95);
-      --color-select-border: rgba(0, 0, 0, 0.12);
+      --color-select-border: rgba(5, 150, 105, 0.15);
       --color-select-options-bg: #ffffff;
       
-      --color-table-header-bg: rgba(0, 0, 0, 0.04);
+      --color-table-header-bg: rgba(5, 150, 105, 0.04);
       
-      --box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-      --bg-gradient: radial-gradient(circle at top, #e3e8f4 0%, #f4f6fa 70%);
+      --box-shadow: 0 8px 32px 0 rgba(5, 150, 105, 0.07);
+      --bg-gradient: radial-gradient(circle at top, #d1fae5 0%, #f0fdf4 80%);
       --glow-shadow-green: none;
       --glow-shadow-red: none;
     }
@@ -160,20 +160,21 @@
       border: 1px solid var(--color-border-primary);
       color: var(--color-text-primary);
       padding: 6px 14px;
-      border-radius: 20px;
+      border-radius: 9999px; /* Capsule switcher */
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .btn-theme-toggle:hover {
       background: rgba(255, 255, 255, 0.12);
       border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.02);
     }
 
     body.light-theme .btn-theme-toggle {
@@ -184,6 +185,7 @@
     body.light-theme .btn-theme-toggle:hover {
       background: rgba(0, 0, 0, 0.08);
       border-color: rgba(0, 0, 0, 0.15);
+      transform: scale(1.02);
     }
 
     /* Live Indicator */
@@ -773,8 +775,8 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--color-border-primary);
       color: var(--color-text-primary);
-      padding: 8px 14px;
-      border-radius: var(--border-radius-md);
+      padding: 8px 16px;
+      border-radius: 9999px; /* Capsule buttons like Apple */
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
@@ -782,7 +784,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     body.light-theme .btn {
@@ -792,11 +794,13 @@
     .btn:hover {
       background: rgba(255, 255, 255, 0.12);
       border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.02);
     }
 
     body.light-theme .btn:hover {
       background: rgba(0, 0, 0, 0.08);
       border-color: rgba(0, 0, 0, 0.15);
+      transform: scale(1.02);
     }
 
     .btn-primary {
@@ -806,7 +810,7 @@
     }
 
     .btn-primary:hover {
-      background: #0062cc;
+      background: var(--primary-hover, #be123c);
     }
 
     /* Interactive Signals Section */
