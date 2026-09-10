@@ -931,6 +931,40 @@
     .console-box::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.2);
     }
+    /* Match the studio while keeping bid and ask colors meaningful. */
+    :root {
+      color-scheme:dark;
+      --color-background-primary:#111113;--color-background-secondary:#1c1c1e;
+      --color-background-card:#1c1c1e;--color-border-primary:#38383c;
+      --color-border-secondary:#2c2c2e;--color-border-tertiary:#38383c;
+      --color-text-primary:#f5f5f7;--color-text-secondary:#b5b5ba;--color-text-muted:#a1a1a6;
+      --color-info:#2997ff;--color-console-bg:#151517;--color-console-text:#f5f5f7;
+      --color-controls-bg:#222225;--color-select-bg:#2c2c2e;--color-select-border:#48484c;
+      --bg-gradient:none;--box-shadow:0 12px 32px rgba(0,0,0,.15);
+    }
+    body.light-theme {
+      color-scheme:light;
+      --color-background-primary:#f5f5f7;--color-background-secondary:#fff;
+      --color-background-card:#fff;--color-border-primary:#dcdce0;
+      --color-border-secondary:#e8e8eb;--color-border-tertiary:#dcdce0;
+      --color-text-primary:#1d1d1f;--color-text-secondary:#616166;--color-text-muted:#6e6e73;
+      --color-info:#0071e3;--color-console-bg:#f5f5f7;--color-console-text:#1d1d1f;
+      --color-controls-bg:#f5f5f7;--color-select-bg:#fff;--color-select-border:#d2d2d7;
+      --bg-gradient:none;--box-shadow:0 12px 32px rgba(0,0,0,.04);
+    }
+    .native-select{width:100%;min-height:44px;min-width:0;padding:10px 12px;border:1px solid var(--color-select-border);border-radius:10px;background:var(--color-select-bg);color:var(--color-text-primary);font:inherit;font-size:14px}
+    :focus-visible{outline:3px solid var(--color-info);outline-offset:3px}
+    .btn{min-height:44px}
+    @media(max-width:600px){
+      body{padding:16px}
+      .header{flex-wrap:wrap}
+      .controls-grid{grid-template-columns:1fr}
+      .card{padding:18px;min-width:0}
+      .ob-table-container{overflow-x:auto}
+      .ob-table{min-width:280px}
+      .signal-row{padding:14px}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
   </style>
 </head>
 <body>
@@ -1014,52 +1048,34 @@
               <!-- Custom Dropdown: Asset Class -->
               <div class="control-row">
                 <span class="control-label">Asset Class</span>
-                <div class="custom-select" id="custom-select-symbol">
-                  <div class="select-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="symbol-options" onclick="toggleDropdown('custom-select-symbol', event)">
-                    <span class="trigger-text">BTC/USDT (Crypto)</span>
-                    <span class="select-arrow">▼</span>
-                  </div>
-                  <div class="select-options-panel" id="symbol-options" role="listbox">
-                    <div class="select-option selected" role="option" aria-selected="true" data-value="BTC" onclick="selectOption('custom-select-symbol', 'BTC', 'BTC/USDT (Crypto)', changeSymbol)">BTC/USDT (Crypto)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="AAPL" onclick="selectOption('custom-select-symbol', 'AAPL', 'AAPL (Stock)', changeSymbol)">AAPL (Stock)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="EURUSD" onclick="selectOption('custom-select-symbol', 'EURUSD', 'EUR/USD (Forex)', changeSymbol)">EUR/USD (Forex)</div>
-                  </div>
-                </div>
+                <select class="native-select" id="custom-select-symbol" aria-label="Asset Class" onchange="changeSymbol(this.value)">
+                    <option value="BTC" selected>BTC/USDT (Crypto)</option>
+                    <option value="AAPL">AAPL (Stock)</option>
+                    <option value="EURUSD">EUR/USD (Forex)</option>
+                </select>
               </div>
               
               <!-- Custom Dropdown: Scenario Mode -->
               <div class="control-row">
                 <span class="control-label">Scenario Mode</span>
-                <div class="custom-select" id="custom-select-scenario">
-                  <div class="select-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="scenario-options" onclick="toggleDropdown('custom-select-scenario', event)">
-                    <span class="trigger-text">Normal Market (Balanced)</span>
-                    <span class="select-arrow">▼</span>
-                  </div>
-                  <div class="select-options-panel" id="scenario-options" role="listbox">
-                    <div class="select-option selected" role="option" aria-selected="true" data-value="normal" onclick="selectOption('custom-select-scenario', 'normal', 'Normal Market (Balanced)', selectScenario)">Normal Market (Balanced)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="bid_wall" onclick="selectOption('custom-select-scenario', 'bid_wall', 'Bid Wall (Support)', selectScenario)">Bid Wall (Support)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="ask_wall" onclick="selectOption('custom-select-scenario', 'ask_wall', 'Ask Wall (Resistance)', selectScenario)">Ask Wall (Resistance)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="breakout" onclick="selectOption('custom-select-scenario', 'breakout', 'Breakout (Ask Wall Eaten)', selectScenario)">Breakout (Ask Wall Eaten)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="breakdown" onclick="selectOption('custom-select-scenario', 'breakdown', 'Breakdown (Bid Wall Eaten)', selectScenario)">Breakdown (Bid Wall Eaten)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="spoofing" onclick="selectOption('custom-select-scenario', 'spoofing', 'Spoofing (Fake Wall Canceled)', selectScenario)">Spoofing (Fake Wall Canceled)</div>
-                  </div>
-                </div>
+                <select class="native-select" id="custom-select-scenario" aria-label="Scenario Mode" onchange="selectScenario(this.value)">
+                    <option value="normal" selected>Normal Market (Balanced)</option>
+                    <option value="bid_wall">Bid Wall (Support)</option>
+                    <option value="ask_wall">Ask Wall (Resistance)</option>
+                    <option value="breakout">Breakout (Ask Wall Eaten)</option>
+                    <option value="breakdown">Breakdown (Bid Wall Eaten)</option>
+                    <option value="spoofing">Spoofing (Fake Wall Canceled)</option>
+                </select>
               </div>
               
               <!-- Custom Dropdown: Update Speed -->
               <div class="control-row">
                 <span class="control-label">Update Speed</span>
-                <div class="custom-select" id="custom-select-speed">
-                  <div class="select-trigger" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="speed-options" onclick="toggleDropdown('custom-select-speed', event)">
-                    <span class="trigger-text">Normal (0.75s)</span>
-                    <span class="select-arrow">▼</span>
-                  </div>
-                  <div class="select-options-panel" id="speed-options" role="listbox">
-                    <div class="select-option" role="option" aria-selected="false" data-value="1200" onclick="selectOption('custom-select-speed', '1200', 'Slow (1.2s)', changeSpeed)">Slow (1.2s)</div>
-                    <div class="select-option selected" role="option" aria-selected="true" data-value="750" onclick="selectOption('custom-select-speed', '750', 'Normal (0.75s)', changeSpeed)">Normal (0.75s)</div>
-                    <div class="select-option" role="option" aria-selected="false" data-value="400" onclick="selectOption('custom-select-speed', '400', 'Fast (0.4s)', changeSpeed)">Fast (0.4s)</div>
-                  </div>
-                </div>
+                <select class="native-select" id="custom-select-speed" aria-label="Update Speed" onchange="changeSpeed(this.value)">
+                    <option value="1200">Slow (1.2s)</option>
+                    <option value="750" selected>Normal (0.75s)</option>
+                    <option value="400">Fast (0.4s)</option>
+                </select>
               </div>
 
               <!-- Button actions -->
@@ -1282,6 +1298,16 @@
   let isPaused = false;
   let updateIntervalMs = 750;
   let timerId = null;
+  let hostVisible = true;
+
+  function saveTheme(value) {
+    try { localStorage.setItem("signal-theme", value); } catch {}
+  }
+  function notifyHost(data) {
+    if (window.parent !== window) {
+      window.parent.postMessage(data, location.origin === 'null' ? '*' : location.origin);
+    }
+  }
 
   // Book Arrays
   let asks = [];
@@ -1303,6 +1329,17 @@
     logMessage("SYSTEM: Level II Simulator Initialized. Loaded asset: BTC/USDT.", "system");
     logMessage("TIPS: Click on any 'Signal to Watch' card to view its live animated simulation.", "info");
     startTimer();
+    document.querySelectorAll('.signal-row').forEach(row => {
+      row.setAttribute('role', 'button');
+      row.tabIndex = 0;
+      row.setAttribute('aria-pressed', 'false');
+      row.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          row.click();
+        }
+      });
+    });
     
     // Close dropdowns on outside click
     document.addEventListener("click", function(event) {
@@ -1318,6 +1355,10 @@
 
   // Keyboard Accessibility for Custom Dropdowns
   document.addEventListener("keydown", function(event) {
+    if (event.key === 'Escape') {
+      const openPicker = document.querySelector('.custom-select.active');
+      if (!openPicker) notifyHost({ type: 'studio-escape' });
+    }
     const activeEl = document.activeElement;
     if (!activeEl || !activeEl.classList.contains("select-trigger")) return;
     
@@ -1393,6 +1434,10 @@
   function updateCustomSelectValue(containerId, value, text) {
     const container = document.getElementById(containerId);
     if (!container) return;
+    if (container.tagName === 'SELECT') {
+      container.value = value;
+      return;
+    }
     
     // Update trigger text
     const triggerText = container.querySelector(".trigger-text");
@@ -1418,14 +1463,14 @@
     const body = document.body;
     const isLight = body.classList.toggle("light-theme");
     const newTheme = isLight ? "light" : "dark";
-    localStorage.setItem("theme-preference", newTheme);
+    saveTheme(newTheme);
     updateThemeButtonUI(isLight);
     logMessage(`SYSTEM: Switched to ${isLight ? 'Light' : 'Dark'} visual theme.`, "system");
 
     // Notify parent window if embedded in iframe
     try {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ theme: newTheme }, '*');
+        notifyHost({ type: 'studio-theme', theme: newTheme });
       }
     } catch(e) {
       // Suppress cross-origin issues
@@ -1450,7 +1495,8 @@
   }
 
   function checkThemePreference() {
-    const saved = localStorage.getItem("theme-preference");
+    let saved;
+    try { saved = localStorage.getItem("signal-theme") || localStorage.getItem("theme-preference"); } catch {}
     const systemPrefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
     
     const isLight = saved === "light" || (!saved && systemPrefersLight);
@@ -1464,14 +1510,20 @@
 
   // Listen for theme toggle messages from parent window
   window.addEventListener('message', (event) => {
-    if (event.data && event.data.theme) {
+    if (event.source !== window.parent || event.origin !== location.origin) return;
+    if (event.data?.type === 'studio-visibility') {
+      hostVisible = event.data.visible === true;
+      if (hostVisible && !isPaused) startTimer();
+      else stopTimer();
+    }
+    if (event.data?.type === 'studio-theme' && ['light', 'dark'].includes(event.data.theme)) {
       const isLight = event.data.theme === 'light';
       if (isLight) {
         document.body.classList.add("light-theme");
       } else {
         document.body.classList.remove("light-theme");
       }
-      localStorage.setItem("theme-preference", event.data.theme);
+      saveTheme(event.data.theme);
       updateThemeButtonUI(isLight);
     }
   });
@@ -1545,6 +1597,8 @@
   // Master Timer Functions
   function startTimer() {
     if (timerId) clearInterval(timerId);
+    timerId = null;
+    if (isPaused || !hostVisible) return;
     timerId = setInterval(tick, updateIntervalMs);
   }
 
@@ -1595,6 +1649,8 @@
     lastPrice = midPrice;
     activeScenario = "normal";
     stepIndex = 0;
+    lastAsks = [];
+    lastBids = [];
     
     updateCustomSelectValue("custom-select-scenario", "normal", "Normal Market (Balanced)");
     updateActiveSignalHighlight();
@@ -1709,6 +1765,10 @@
     wallPrice = null;
     wallSide = null;
     wallSize = 0;
+    // Clear the previous scenario immediately, including while paused.
+    realignBookPrices();
+    calculateCumulative();
+    renderOrderBook();
     updateActiveSignalHighlight();
     logMessage(`SYSTEM: Changed scenario mode to '${val.toUpperCase()}'.`, "system");
   }
@@ -1718,6 +1778,7 @@
     // Clear all active highlights
     document.querySelectorAll(".signal-row").forEach(el => {
       el.classList.remove("active-signal");
+      el.setAttribute('aria-pressed', 'false');
     });
     
     // Set active highlight if exists
@@ -1725,6 +1786,7 @@
       const activeEl = document.getElementById(`signal-${activeScenario}`);
       if (activeEl) {
         activeEl.classList.add("active-signal");
+        activeEl.setAttribute('aria-pressed', 'true');
       }
     }
   }

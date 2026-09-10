@@ -1,0 +1,381 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0
+// © Candle Volume Delta Stick-to-Candle Overlay - Pine Script v6
+//
+// ============================================================================
+// CANDLE VOLUME DELTA (ON-CHART STICK-TO-CANDLE OVERLAY)
+// ============================================================================
+//
+// • Glues the exact Delta value directly UNDER each candlestick wick using exact
+//   price coordinates (yloc.price), so it NEVER drifts or moves away when panning,
+//   zooming, or scaling the X/Y axes.
+// • Large, high-visibility, bold text sizing for instant readability.
+// • Precise Intrabar Lower-Timeframe (1S, 1M, 5M) delta calculation with automatic
+//   continuous price-action fallbacks.
+// ============================================================================
+
+//@version=6
+indicator(title="Candle Volume Delta [Overlay]", shorttitle="Candle Delta", overlay=true, max_labels_count=500, max_lines_count=500, max_bars_back=500)
+
+// ─── INPUT GROUPS ─────────────────────────────────────────────────────────────
+var string GRP_DISPLAY = "🏷️ Delta Text & Positioning"
+var string GRP_CALC    = "⚙️ Calculation Engine"
+var string GRP_CANDLE  = "🕯️ Candle Colors & Climax"
+var string GRP_DIV     = "🔍 Delta Divergence Detection"
+var string GRP_HUD     = "📋 On-Screen Dashboard (HUD)"
+var string GRP_COLORS  = "🎨 Palette & Styling"
+
+// ─── 1. Delta Text & Positioning ─────────────────────────────────────────────
+showDeltaLabels = input.bool(true, "Show Delta Labels", group=GRP_DISPLAY)
+labelPlacement  = input.string("Under Candle (Below Low Wick)", "Label Placement",
+     options=["Under Candle (Below Low Wick)", "Above Candle (Above High Wick)", "Polarity-Based (Positive Below / Negative Above)"],
+     group=GRP_DISPLAY,
+     tooltip="Glued directly to candle wick price coordinates.")
+
+labelFontSize = input.string(size.normal, "Font Size (Large & Clear)",
+     options=[size.huge, size.large, size.normal, size.small, size.tiny],
+     group=GRP_DISPLAY,
+     tooltip="Choose normal, large, or huge for high visibility.")
+
+atrDistance = input.float(0.12, "Distance from Wick (x ATR)", minval=0.0, maxval=2.0, step=0.02,
+     group=GRP_DISPLAY,
+     tooltip="Controls how close the number sticks to the candle wick. Lower value = closer to the candle.")
+
+labelContent = input.string("Compact (+125.4K)", "Text Format",
+     options=["Compact (+125.4K)", "Percentage (+64%)", "Both (+125.4K | +64%)", "Detailed (B:45K S:20K | Δ+25K)", "Raw Integer (+12,450)"],
+     group=GRP_DISPLAY)
+
+labelFilter = input.string("All Bars", "Display Filter",
+     options=["All Bars", "High Delta Only (> 1.5x Avg)", "Last 100 Bars", "Last 50 Bars"],
+     group=GRP_DISPLAY)
+
+labelBadgeStyle = input.string("Clean Text (Transparent Background)", "Badge Background",
+     options=["Clean Text (Transparent Background)", "Solid Dark Pill Badge", "Colored Pill Badge"],
+     group=GRP_DISPLAY)
+
+// ─── 2. Calculation Engine ───────────────────────────────────────────────────
+calcMode = input.string("Intrabar Lower-TF (Most Precise)", "Calculation Mode",
+     options=["Intrabar Lower-TF (Most Precise)", "Price-Action Approximation (DeMark Model)", "Bar Polarity (Close vs Open)"],
+     group=GRP_CALC,
+     tooltip="Intrabar Lower-TF inspects sub-minute/sub-hour tick bars. Price-Action Approximation uses continuous volume distribution. Bar Polarity uses Close vs Open.")
+
+customLtf = input.string("Auto", "Lower Timeframe Resolution",
+     options=["Auto", "1S", "5S", "15S", "1", "3", "5", "15", "30", "60"],
+     group=GRP_CALC,
+     tooltip="Auto automatically selects 1S, 1M, or 5M depending on your active chart timeframe.")
+
+// ─── 3. Candle Colors & Climax ───────────────────────────────────────────────
+enableBarColor   = input.bool(true, "Color Candles by Delta", group=GRP_CANDLE)
+highlightClimax  = input.bool(true, "Highlight Climax Bars with Icon", group=GRP_CANDLE)
+climaxMultiplier = input.float(2.0, "Climax Threshold (x 20-bar Avg Delta)", minval=1.0, maxval=5.0, step=0.1, group=GRP_CANDLE)
+
+// ─── 4. Delta Divergence Detection ───────────────────────────────────────────
+showDivergence = input.bool(true, "Detect Delta Divergences", group=GRP_DIV)
+lbLeft         = input.int(5, "Pivot Lookback Left", minval=1, maxval=50, group=GRP_DIV)
+lbRight        = input.int(5, "Pivot Lookback Right", minval=1, maxval=50, group=GRP_DIV)
+divMaxBars     = input.int(60, "Max Lookback Bars", minval=5, maxval=120, group=GRP_DIV)
+
+// ─── 5. On-Screen Dashboard (HUD) ────────────────────────────────────────────
+showHUD     = input.bool(true, "Show Live Delta HUD Table", group=GRP_HUD)
+hudPosition = input.string("Top Right", "HUD Position",
+     options=["Top Right", "Bottom Right", "Top Left", "Bottom Left"],
+     group=GRP_HUD)
+
+// ─── 6. Colors ───────────────────────────────────────────────────────────────
+colBullStrong = input.color(#00E676, "Bullish Delta (+)", group=GRP_COLORS)
+colBullAbsorb = input.color(#00B0FF, "Bullish Delta on Red Bar (Absorption)", group=GRP_COLORS)
+colBearStrong = input.color(#FF1744, "Bearish Delta (-)", group=GRP_COLORS)
+colBearAbsorb = input.color(#FF9100, "Bearish Delta on Green Bar (Exhaustion)", group=GRP_COLORS)
+
+// ============================================================================
+// CALCULATION LOGIC
+// ============================================================================
+
+// 1. Dynamic ATR for Exact Proximity Positioning
+atrVal = ta.atr(14)
+float wickGap = nz(atrVal * atrDistance, (high - low) * 0.15)
+
+// 2. Auto-Resolution Selector
+f_get_auto_ltf() =>
+    if timeframe.isseconds
+        "1S"
+    else if timeframe.isminutes
+        if timeframe.multiplier <= 5
+            "1"
+        else if timeframe.multiplier <= 15
+            "1"
+        else if timeframe.multiplier <= 60
+            "5"
+        else if timeframe.multiplier <= 240
+            "15"
+        else
+            "30"
+    else if timeframe.isdaily
+        "60"
+    else
+        "1D"
+
+activeLtf = customLtf == "Auto" ? f_get_auto_ltf() : customLtf
+
+// 3. Query Lower Timeframe Ticks
+[ltfOpen, ltfClose, ltfVol] = request.security_lower_tf(syminfo.tickerid, activeLtf, [open, close, volume])
+
+// 4. Compute Buy Volume, Sell Volume, and Delta
+f_calc_delta() =>
+    float buyV   = 0.0
+    float sellV  = 0.0
+    int ltfCount = array.size(ltfVol)
+
+    if calcMode == "Intrabar Lower-TF (Most Precise)" and ltfCount > 0
+        for i = 0 to ltfCount - 1
+            float o = array.get(ltfOpen, i)
+            float c = array.get(ltfClose, i)
+            float v = array.get(ltfVol, i)
+            if not na(v)
+                if c > o
+                    buyV += v
+                else if c < o
+                    sellV += v
+                else
+                    buyV  += v * 0.5
+                    sellV += v * 0.5
+    else if calcMode == "Price-Action Approximation (DeMark Model)" or (calcMode == "Intrabar Lower-TF (Most Precise)" and ltfCount == 0)
+        float tr = high - low
+        if tr > 0
+            buyV  := volume * ((close - low) / tr)
+            sellV := volume * ((high - close) / tr)
+        else
+            buyV  := close >= open ? volume : 0.0
+            sellV := volume - buyV
+    else
+        // Bar Polarity Mode
+        if close > open
+            buyV  := volume
+            sellV := 0.0
+        else if close < open
+            buyV  := 0.0
+            sellV := volume
+        else
+            buyV  := volume * 0.5
+            sellV := volume * 0.5
+
+    float d = buyV - sellV
+    [buyV, sellV, d]
+
+[buyVol, sellVol, barDelta] = f_calc_delta()
+totVol = buyVol + sellVol > 0 ? buyVol + sellVol : volume
+
+// Delta Percentage of Total Candle Volume
+deltaPct = totVol > 0 ? (barDelta / totVol) * 100 : 0.0
+
+// Cumulative Volume Delta (CVD)
+var float cvd = 0.0
+if timeframe.change("D")
+    cvd := barDelta
+else
+    cvd += barDelta
+
+// Climax & Average Delta Statistics
+avgDelta = ta.sma(math.abs(barDelta), 20)
+isClimax = math.abs(barDelta) >= climaxMultiplier * avgDelta
+
+// ============================================================================
+// FORMATTING FUNCTIONS
+// ============================================================================
+
+f_format_compact(float val) =>
+    float absVal = math.abs(val)
+    string sign  = val > 0 ? "+" : val < 0 ? "-" : ""
+    if absVal >= 1000000000
+        sign + str.tostring(absVal / 1000000000, "#.##") + "B"
+    else if absVal >= 1000000
+        sign + str.tostring(absVal / 1000000, "#.##") + "M"
+    else if absVal >= 1000
+        sign + str.tostring(absVal / 1000, "#.#") + "K"
+    else
+        sign + str.tostring(absVal, "#")
+
+f_build_label_text(float d, float pct, float bV, float sV, bool climax) =>
+    string prefix = climax and highlightClimax ? "🔥 " : ""
+    if labelContent == "Compact (+125.4K)"
+        prefix + f_format_compact(d)
+    else if labelContent == "Percentage (+64%)"
+        prefix + (pct >= 0 ? "+" : "") + str.tostring(pct, "#.#") + "%"
+    else if labelContent == "Both (+125.4K | +64%)"
+        prefix + f_format_compact(d) + " (" + (pct >= 0 ? "+" : "") + str.tostring(pct, "#.#") + "%)"
+    else if labelContent == "Detailed (B:45K S:20K | Δ+25K)"
+        prefix + "B:" + f_format_compact(bV) + " S:" + f_format_compact(sV) + "\nΔ:" + f_format_compact(d)
+    else
+        prefix + (d >= 0 ? "+" : "") + str.tostring(d, "#")
+
+// ============================================================================
+// GLUED ON-CHART LABELS (STICK UNDER CANDLE WICK)
+// ============================================================================
+
+bool qualifiesForLabel = false
+if labelFilter == "All Bars"
+    qualifiesForLabel := true
+else if labelFilter == "High Delta Only (> 1.5x Avg)"
+    qualifiesForLabel := math.abs(barDelta) >= 1.5 * avgDelta
+else if labelFilter == "Last 100 Bars"
+    qualifiesForLabel := (last_bar_index - bar_index) <= 100
+else if labelFilter == "Last 50 Bars"
+    qualifiesForLabel := (last_bar_index - bar_index) <= 50
+
+if showDeltaLabels and qualifiesForLabel and not na(barDelta) and bar_index > 0
+    string lblText = f_build_label_text(barDelta, deltaPct, buyVol, sellVol, isClimax)
+    
+    // Choose Color based on delta polarity and candle direction
+    color lblTextColor = barDelta >= 0 ? (close >= open ? colBullStrong : colBullAbsorb) : (close < open ? colBearStrong : colBearAbsorb)
+    
+    // Calculate Exact Price Coordinates (Stick directly to low/high wick)
+    float targetY = low - wickGap
+    string targetStyle = label.style_none
+    
+    if labelPlacement == "Under Candle (Below Low Wick)"
+        targetY := low - wickGap
+        targetStyle := labelBadgeStyle == "Clean Text (Transparent Background)" ? label.style_none : label.style_label_up
+    else if labelPlacement == "Above Candle (Above High Wick)"
+        targetY := high + wickGap
+        targetStyle := labelBadgeStyle == "Clean Text (Transparent Background)" ? label.style_none : label.style_label_down
+    else
+        // Polarity-based
+        if barDelta >= 0
+            targetY := low - wickGap
+            targetStyle := labelBadgeStyle == "Clean Text (Transparent Background)" ? label.style_none : label.style_label_up
+        else
+            targetY := high + wickGap
+            targetStyle := labelBadgeStyle == "Clean Text (Transparent Background)" ? label.style_none : label.style_label_down
+
+    color boxBgColor = labelBadgeStyle == "Clean Text (Transparent Background)" ? color.new(color.black, 100) :
+                       labelBadgeStyle == "Solid Dark Pill Badge" ? color.new(#131722, 10) :
+                       color.new(lblTextColor, 85)
+
+    label.new(
+         x=bar_index,
+         y=targetY,
+         yloc=yloc.price,
+         text=lblText,
+         color=boxBgColor,
+         textcolor=lblTextColor,
+         style=targetStyle,
+         size=labelFontSize
+         )
+
+// ============================================================================
+// CANDLESTICK COLORING
+// ============================================================================
+
+color candleColor = na
+if barDelta >= 0
+    candleColor := close >= open ? colBullStrong : colBullAbsorb
+else
+    candleColor := close < open ? colBearStrong : colBearAbsorb
+
+barcolor(enableBarColor ? candleColor : na, title="Candle Delta Coloring")
+
+// ============================================================================
+// DELTA DIVERGENCE DETECTION (ON PRICE CHART)
+// ============================================================================
+
+phPrice = ta.pivothigh(high, lbLeft, lbRight)
+plPrice = ta.pivotlow(low, lbLeft, lbRight)
+
+_inRange(cond) =>
+    bars = ta.barssince(cond == true)
+    5 <= bars and bars <= divMaxBars
+
+// Bullish Divergence: Price Lower Low, Delta Higher Low
+plFound = not na(plPrice)
+inRangePl = _inRange(plFound[1])
+priceLL = low[lbRight] < ta.valuewhen(plFound, low[lbRight], 1)
+deltaHL = barDelta[lbRight] > ta.valuewhen(plFound, barDelta[lbRight], 1) and inRangePl
+bullDiv = showDivergence and plFound and priceLL and deltaHL
+
+// Bearish Divergence: Price Higher High, Delta Lower High
+phFound = not na(phPrice)
+inRangePh = _inRange(phFound[1])
+priceHH = high[lbRight] > ta.valuewhen(phFound, high[lbRight], 1)
+deltaLH = barDelta[lbRight] < ta.valuewhen(phFound, barDelta[lbRight], 1) and inRangePh
+bearDiv = showDivergence and phFound and priceHH and deltaLH
+
+// Plot Divergence Labels directly attached to pivot bars
+if bullDiv
+    label.new(
+         x=bar_index - lbRight,
+         y=low[lbRight] - (wickGap * 2.2),
+         yloc=yloc.price,
+         text="▲ BULL DIV",
+         color=color.new(colBullStrong, 20),
+         textcolor=color.white,
+         style=label.style_label_up,
+         size=size.tiny
+         )
+
+if bearDiv
+    label.new(
+         x=bar_index - lbRight,
+         y=high[lbRight] + (wickGap * 2.2),
+         yloc=yloc.price,
+         text="▼ BEAR DIV",
+         color=color.new(colBearStrong, 20),
+         textcolor=color.white,
+         style=label.style_label_down,
+         size=size.tiny
+         )
+
+// ============================================================================
+// ON-SCREEN ORDER FLOW HUD DASHBOARD
+// ============================================================================
+
+var table_pos = hudPosition == "Top Right" ? position.top_right :
+                 hudPosition == "Bottom Right" ? position.bottom_right :
+                 hudPosition == "Top Left" ? position.top_left :
+                 position.bottom_left
+
+var table hud = table.new(table_pos, 2, 7, bgcolor=color.new(#1e222d, 10), border_color=color.new(#434651, 20), border_width=1)
+
+if showHUD and barstate.islast
+    // Header
+    table.cell(hud, 0, 0, "CANDLE DELTA", bgcolor=color.new(#2962ff, 20), text_color=color.white, text_size=size.small)
+    table.cell(hud, 1, 0, activeLtf + " LTF", bgcolor=color.new(#2962ff, 20), text_color=color.white, text_size=size.small)
+
+    // Current Bar Delta
+    color dCol = barDelta >= 0 ? colBullStrong : colBearStrong
+    table.cell(hud, 0, 1, "Bar Delta", text_color=#d1d4dc, text_size=size.small)
+    table.cell(hud, 1, 1, f_format_compact(barDelta) + " (" + str.tostring(deltaPct, "#.#") + "%)", text_color=dCol, text_size=size.small)
+
+    // Buy Volume
+    table.cell(hud, 0, 2, "Buy Volume", text_color=#d1d4dc, text_size=size.small)
+    table.cell(hud, 1, 2, f_format_compact(buyVol) + " (" + str.tostring(totVol > 0 ? (buyVol/totVol)*100 : 0, "#.#") + "%)", text_color=colBullStrong, text_size=size.small)
+
+    // Sell Volume
+    table.cell(hud, 0, 3, "Sell Volume", text_color=#d1d4dc, text_size=size.small)
+    table.cell(hud, 1, 3, f_format_compact(sellVol) + " (" + str.tostring(totVol > 0 ? (sellVol/totVol)*100 : 0, "#.#") + "%)", text_color=colBearStrong, text_size=size.small)
+
+    // Total Volume
+    table.cell(hud, 0, 4, "Total Volume", text_color=#d1d4dc, text_size=size.small)
+    table.cell(hud, 1, 4, f_format_compact(totVol), text_color=color.white, text_size=size.small)
+
+    // Cumulative CVD
+    color cvdCol = cvd >= 0 ? colBullStrong : colBearStrong
+    table.cell(hud, 0, 5, "Daily CVD", text_color=#d1d4dc, text_size=size.small)
+    table.cell(hud, 1, 5, f_format_compact(cvd), text_color=cvdCol, text_size=size.small)
+
+    // Momentum Bias
+    string statusText = barDelta > 0 ? "⚡ Buyer Dominance" : "⚠️ Seller Dominance"
+    color statusCol   = barDelta > 0 ? colBullStrong : colBearStrong
+    table.cell(hud, 0, 6, "Order Flow State", text_color=#d1d4dc, text_size=size.small)
+    table.cell(hud, 1, 6, statusText, text_color=statusCol, text_size=size.small)
+
+// ============================================================================
+// ALERTS
+// ============================================================================
+
+bool highDeltaBull = barDelta >= 2.0 * avgDelta and barDelta > 0
+bool highDeltaBear = math.abs(barDelta) >= 2.0 * avgDelta and barDelta < 0
+
+alertcondition(bullDiv, title="Bullish Delta Divergence", message="[Candle Delta] Bullish Divergence on chart: Price Lower Low with Delta Higher Low!")
+alertcondition(bearDiv, title="Bearish Delta Divergence", message="[Candle Delta] Bearish Divergence on chart: Price Higher High with Delta Lower High!")
+alertcondition(highDeltaBull, title="High Bullish Delta Climax", message="[Candle Delta] High Bullish Volume Delta spike (> 2.0x 20-bar avg) under current candle!")
+alertcondition(highDeltaBear, title="High Bearish Delta Climax", message="[Candle Delta] High Bearish Volume Delta spike (> 2.0x 20-bar avg) under current candle!")
+alertcondition(isClimax, title="Delta Climax Alert", message="[Candle Delta] Abnormal volume delta climax detected on active candlestick!")

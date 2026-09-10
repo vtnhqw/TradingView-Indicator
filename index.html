@@ -32,13 +32,70 @@
     @media(max-width:900px){.tabs{display:none}.github span{display:none}.github{width:36px;padding:0;justify-content:center}.hero{grid-template-columns:1fr;gap:56px}.preview{max-width:670px;margin:auto}.window{transform:none}.signal{right:12px}.metrics{grid-template-columns:1fr 1fr}.features{grid-template-columns:1fr}.feature.large{min-height:650px}.section-head{align-items:start;flex-direction:column}.indicator{grid-template-columns:70px 1fr}.indicator-actions{grid-column:2}.steps{grid-template-columns:1fr 1fr}.lab-head{grid-template-columns:1fr;align-items:start;gap:22px}.lab-shell iframe{height:620px}}
     @media(max-width:600px){.header{height:60px}.nav,.shell,.footer-in{width:calc(100% - 28px)}.brand>span:last-child{display:none}main{padding-top:78px}.hero{min-height:auto;padding:38px 0 60px}.hero h1{font-size:3.45rem}.lead{font-size:1rem}.hero-buttons .button{width:100%}.trust{gap:10px 16px}.window{border-radius:16px}.chart{height:220px;margin-inline:6px}.signal{right:8px;bottom:12px;width:180px}.section{padding:62px 0}.section-head h2{font-size:2.65rem}.metrics{grid-template-columns:1fr}.feature{min-height:330px;padding:24px}.feature.large{min-height:580px}.mini-chart{height:330px}.code{inset:auto 14px 0}.alerts{inset:auto 16px 20px}.page-head h1,.lab-head h1{font-size:3.2rem}.toolbar{align-items:start;flex-direction:column}.indicator{grid-template-columns:56px 1fr;align-items:start;gap:15px;padding:17px;border-radius:19px}.indicator-icon{width:56px;height:56px;border-radius:14px}.indicator-icon svg{width:44px;height:44px}.indicator-actions{grid-column:1/-1}.indicator-actions button{flex:1}.setup{padding:22px}.steps{grid-template-columns:1fr}.step{min-height:155px}.step h3{margin-top:28px}.lab-title span{display:none}.lab-shell iframe{height:560px}.detail-grid{grid-template-columns:1fr}.footer-in{padding:24px 0;align-items:start;flex-direction:column}.footer-links{flex-wrap:wrap}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+    /* Interaction and responsive fixes. */
+    [hidden]{display:none!important}
+    .preview{width:100%;min-width:0}
+    .preview:before{inset:10% 0 0;pointer-events:none}
+    .small{display:inline-flex;align-items:center;justify-content:center;min-height:44px;height:auto;padding:10px 15px;font-size:.875rem;white-space:nowrap}
+    .tab,.segment{min-height:40px;font-size:.875rem}
+    .icon,.github,.close{min-width:44px;min-height:44px}
+    .indicator-copy p,.step p,.detail p{font-size:1rem}
+    .tag,.status,.ticker,.signal-top,.signal p,.code{font-size:.75rem}
+    .metric span,.trust,.detail h3,.dialog-head p,.lab-title,.footer-in{font-size:.875rem}
+    .feature{min-height:0;display:flex;flex-direction:column;gap:16px}
+    .feature .eyebrow{margin:0}
+    .feature>p:not(.eyebrow){margin:0}
+    .feature.large{min-height:0}
+    .mini-chart,.code,.alerts{position:relative;inset:auto;margin-top:auto;flex-shrink:0}
+    .mini-chart{height:390px;margin-top:28px}
+    .code{height:auto;min-height:210px;overflow:auto;border-radius:17px;border-bottom:1px solid var(--line)}
+    .alerts{margin-top:24px}
+    .alert{align-items:center;font-size:.875rem}
+    .status{flex-shrink:0}
+    .lab-bar{height:auto;min-height:64px;gap:12px;padding:10px 18px}
+    .lab-shell.max{display:flex;flex-direction:column;height:100dvh}
+    .lab-shell.max iframe{height:auto;flex:1;min-height:0}
+    dialog[open]{display:flex;flex-direction:column;max-height:calc(100dvh - 28px)}
+    .dialog-head,.dialog-foot{flex-shrink:0;gap:12px}
+    .dialog-body{overflow:auto;min-height:0;overscroll-behavior:contain}
+    .dialog-foot{flex-wrap:wrap;align-items:center}
+    .dialog-status{margin:0 auto 0 0;font-size:.875rem;flex-basis:100%;color:var(--muted)}
+    .source-section{margin-top:20px}
+    .source-section summary{cursor:pointer;font-weight:600;padding:12px 0}
+    .source-code{display:block;width:100%;height:260px;padding:16px;border:1px solid var(--line2);border-radius:12px;background:var(--bg);color:var(--ink);font: .875rem/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;white-space:pre;overflow:auto}
+    .toast{width:max-content;max-width:calc(100% - 32px);text-align:center}
+    .toast:not(.show){visibility:hidden}
+    .step h3{font-size:1rem}
+    .github{color:var(--card)}
+    .primary{background:#0071e3}
+    @media(max-width:900px){
+      .header{height:118px}
+      .nav{height:118px;display:grid;grid-template-columns:1fr auto;grid-template-rows:62px 50px;gap:0 16px}
+      .brand{grid-column:1;grid-row:1}.actions{grid-column:2;grid-row:1}
+      .tabs{display:flex;grid-column:1/-1;grid-row:2;justify-self:center;max-width:100%}
+      main{padding-top:140px}
+      .indicator-icon{width:70px;height:70px}
+      .features .feature.large{min-height:0}
+    }
+    @media(max-width:600px){
+      .brand>span:last-child{display:inline}
+      .tabs{width:100%}.tab{flex:1;padding:7px 8px;font-size:.8125rem;white-space:nowrap}
+      .hero h1{font-size:clamp(2.6rem,12vw,3.45rem)}
+      .page-head h1,.lab-head h1{font-size:clamp(2.5rem,11vw,3.2rem);overflow-wrap:anywhere}
+      .hero{gap:36px}
+      .indicator-icon{width:56px;height:56px}
+      .metrics{grid-template-columns:1fr 1fr}.metric{padding:20px}
+      .feature{padding:22px}.mini-chart{height:280px}.code{font-size:.75rem;padding:16px}
+      .dialog-head,.dialog-body{padding:18px}.dialog-foot{padding:14px 18px}
+      .lab-bar{padding:10px 12px}.lab-title{display:none}.lab-buttons{width:100%;justify-content:space-between}
+    }
   </style>
 </head>
 <body>
   <div id="announcer" class="sr-only" aria-live="polite"></div>
   <header class="header"><nav class="nav" aria-label="Primary navigation">
     <a class="brand" href="#overview" data-route="overview" aria-label="Signal Studio overview"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16.5 8.5 12l3 3L20 6.5"/><path d="M15 6.5h5v5"/></svg></span><span>Signal Studio</span></a>
-    <div class="tabs" role="tablist"><button class="tab active" data-route="overview" role="tab" aria-selected="true">Overview</button><button class="tab" data-route="indicators" role="tab" aria-selected="false">Indicators</button><button class="tab" data-route="lab" role="tab" aria-selected="false">Order Book Lab</button></div>
+    <div class="tabs" role="tablist" aria-label="Sections"><button id="tab-overview" class="tab active" data-route="overview" role="tab" aria-controls="view-overview" aria-selected="true">Overview</button><button id="tab-indicators" class="tab" data-route="indicators" role="tab" aria-controls="view-indicators" aria-selected="false" tabindex="-1">Indicators</button><button id="tab-lab" class="tab" data-route="lab" role="tab" aria-controls="view-lab" aria-selected="false" tabindex="-1">Order Book Lab</button></div>
     <div class="actions"><button id="theme" class="icon" aria-label="Switch color theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.3 15.2A8.5 8.5 0 0 1 8.8 3.7a8.5 8.5 0 1 0 11.5 11.5Z"/></svg></button><a class="github" href="https://github.com/vtnhqw/TradingView-Indicator" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .7a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.2.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.1v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .7Z"/></svg><span>View source</span></a></div>
   </nav></header>
   <main>
@@ -64,14 +121,7 @@
   </main>
   <footer><div class="footer-in"><span><strong>Signal Studio</strong> · Open-source TradingView tools</span><div class="footer-links"><span>Educational use only. Not financial advice.</span><a href="https://github.com/vtnhqw/TradingView-Indicator" target="_blank" rel="noopener">GitHub ↗</a></div></div></footer>
   <dialog id="dialog"><div class="dialog-head"><div><h2 id="dialogTitle"></h2><p id="dialogSub"></p></div><button class="close" id="close" aria-label="Close details">×</button></div><div class="dialog-body" id="dialogBody"></div><div class="dialog-foot"><button class="small" id="done">Done</button><button class="small dark" id="dialogCopy">Copy source</button></div></dialog><div class="toast" id="toast" role="status">Source copied</div>
-  <script>
-    const info={high52:{title:'52-Week High',sub:'Breakout and proximity framework',items:[['Adaptive lookback','Uses up to 252 trading days and safely adapts for newer listings.'],['Distance tracking','Shows the current close as a percentage from the active high.'],['Visual control','Adjust line style, width, axis marker, and label visibility.'],['Alerts','Near 52W High and Broke 52W High conditions.']]},mcdx:{title:'MCDX Smart Money',sub:'Market participation classifier',items:[['Banker strength','RSI-derived institutional participation with adjustable sensitivity.'],['Hot money','A separate short-term speculative momentum layer.'],['Retail balance','Fills the remaining participation view for fast dominance checks.'],['Alerts','Banker crossovers, strong zones, and retailer dominance.']]},pink:{title:'Pink Candle',sub:'Buy-on-dip execution system',items:[['Pillow Support','A dynamic EMA and ATR ribbon for pullback context.'],['Shark Zone','Maps overhead supply around recent high structure.'],['Signal sequence','Pink prepares, White confirms, Blue extends, Yellow flags profit-taking.'],['Climax volume','Marks selling and buying exhaustion using relative volume.']]},zigzag:{title:'ZigZag Swing Wave',sub:'Noise-filtered market structure',items:[['Confirmed pivots','Builds swings from a configurable depth window.'],['Directional waves','Colors rising and falling legs for immediate recognition.'],['Live leg','Previews the developing move before the next pivot confirms.'],['Alerts','Signals newly confirmed swing highs and lows.']]}};
-    const routes=['overview','indicators','lab'];function route(r,hash=true){if(!routes.includes(r))r='overview';document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+r));document.querySelectorAll('.tab').forEach(b=>{let a=b.dataset.route===r;b.classList.toggle('active',a);b.setAttribute('aria-selected',a)});if(hash)history.replaceState(null,'','#'+r);scrollTo({top:0,behavior:'instant'})}document.querySelectorAll('[data-route]').forEach(x=>x.onclick=e=>{e.preventDefault();route(x.dataset.route)});addEventListener('hashchange',()=>route(location.hash.slice(1),false));route(location.hash.slice(1)||'overview',false);
-    const root=document.documentElement;root.dataset.theme=localStorage.getItem('signal-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.getElementById('theme').onclick=()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';localStorage.setItem('signal-theme',root.dataset.theme)};
-    let activeCard;const dialog=document.getElementById('dialog'),dialogTitleEl=document.getElementById('dialogTitle'),dialogSubEl=document.getElementById('dialogSub'),dialogBodyEl=document.getElementById('dialogBody'),toastEl=document.getElementById('toast'),announcerEl=document.getElementById('announcer');document.querySelectorAll('.detail-button').forEach(b=>b.onclick=()=>{activeCard=b.closest('.indicator');const d=info[activeCard.dataset.key];dialogTitleEl.textContent=d.title;dialogSubEl.textContent=d.sub;dialogBodyEl.innerHTML='<div class="detail-grid">'+d.items.map(x=>'<article class="detail"><h3>'+x[0]+'</h3><p>'+x[1]+'</p></article>').join('')+'</div>';dialog.showModal()});document.getElementById('close').onclick=document.getElementById('done').onclick=()=>dialog.close();dialog.onclick=e=>{if(e.target===dialog)dialog.close()};
-    async function copy(card){try{const r=await fetch(card.dataset.file);if(!r.ok)throw 0;await navigator.clipboard.writeText(await r.text());show('Source copied to clipboard')}catch{show('Open from a local server to copy source')}}document.querySelectorAll('.copy-button').forEach(b=>b.onclick=()=>copy(b.closest('.indicator')));document.getElementById('dialogCopy').onclick=()=>activeCard&&copy(activeCard);function show(m){toastEl.textContent=m;toastEl.classList.add('show');announcerEl.textContent=m;clearTimeout(window.tt);window.tt=setTimeout(()=>toastEl.classList.remove('show'),2200)}
-    document.querySelectorAll('.segment').forEach(b=>b.onclick=()=>{document.querySelectorAll('.segment').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.indicator').forEach(x=>x.hidden=b.dataset.filter!=='all'&&x.dataset.type!==b.dataset.filter)});
-    const labShell=document.getElementById('labShell'),maximizeButton=document.getElementById('maximize');maximizeButton.onclick=()=>{const on=labShell.classList.toggle('max');maximizeButton.textContent=on?'Minimize':'Maximize';document.body.style.overflow=on?'hidden':''};addEventListener('keydown',e=>{if(e.key==='Escape'&&labShell.classList.contains('max'))maximizeButton.click()});
-  </script>
+  <script src="pine-sources.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
