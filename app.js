@@ -9,6 +9,7 @@ const iframe = document.querySelector('.lab-shell iframe');
 const labShell = $('labShell');
 let activeCard = null;
 let toastTimer;
+let themeTimer;
 let previousOverflow = '';
 
 // Storage can be unavailable in private browsing or when opening local files.
@@ -35,11 +36,23 @@ function applyTheme(theme, persist = false) {
   }
   sendToSimulator({ type: 'studio-theme', theme });
 }
-$('theme').addEventListener('click', () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true));
+$('theme').addEventListener('click', () => {
+  const button = $('theme');
+  clearTimeout(themeTimer);
+  button.classList.remove('theme-switching');
+  void button.offsetWidth;
+  root.classList.add('theme-transition');
+  button.classList.add('theme-switching');
+  applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true);
+  themeTimer = setTimeout(() => {
+    root.classList.remove('theme-transition');
+    button.classList.remove('theme-switching');
+  }, 300);
+});
 systemTheme.addEventListener('change', e => { if (!preferredTheme) applyTheme(e.matches ? 'dark' : 'light'); });
 iframe.addEventListener('load', () => {
   sendToSimulator({ type: 'studio-theme', theme: root.dataset.theme });
-  sendToSimulator({ type: 'studio-visibility', visible: $('view-lab').classList.contains('active') });
+  sendToSimulator({ type: 'studio-visibility', visible: $('view-learn').classList.contains('active') });
 });
 window.addEventListener('message', event => {
   if (event.source !== iframe.contentWindow || event.origin !== location.origin) return;
@@ -74,9 +87,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') maximize(false);
 });
 
-const aliases = { home: 'overview', note: 'lab' };
+const aliases = { home: 'overview', note: 'learn', lab: 'learn' };
 function route(value, push = false, moveFocus = false) {
-  const name = aliases[value] || (['overview', 'indicators', 'lab'].includes(value) ? value : 'overview');
+  const name = aliases[value] || (['overview', 'indicators', 'learn'].includes(value) ? value : 'overview');
   maximize(false);
   if (dialog.open) dialog.close();
   document.querySelectorAll('.view').forEach(view => {
@@ -97,7 +110,7 @@ function route(value, push = false, moveFocus = false) {
     try { history[push ? 'pushState' : 'replaceState'](null, '', hash); }
     catch { location.hash = hash; }
   }
-  sendToSimulator({ type: 'studio-visibility', visible: name === 'lab' });
+  sendToSimulator({ type: 'studio-visibility', visible: name === 'learn' });
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (moveFocus) {
     const heading = document.querySelector('#view-' + name + ' h1');
@@ -127,6 +140,10 @@ window.addEventListener('hashchange', () => route(location.hash.slice(1)));
 
 const count = document.querySelector('.toolbar > span');
 count.setAttribute('aria-live', 'polite');
+$('indicatorCount').textContent = String(cards.length);
+$('alertCount').textContent = String(Object.values(window.PINE_SOURCES || {}).reduce((total, source) =>
+  total + (source.match(/^\s*alertcondition\s*\(/gm) || []).length, 0));
+count.textContent = cards.length + ' indicators · Pine Script v6';
 document.querySelector('.segments').setAttribute('role', 'group');
 document.querySelector('.segments').setAttribute('aria-label', 'Filter indicators');
 document.querySelectorAll('.segment').forEach(button => {
@@ -281,4 +298,4 @@ document.querySelectorAll('svg').forEach(svg => svg.setAttribute('aria-hidden', 
 applyTheme(preferredTheme || (systemTheme.matches ? 'dark' : 'light'));
 route(location.hash.slice(1));
 
-const info = {high52:{title:'52-Week High',sub:'Breakout and proximity framework',items:[['Adaptive lookback','Uses up to 252 trading days and safely adapts for newer listings.'],['Distance tracking','Shows the current close as a percentage from the active high.'],['Visual control','Adjust line style, width, axis marker, and label visibility.'],['Alerts','Near 52W High and Broke 52W High conditions.']]},mcdx:{title:'MCDX Smart Money',sub:'Market participation classifier',items:[['Banker strength','RSI-derived institutional participation with adjustable sensitivity.'],['Hot money','A separate short-term speculative momentum layer.'],['Retail balance','Fills the remaining participation view for fast dominance checks.'],['Alerts','Banker crossovers, strong zones, and retailer dominance.']]},pink:{title:'Pink Candle',sub:'Buy-on-dip execution system',items:[['Pillow Support','A dynamic EMA and ATR ribbon for pullback context.'],['Shark Zone','Maps overhead supply around recent high structure.'],['Signal sequence','Pink prepares, White confirms, Blue extends, Yellow flags profit-taking.'],['Climax volume','Marks selling and buying exhaustion using relative volume.']]},zigzag:{title:'ZigZag Swing Wave',sub:'Noise-filtered market structure',items:[['Confirmed pivots','Builds swings from a configurable depth window.'],['Directional waves','Colors rising and falling legs for immediate recognition.'],['Live leg','Previews the developing move before the next pivot confirms.'],['Alerts','Signals newly confirmed swing highs and lows.']]}};
+const info = {high52:{title:'52-Week High',sub:'Breakout and proximity framework',items:[['Adaptive lookback','Uses up to 252 chart bars and safely adapts for newer listings.'],['Distance tracking','Shows the current close as a percentage from the active high.'],['Visual control','Adjust line style, width, axis marker, and label visibility.'],['Alerts','Near 52W High and Broke 52W High conditions.']]},mcdx:{title:'MCDX Smart Money',sub:'RSI-derived momentum classifier',items:[['Banker strength','An RSI-derived momentum proxy with adjustable sensitivity.'],['Hot money','A separate short-term momentum layer.'],['Retail balance','Fills the remaining oscillator view for fast comparisons.'],['Alerts','Banker crossovers, strong zones, and retailer dominance.']]},pink:{title:'Pink Candle',sub:'Buy-on-dip execution system',items:[['Pillow Support','A dynamic EMA and ATR ribbon for pullback context.'],['Shark Zone','Maps overhead supply around recent high structure.'],['Signal sequence','Pink prepares, White confirms, Blue extends, Yellow flags profit-taking.'],['Climax volume','Marks selling and buying exhaustion using relative volume.']]},rsi:{title:'RSI Divergence',sub:'Momentum and price divergence',items:[['Regular divergence','Compares confirmed RSI pivots with price for bullish and bearish divergence.'],['Hidden divergence','Optionally displays hidden bullish and bearish continuation patterns.'],['RSI average','Adds a configurable SMA, EMA, WMA, RMA, or VWMA.'],['Alerts','Four conditions cover regular and hidden divergence in both directions.']]},zigzag:{title:'ZigZag Swing Wave',sub:'Noise-filtered market structure',items:[['Confirmed pivots','Builds swings from a configurable depth window.'],['Directional waves','Colors rising and falling legs for immediate recognition.'],['Live leg','Previews the developing move before the next pivot confirms.'],['Alerts','Signals newly confirmed swing highs and lows.']]}};
