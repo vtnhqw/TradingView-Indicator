@@ -7,8 +7,11 @@ lineColorHigh  = input.color(color.new(color.orange, 0), "Line Color",         g
 lineWidth      = input.int(2,      "Line Width",    minval=1, maxval=4,         group=grpHigh)
 lineStyle      = input.string("Solid", "Line Style", options=["Solid","Dashed","Dotted"], group=grpHigh)
 showLabel      = input.bool(true,  "Show Label",                                group=grpHigh)
-showDist       = input.bool(true,  "Show Distance %",                           group=grpHigh)
+showDist       = input.bool(true,  "Show Distance From Current Price",          group=grpHigh)
 showPriceLabel = input.bool(true,  "Show Price on Axis",                        group=grpHigh)
+leftBars       = input.int(7,      "Line Before High (bars)", minval=0, maxval=50, group=grpHigh)
+labelSize      = input.string("Normal", "Label Size", options=["Tiny","Small","Normal","Large"], group=grpHigh)
+labelGapAtr    = input.float(0.15, "Label Gap Above Line (ATR)", minval=0.05, maxval=1.0, step=0.05, group=grpHigh)
 alertProxPct   = input.float(2.0,  "Proximity Alert (%)", minval=0.0, step=0.1, group=grpHigh)
 
 // ─── Adaptive Lookback ────────────────────────────────────────────────────────
@@ -17,8 +20,10 @@ adaptedLen = math.min(bar_index + 1, IDEAL_BARS)
 
 // ─── Logic ────────────────────────────────────────────────────────────────────
 weekHigh52 = ta.highest(high, adaptedLen)
-distPct    = (close - weekHigh52) / weekHigh52 * 100
-isNearHigh = math.abs(distPct) <= alertProxPct
+highOffset = ta.highestbars(high, adaptedLen)
+belowHighPct = math.max(0.0, (weekHigh52 - close) / weekHigh52 * 100)
+isNearHigh = belowHighPct <= alertProxPct
+labelY = weekHigh52 + math.max(ta.atr(14) * labelGapAtr, syminfo.mintick * 5)
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 _lineStyle(s) =>
@@ -28,6 +33,9 @@ _lineStyle(s) =>
         line.style_dotted
     else
         line.style_solid
+
+_labelSize(s) =>
+    s == "Large" ? size.large : s == "Normal" ? size.normal : s == "Small" ? size.small : size.tiny
 
 // ─── Price axis label via plot + plotchar trick ───────────────────────────────
 // This is the native way to get a coloured price tag on the right axis
@@ -45,12 +53,14 @@ if barstate.islast
     line.delete(highLine)
     label.delete(highLabel)
 
-    startBar = bar_index - adaptedLen + 1
+    // Begin a few candles before the high, then continue to the right edge.
+    highBar = bar_index + highOffset
+    lineStartBar = math.max(0, highBar - leftBars)
 
     highLine := line.new(
-         x1     = startBar,
+         x1     = lineStartBar,
          y1     = weekHigh52,
-         x2     = bar_index,
+         x2     = bar_index + 1,
          y2     = weekHigh52,
          xloc   = xloc.bar_index,
          extend = extend.right,
@@ -58,27 +68,27 @@ if barstate.islast
          style  = _lineStyle(lineStyle),
          width  = lineWidth)
 
-    // ── Chart label (left side of line) ──
+    // Compact dark label directly above the candle that made the high.
     if showLabel
-        distStr  = showDist ? " (" + (distPct >= 0 ? "+" : "") + str.tostring(distPct, "#.##") + "%)" : ""
-        barsNote = adaptedLen < IDEAL_BARS ? " [" + str.tostring(adaptedLen) + "d]" : ""
-        labelTxt = "52W High: " + str.tostring(weekHigh52, format.mintick) + distStr + barsNote
+        distStr  = showDist ? " " + (belowHighPct < 0.005 ? "0.00%" : "-" + str.tostring(belowHighPct, "#.00") + "%") : ""
+        labelTxt = "52W HIGH" + distStr
 
         highLabel := label.new(
-             x         = startBar,
-             y         = weekHigh52,
+             x         = highBar,
+             y         = labelY,
              text      = labelTxt,
              xloc      = xloc.bar_index,
              yloc      = yloc.price,
-             style     = label.style_label_right,
-             color     = color.new(lineColorHigh, 80),
+             style     = label.style_label_down,
+             color     = color.new(lineColorHigh, 82),
              textcolor = lineColorHigh,
-             size      = size.small)
+             size      = _labelSize(labelSize))
 
 // ─── Data Window only ─────────────────────────────────────────────────────────
 plot(weekHigh52, "52W High",            display=display.data_window)
-plot(distPct,    "Dist% from 52W High", display=display.data_window)
+plot(belowHighPct, "Current Price Below 52W High (%)", display=display.data_window)
 
 // ─── Alerts ───────────────────────────────────────────────────────────────────
 alertcondition(isNearHigh,                      "Near 52W High",  "Price is near the 52-Week High!")
-alertcondition(ta.crossover(close, weekHigh52), "Broke 52W High", "Price broke above the 52-Week High!")
+alertcondition(high > weekHigh52[1], "New 52W High", "Price made a new 52-Week High!")
+
