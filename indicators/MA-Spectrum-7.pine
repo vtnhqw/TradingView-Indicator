@@ -1,0 +1,90 @@
+//@version=6
+indicator("MA Spectrum 7", overlay=true, timeframe="", timeframe_gaps=true)
+
+// ==================================================
+// MA 20 / 50 / 100 / 200 SETTINGS
+// ==================================================
+groupFast = "MA 20 / 50 / 100 / 200"
+
+showFastGroup = input.bool(true, "Show all 20 / 50 / 100 / 200", group=groupFast)
+
+maTypeFast = input.string(
+     "EMA",
+     title="Basis MA Type",
+     options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"],
+     group=groupFast)
+
+src = input.source(close, title="Source", group=groupFast)
+
+show20 = input.bool(true, "MA 20", inline="ma20", group=groupFast)
+col20  = input.color(color.aqua, "", inline="ma20", group=groupFast)
+
+show50 = input.bool(true, "MA 50", inline="ma50", group=groupFast)
+col50  = input.color(color.yellow, "", inline="ma50", group=groupFast)
+
+show100 = input.bool(true, "MA 100", inline="ma100", group=groupFast)
+col100  = input.color(color.orange, "", inline="ma100", group=groupFast)
+
+show200 = input.bool(true, "MA 200", inline="ma200", group=groupFast)
+col200  = input.color(color.red, "", inline="ma200", group=groupFast)
+
+// ==================================================
+// MA 350 / 700 / 1400 SETTINGS
+// ==================================================
+groupLong = "MA 350 / 700 / 1400"
+
+showLongGroup = input.bool(true, "Show all 350 / 700 / 1400", group=groupLong)
+
+maTypeLong = input.string(
+     "SMA",
+     title="MA Type",
+     options=["SMA", "EMA"],
+     group=groupLong)
+
+show350 = input.bool(true, "MA 350", inline="ma350", group=groupLong)
+col350  = input.color(#00875A, "", inline="ma350", group=groupLong)
+
+show700 = input.bool(true, "MA 700", inline="ma700", group=groupLong)
+col700  = input.color(#2962FF, "", inline="ma700", group=groupLong)
+
+show1400 = input.bool(true, "MA 1400", inline="ma1400", group=groupLong)
+col1400  = input.color(#7B1FA2, "", inline="ma1400", group=groupLong)
+
+// ==================================================
+// MOVING AVERAGE FUNCTIONS
+// ==================================================
+getMA(source, length, type) =>
+    switch type
+        "SMA"        => ta.sma(source, length)
+        "EMA"        => ta.ema(source, length)
+        "SMMA (RMA)" => ta.rma(source, length)
+        "WMA"        => ta.wma(source, length)
+        "VWMA"       => ta.vwma(source, length)
+        => na
+
+getLongMA(source, length, type) =>
+    type == "EMA" ? ta.ema(source, length) : ta.sma(source, length)
+
+// ==================================================
+// CALCULATIONS
+// ==================================================
+ma20  = getMA(src, 20, maTypeFast)
+ma50  = getMA(src, 50, maTypeFast)
+ma100 = getMA(src, 100, maTypeFast)
+ma200 = getMA(src, 200, maTypeFast)
+
+ma350  = getLongMA(close, 350, maTypeLong)
+ma700  = getLongMA(close, 700, maTypeLong)
+ma1400 = getLongMA(close, 1400, maTypeLong)
+
+// ==================================================
+// PLOTS
+// ==================================================
+plot(showFastGroup and show20 ? ma20 : na, title="MA 20", color=col20)
+plot(showFastGroup and show50 ? ma50 : na, title="MA 50", color=col50)
+plot(showFastGroup and show100 ? ma100 : na, title="MA 100", color=col100)
+plot(showFastGroup and show200 ? ma200 : na, title="MA 200", color=col200)
+
+plot(showLongGroup and show350 ? ma350 : na, title="MA 350", color=col350, linewidth=2)
+plot(showLongGroup and show700 ? ma700 : na, title="MA 700", color=col700, linewidth=2)
+plot(showLongGroup and show1400 ? ma1400 : na, title="MA 1400", color=col1400, linewidth=2)

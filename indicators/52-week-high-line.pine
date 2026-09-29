@@ -70,7 +70,7 @@ if barstate.islast
 
     // Compact dark label directly above the candle that made the high.
     if showLabel
-        distStr  = showDist ? " " + (belowHighPct < 0.005 ? "0.00%" : "-" + str.tostring(belowHighPct, "#.00") + "%") : ""
+        distStr  = showDist ? "    " + (belowHighPct < 0.005 ? "0.00%" : "−" + str.tostring(belowHighPct, "0.00") + "%") : ""
         labelTxt = "52W HIGH" + distStr
 
         highLabel := label.new(
@@ -91,4 +91,3 @@ plot(belowHighPct, "Current Price Below 52W High (%)", display=display.data_wind
 // ─── Alerts ───────────────────────────────────────────────────────────────────
 alertcondition(isNearHigh,                      "Near 52W High",  "Price is near the 52-Week High!")
 alertcondition(high > weekHigh52[1], "New 52W High", "Price made a new 52-Week High!")
-

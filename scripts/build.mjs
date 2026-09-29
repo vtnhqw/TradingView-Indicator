@@ -5,9 +5,8 @@ import path from 'node:path';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const files = {
   high52: 'indicators/52-week-high-line-v2.pine',
+  maSpectrum: 'indicators/MA-Spectrum-7.pine',
   mcdx: 'indicators/MCDX-SmartMoney.pine',
-  pink: 'indicators/PinkCandle-Indicator-v1.pine',
-  rsi: 'indicators/rsi-divergence-indicator.pine',
   zigzag: 'indicators/zigzag-indicator.pine',
 };
 

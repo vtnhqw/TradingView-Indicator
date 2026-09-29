@@ -1,6 +1,6 @@
 # TradingView Pine Script v6 Indicator Suite
 
-An open-source collection of five TradingView indicators plus an interactive Level II order-book simulator. Every indicator is plain Pine Script v6 and can be inspected before it is copied into TradingView.
+An open-source collection of four TradingView indicators plus an interactive Level II order-book simulator. Every indicator is plain Pine Script v6 and can be inspected before it is copied into TradingView.
 
 > These tools are for education and chart analysis. They are not financial advice, and their labels are signals or momentum proxies—not observations of actual institutional order flow.
 
@@ -9,9 +9,8 @@ An open-source collection of five TradingView indicators plus an interactive Lev
 | Indicator | Display | Purpose | Alerts |
 | --- | --- | --- | ---: |
 | [52-Week High](indicators/52-week-high-line-v2.pine) | Overlay | Tracks the highest value across an adaptive 252-chart-bar lookback, distance, and proximity | 2 |
+| [MA Spectrum 7](indicators/MA-Spectrum-7.pine) | Overlay | Plots seven configurable moving averages spanning 20 to 1,400 periods | 0 |
 | [MCDX Smart Money](indicators/MCDX-SmartMoney.pine) | Pane | Displays RSI-derived momentum components labelled Banker, Hot Money, and Retailer | 5 |
-| [Pink Candle](indicators/PinkCandle-Indicator-v1.pine) | Overlay | Combines EMA/ATR bands, volume climaxes, and candle-colour setup signals | 6 |
-| [RSI Divergence](indicators/rsi-divergence-indicator.pine) | Pane | Finds regular and hidden divergence between confirmed RSI and price pivots | 4 |
 | [ZigZag Swing Wave](indicators/zigzag-indicator.pine) | Overlay | Connects confirmed price pivots and previews the developing swing | 2 |
 
 The names used by MCDX are conventional labels for its RSI-derived model. They should not be interpreted as measured ownership or capital-flow percentages.
@@ -30,7 +29,9 @@ Pivot-based indicators confirm signals only after their configured right-side lo
 
 The website provides a visual catalog, offline source-copying support, and a Learn section. The interactive Order Book Lab is its first lesson, with room for more learning modules later.
 
-Open `index.html` directly, or build the deployable directory:
+> **Hosting policy:** This repository must not be deployed or hosted using OpenAI hosting. Do not create or restore `.openai/hosting.json` or any other OpenAI hosting configuration. Keep the website local unless the repository owner explicitly chooses a different, non-OpenAI hosting provider.
+
+Open `index.html` directly, or build the local static output directory:
 
 ```sh
 node scripts/build.mjs
@@ -52,7 +53,7 @@ index.html                          Website shell and catalog
 pine-sources.js                     Generated offline source bundle
 ```
 
-The root-level `test` file is a standalone experimental Pine script and is not part of the published five-indicator catalog.
+The root-level `test` file is a standalone experimental Pine script and is not part of the published four-indicator catalog.
 
 ## License
 
