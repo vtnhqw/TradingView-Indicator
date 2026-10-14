@@ -4,10 +4,9 @@ import path from 'node:path';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const files = {
-  high52: 'indicators/52-week-high-line-v2.pine',
+  high52: 'indicators/52-week-high-line.pine',
   maSpectrum: 'indicators/MA-Spectrum-7.pine',
   mcdx: 'indicators/MCDX-SmartMoney.pine',
-  zigzag: 'indicators/zigzag-indicator.pine',
 };
 
 const indicatorFiles = (await readdir(path.join(root, 'indicators')))
@@ -34,13 +33,14 @@ for (const [key, file] of Object.entries(files)) {
     throw new Error('Invalid Pine source: ' + file);
   }
 }
-await writeFile(path.join(root, 'pine-sources.js'),
+await writeFile(path.join(root, 'js/pine-sources.js'),
   '// Generated from indicators/*.pine by node scripts/build.mjs. Do not edit.\nwindow.PINE_SOURCES = ' +
   JSON.stringify(sources, null, 2) + ';\n');
-const assets = ['index.html', 'app.js', 'pine-sources.js', 'assets/favicon.svg', 'note/level2_orderbook_cheatsheet.html', ...Object.values(files)];
+const assets = ['index.html', 'js/app.js', 'js/pine-sources.js', 'assets/favicon.svg', 'css/studio.css', 'css/orderbook.css', 'js/orderbook.js', 'js/theme.js', 'js/lab-size.js', 'js/market.js', 'note/level2_orderbook_cheatsheet.html', ...Object.values(files)];
 for (const file of assets) {
   const output = path.join(root, 'out', file);
   await mkdir(path.dirname(output), { recursive: true });
   await copyFile(path.join(root, file), output);
 }
 console.log(`Built ${assets.length} static assets; all ${bundledFiles.length} Pine sources bundled for offline copying.`);
+

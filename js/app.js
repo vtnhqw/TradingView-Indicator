@@ -11,30 +11,27 @@ let activeCard = null;
 let toastTimer;
 let themeTimer;
 let previousOverflow = '';
+let labContentHeight = null;
+const copyFeedback = new WeakMap();
 
 // Storage can be unavailable in private browsing or when opening local files.
-function readPreference(key) {
-  try { return localStorage.getItem(key); } catch { return null; }
-}
 function savePreference(key, value) {
   try { localStorage.setItem(key, value); } catch { /* Keep the session usable. */ }
 }
 const systemTheme = matchMedia('(prefers-color-scheme: dark)');
-let preferredTheme = readPreference('signal-theme') || readPreference('theme') || readPreference('theme-preference');
-if (!['light', 'dark'].includes(preferredTheme)) preferredTheme = null;
+let preferredTheme = window.StudioTheme.preference;
 
 function sendToSimulator(data) {
   iframe.contentWindow?.postMessage(data, location.origin === 'null' ? '*' : location.origin);
 }
 function applyTheme(theme, persist = false) {
-  root.dataset.theme = theme;
-  document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#000000' : '#f5f5f7';
+  window.StudioTheme.apply(theme);
   $('theme').setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' mode');
   if (persist) {
     preferredTheme = theme;
     savePreference('signal-theme', theme);
   }
-  sendToSimulator({ type: 'studio-theme', theme });
+  sendToSimulator({ type: 'studio-theme', theme, persist: preferredTheme !== null });
 }
 $('theme').addEventListener('click', () => {
   const button = $('theme');
@@ -51,7 +48,7 @@ $('theme').addEventListener('click', () => {
 });
 systemTheme.addEventListener('change', e => { if (!preferredTheme) applyTheme(e.matches ? 'dark' : 'light'); });
 iframe.addEventListener('load', () => {
-  sendToSimulator({ type: 'studio-theme', theme: root.dataset.theme });
+  sendToSimulator({ type: 'studio-theme', theme: root.dataset.theme, persist: preferredTheme !== null });
   sendToSimulator({ type: 'studio-visibility', visible: $('view-learn').classList.contains('active') });
 });
 window.addEventListener('message', event => {
@@ -59,11 +56,16 @@ window.addEventListener('message', event => {
   const data = event.data;
   if (data?.type === 'studio-theme' && ['light', 'dark'].includes(data.theme)) applyTheme(data.theme, true);
   if (data?.type === 'studio-escape' && labShell.classList.contains('max')) maximize(false);
+  if (data?.type === 'studio-size' && typeof data.height === 'number' && Number.isFinite(data.height) && data.height > 0 && data.height <= 20000) {
+    labContentHeight = Math.max(400, Math.ceil(data.height));
+    if (!labShell.classList.contains('max')) iframe.style.height = labContentHeight + 'px';
+  }
 });
 
 function maximize(on) {
   if (on === labShell.classList.contains('max')) return;
   labShell.classList.toggle('max', on);
+  iframe.style.height = on || labContentHeight === null ? '' : labContentHeight + 'px';
   $('maximize').textContent = on ? 'Minimize' : 'Maximize';
   $('maximize').setAttribute('aria-expanded', String(on));
   if (on) {
@@ -78,6 +80,7 @@ function maximize(on) {
     document.querySelector('footer').inert = false;
     document.querySelector('.lab-head').inert = false;
   }
+  document.querySelector('.skip-link').inert = on;
   $('maximize').focus();
 }
 $('maximize').setAttribute('aria-controls', 'labShell');
@@ -89,6 +92,7 @@ document.addEventListener('keydown', e => {
 
 const aliases = { home: 'overview', note: 'learn', lab: 'learn' };
 function route(value, push = false, moveFocus = false) {
+  ++detailGeneration;
   const name = aliases[value] || (['overview', 'indicators', 'learn'].includes(value) ? value : 'overview');
   maximize(false);
   if (dialog.open) dialog.close();
@@ -122,6 +126,11 @@ document.querySelectorAll('[data-route]').forEach(control => control.addEventLis
   e.preventDefault();
   route(control.dataset.route, true, !control.classList.contains('tab'));
 }));
+// Skip navigation without changing the active hash-routed workspace.
+document.querySelector('.skip-link').addEventListener('click', e => {
+  e.preventDefault();
+  $('main').focus();
+});
 document.querySelector('.tabs').addEventListener('keydown', e => {
   const index = tabs.indexOf(document.activeElement);
   if (index < 0) return;
@@ -263,25 +272,51 @@ function legacyCopy(text) {
   return copied;
 }
 async function copySource(card, button) {
-  if (button.disabled) return;
-  const label = button.textContent;
-  button.disabled = true;
+  if (button.disabled || button.dataset.copyState === 'loading') return;
+  const generation = detailGeneration;
+  let state = copyFeedback.get(button);
+  if (state) clearTimeout(state.timer);
+  else state = { markup: button.innerHTML, label: button.getAttribute('aria-label'), minWidth: button.style.minWidth };
+  copyFeedback.set(button, state);
+  button.style.minWidth = Math.ceil(button.getBoundingClientRect().width) + 'px';
+  button.setAttribute('aria-disabled', 'true');
+  button.setAttribute('aria-busy', 'true');
+  button.dataset.copyState = 'loading';
   button.textContent = 'Copying…';
+  let success = false;
   try {
     const source = await getSource(card);
+    if (generation !== detailGeneration) return;
     let copied = false;
     if (navigator.clipboard?.writeText) {
       try { await navigator.clipboard.writeText(source); copied = true; } catch { /* Fall through. */ }
     }
+    if (generation !== detailGeneration) return;
     if (!copied) copied = legacyCopy(source);
     if (!copied) { await openDetails(card, true); return; }
+    success = true;
     showStatus('Source copied to clipboard.');
   } catch {
-    showStatus('Could not load the source. Open Details to access the file.');
+    if (generation === detailGeneration) showStatus('Could not load the source. Open Details to access the file.');
   } finally {
-    button.disabled = false;
-    button.textContent = label;
+    button.removeAttribute('aria-disabled');
+    button.removeAttribute('aria-busy');
+    if (success) {
+      button.textContent = 'Copied ✓';
+      button.dataset.copyState = 'copied';
+      button.setAttribute('aria-label', 'Source copied. ' + (state.label || 'Copy source'));
+      state.timer = setTimeout(() => resetCopyFeedback(button, state), 1800);
+    } else resetCopyFeedback(button, state);
   }
+}
+function resetCopyFeedback(button, state) {
+  if (copyFeedback.get(button) !== state) return;
+  button.innerHTML = state.markup;
+  if (state.label === null) button.removeAttribute('aria-label');
+  else button.setAttribute('aria-label', state.label);
+  button.style.minWidth = state.minWidth;
+  delete button.dataset.copyState;
+  copyFeedback.delete(button);
 }
 function showStatus(message) {
   if (dialog.open) dialogStatus.textContent = message;
@@ -298,4 +333,36 @@ document.querySelectorAll('svg').forEach(svg => svg.setAttribute('aria-hidden', 
 applyTheme(preferredTheme || (systemTheme.matches ? 'dark' : 'light'));
 route(location.hash.slice(1));
 
-const info = {high52:{title:'52-Week High',sub:'Breakout and proximity framework',items:[['Adaptive lookback','Uses up to 252 chart bars and safely adapts for newer listings.'],['Distance tracking','Shows the current close as a percentage from the active high.'],['Visual control','Adjust line style, width, axis marker, and label visibility.'],['Alerts','Near 52W High and Broke 52W High conditions.']]},maSpectrum:{title:'MA Spectrum 7',sub:'Seven-layer moving-average overlay',items:[['Fast group','Plots 20, 50, 100, and 200-period averages from a configurable source.'],['Long group','Adds 350, 700, and 1,400-period SMA or EMA trend references.'],['Flexible methods','The fast group supports SMA, EMA, RMA, WMA, and VWMA calculations.'],['Display controls','Toggle either group or each individual average and customize every color.']]},mcdx:{title:'MCDX Smart Money',sub:'RSI-derived momentum classifier',items:[['Banker strength','An RSI-derived momentum proxy with adjustable sensitivity.'],['Hot money','A separate short-term momentum layer.'],['Retail balance','Fills the remaining oscillator view for fast comparisons.'],['Alerts','Banker crossovers, strong zones, and retailer dominance.']]},zigzag:{title:'ZigZag Swing Wave',sub:'Noise-filtered market structure',items:[['Confirmed pivots','Builds swings from a configurable depth window.'],['Directional waves','Colors rising and falling legs for immediate recognition.'],['Live leg','Previews the developing move before the next pivot confirms.'],['Alerts','Signals newly confirmed swing highs and lows.']]}};
+const info = {
+  high52: {
+    title: '52-Week High',
+    sub: 'Breakout and proximity framework',
+    items: [
+      ['Adaptive lookback', 'Uses up to 252 chart bars and safely adapts for newer listings.'],
+      ['Distance tracking', 'Shows the current close as a percentage from the active high.'],
+      ['Visual control', 'Adjust line style, width, axis marker, and label visibility.'],
+      ['Alerts', 'Near 52W High and New 52W High conditions.'],
+    ],
+  },
+  maSpectrum: {
+    title: 'MA Spectrum 7',
+    sub: 'Seven-layer moving-average overlay',
+    items: [
+      ['Fast group', 'Plots 20, 50, 100, and 200-period averages from a configurable source.'],
+      ['Long group', 'Adds 350, 700, and 1,400-period SMA or EMA trend references.'],
+      ['Flexible methods', 'The fast group supports SMA, EMA, RMA, WMA, and VWMA calculations.'],
+      ['Display controls', 'Toggle either group or each individual average and customize every color.'],
+    ],
+  },
+  mcdx: {
+    title: 'MCDX Smart Money',
+    sub: 'RSI-derived momentum classifier',
+    items: [
+      ['Banker strength', 'An RSI-derived momentum proxy with adjustable sensitivity; not measured institutional order flow.'],
+      ['Hot money', 'A separate short-term momentum layer.'],
+      ['Retail balance', 'Fills the remaining oscillator view for fast comparisons.'],
+      ['Alerts', 'Banker crossovers, strong zones, and retailer dominance.'],
+    ],
+  },
+};
+

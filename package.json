@@ -1,0 +1,28 @@
+{
+  "name": "terminal",
+  "version": "1.0.0",
+  "description": "Open-source TradingView Pine Script v6 indicators with an interactive order-book simulator",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test scripts/*.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vtnhqw/TradingView-Indicator"
+  },
+  "license": "MPL-2.0",
+  "keywords": [
+    "tradingview",
+    "pine-script",
+    "indicators",
+    "moving-average",
+    "order-book",
+    "market-education"
+  ]
+}

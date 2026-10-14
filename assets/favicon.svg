@@ -1,13 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="background" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2997ff"/>
-      <stop offset="1" stop-color="#0057c8"/>
+    <linearGradient id="background" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1273de"/>
+      <stop offset="1" stop-color="#064eab"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#background)"/>
-  <path d="M12 44 23 32l9 8 20-22" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M41 18h11v11" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="12" cy="44" r="3.5" fill="#fff"/>
-  <circle cx="32" cy="40" r="3.5" fill="#fff"/>
+  <rect width="64" height="64" rx="18" fill="url(#background)"/>
+  <svg x="9" y="9" width="46" height="46" viewBox="0 0 24 24" fill="none">
+    <defs><mask id="favicon-rocket-window"><rect width="24" height="24" fill="white"/><circle cx="15.8" cy="8.2" r="1.8" fill="black"/></mask></defs>
+    <g fill="white" mask="url(#favicon-rocket-window)">
+      <path d="M8.2 10.4C11.3 5.9 15.2 3.1 21 3C20.9 8.8 18.1 12.7 13.6 15.8L8.2 10.4Z"/>
+      <path d="m8.6 10.3-2.8-.2-2.3 3.3 4.4.2Zm5.1 5.1.2 2.8-3.3 2.3-.2-4.4ZM8.2 13.1l2.7 2.7-1.4 1.4-2.7-2.7Z"/>
+    </g>
+    <g stroke="white" stroke-width="1.5" stroke-linecap="round">
+      <path d="m4.5 15.5-1.8 1.8" opacity=".75"/>
+      <path d="m5.4 18.6-2.2 2.2" opacity=".55"/>
+      <path d="m8.5 19.5-1.8 1.8" opacity=".35"/>
+    </g>
+  </svg>
 </svg>
