@@ -1,158 +1,37 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fbfbfd">
-  <script src="js/theme.js"></script>
-  <meta name="description" content="Three open-source TradingView indicators. Explore trend, momentum, and market structure, inspect the Pine Script, and learn with an interactive order-book lab.">
-  <link rel="preconnect" href="https://s3.tradingview.com" crossorigin>
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://github.com/vtnhqw/TradingView-Indicator">
-  <meta property="og:title" content="Terminal — TradingView Indicator Suite">
-  <meta property="og:description" content="Open-source TradingView indicators and hands-on market education. Understand the logic before it reaches your chart.">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Terminal — TradingView Indicator Suite">
-  <meta name="twitter:description" content="Open-source TradingView indicators and hands-on market education.">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJhY2tncm91bmQiIHgxPSI4IiB5MT0iNiIgeDI9IjU2IiB5Mj0iNTgiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agc3RvcC1jb2xvcj0iIzEyNzNkZSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwNjRlYWIiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE4IiBmaWxsPSJ1cmwoI2JhY2tncm91bmQpIi8+CiAgPHN2ZyB4PSI5IiB5PSI5IiB3aWR0aD0iNDYiIGhlaWdodD0iNDYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+CiAgICA8ZGVmcz48bWFzayBpZD0iZmF2aWNvbi1yb2NrZXQtd2luZG93Ij48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iMTUuOCIgY3k9IjguMiIgcj0iMS44IiBmaWxsPSJibGFjayIvPjwvbWFzaz48L2RlZnM+CiAgICA8ZyBmaWxsPSJ3aGl0ZSIgbWFzaz0idXJsKCNmYXZpY29uLXJvY2tldC13aW5kb3cpIj4KICAgICAgPHBhdGggZD0iTTguMiAxMC40QzExLjMgNS45IDE1LjIgMy4xIDIxIDNDMjAuOSA4LjggMTguMSAxMi43IDEzLjYgMTUuOEw4LjIgMTAuNFoiLz4KICAgICAgPHBhdGggZD0ibTguNiAxMC4zLTIuOC0uMi0yLjMgMy4zIDQuNC4yWm01LjEgNS4xLjIgMi44LTMuMyAyLjMtLjItNC40Wk04LjIgMTMuMWwyLjcgMi43LTEuNCAxLjQtMi43LTIuN1oiLz4KICAgIDwvZz4KICAgIDxnIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiPgogICAgICA8cGF0aCBkPSJtNC41IDE1LjUtMS44IDEuOCIgb3BhY2l0eT0iLjc1Ii8+CiAgICAgIDxwYXRoIGQ9Im01LjQgMTguNi0yLjIgMi4yIiBvcGFjaXR5PSIuNTUiLz4KICAgICAgPHBhdGggZD0ibTguNSAxOS41LTEuOCAxLjgiIG9wYWNpdHk9Ii4zNSIvPgogICAgPC9nPgogIDwvc3ZnPgo8L3N2Zz4K">
-  <link rel="alternate icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/studio.css">
-  <title>Terminal</title>
-</head>
-<body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <div id="announcer" class="sr-only" aria-live="polite"></div>
-  <header class="header">
-    <nav class="nav" aria-label="Primary navigation">
-      <a class="brand" href="#overview" data-route="overview" aria-label="Terminal overview">
-        <span class="mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <defs><mask id="rocket-window"><rect width="24" height="24" fill="white"/><circle cx="15.8" cy="8.2" r="1.8" fill="black"/></mask></defs>
-            <g class="rocket-body" fill="currentColor" mask="url(#rocket-window)">
-              <path d="M8.2 10.4C11.3 5.9 15.2 3.1 21 3C20.9 8.8 18.1 12.7 13.6 15.8L8.2 10.4Z"/>
-              <path d="m8.6 10.3-2.8-.2-2.3 3.3 4.4.2Zm5.1 5.1.2 2.8-3.3 2.3-.2-4.4ZM8.2 13.1l2.7 2.7-1.4 1.4-2.7-2.7Z"/>
-            </g>
-            <g stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-              <path class="rocket-trail trail-one" d="m4.5 15.5-1.8 1.8"/>
-              <path class="rocket-trail trail-two" d="m5.4 18.6-2.2 2.2"/>
-              <path class="rocket-trail trail-three" d="m8.5 19.5-1.8 1.8"/>
-            </g>
-          </svg>
-        </span>
-        <span>Terminal</span>
-      </a>
-      <div class="tabs" role="tablist" aria-label="Sections">
-        <button id="tab-overview" class="tab active" data-route="overview" role="tab" aria-controls="view-overview" aria-selected="true">Overview</button>
-        <button id="tab-indicators" class="tab" data-route="indicators" role="tab" aria-controls="view-indicators" aria-selected="false" tabindex="-1">Indicators</button>
-        <button id="tab-learn" class="tab" data-route="learn" role="tab" aria-controls="view-learn" aria-selected="false" tabindex="-1">Learn</button>
-      </div>
-      <div class="actions">
-        <button id="theme" class="icon" aria-label="Switch color theme">
-          <svg class="sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-          <svg class="moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.3 15.2A8.5 8.5 0 0 1 8.8 3.7a8.5 8.5 0 1 0 11.5 11.5Z"/></svg>
-        </button>
-        <a class="github" href="https://github.com/vtnhqw/TradingView-Indicator" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4m8-8 4 4-4 4M13 6l-2 12"/></svg>
-          <span>View source</span><span class="external-arrow" aria-hidden="true">↗</span>
-        </a>
-      </div>
-    </nav>
-  </header>
-
-  <main id="main" tabindex="-1">
-    <section class="view active" id="view-overview" aria-labelledby="tab-overview">
-      <div class="shell hero">
-        <div class="hero-copy">
-          <p class="release"><span class="release-dot" aria-hidden="true"></span>Open source <span aria-hidden="true">/</span> Pine Script v6</p>
-          <h1>A clearer view<br>of <span>every move.</span></h1>
-          <p class="lead">Bring context to your chart. Three focused TradingView indicators for price, trend, and momentum—with the logic open for you to explore.</p>
-          <div class="hero-buttons">
-            <button class="button primary" data-route="indicators">Explore indicators <span aria-hidden="true">↗</span></button>
-            <button class="button ghost" data-route="learn">Visit the learning lab <span aria-hidden="true">→</span></button>
-          </div>
-          <div class="trust"><span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 10 4 4 8-8"/></svg>Free to use</span><span>Readable source</span><span>No sign-up</span></div>
-        </div>
-        <div class="preview" aria-label="Apple AAPL stock quote and interactive market chart">
-          <div class="window">
-            <div class="window-bar"><span class="workspace-label"><span class="workspace-dot" aria-hidden="true"></span>APPLE / AAPL</span><span class="market-status" id="marketStatus" role="status">Connecting</span></div>
-            <div class="market-stage">
-              <div id="appleMarketMount" class="market-widget"></div>
-              <div id="marketFallback" class="market-fallback">
-                <span class="market-symbol">NASDAQ · AAPL</span>
-                <strong>Apple Inc.</strong>
-                <p id="marketMessage">Connecting to Apple's market activity…</p>
-                <div class="market-fallback-actions"><button id="marketRetry" class="small" hidden>Try again</button><a class="small" href="https://www.tradingview.com/symbols/NASDAQ-AAPL/" target="_blank" rel="noopener">Open AAPL <span aria-hidden="true">↗</span></a></div>
-              </div>
-            </div>
-            <div class="market-tools"><a href="https://www.tradingview.com/symbols/NASDAQ-AAPL/" target="_blank" rel="noopener">Open AAPL <span aria-hidden="true">↗</span></a><button id="marketRefresh" aria-label="Reload Apple market chart">Reload chart <span aria-hidden="true">↻</span></button></div>
-          </div>
-          <p class="market-note">Market data by TradingView. Quotes may be delayed.</p>
-        </div>
-      </div>
-      <div class="shell metrics" aria-label="Toolkit at a glance">
-        <div class="metric"><b id="indicatorCount">3</b><span>Focused indicators</span></div>
-        <div class="metric"><b id="alertCount">7</b><span>Alert conditions</span></div>
-        <div class="metric"><b>v6</b><span>Pine Script</span></div>
-        <div class="metric"><b>100%</b><span>Open source</span></div>
-      </div>
-      <div class="soft-section">
-        <div class="shell section">
-          <div class="section-head"><div><p class="eyebrow">Less clutter. More context.</p><h2>Make your chart<br>work for you.</h2></div><p>Understand the trend, put momentum in perspective, and track price against its high. Use the tools that fit your process.</p></div>
-          <div class="features">
-            <article class="feature large"><div class="feature-top"><span class="feature-number">Trend context</span><span class="feature-chip">MA Spectrum 7</span></div><h3>Find the trend.<br>See every time horizon.</h3><p>Layer seven configurable moving averages to compare short-term movement with the longer-term trend.</p><div class="mini-chart"><div class="mini-chart-label"><span>MOVING AVERAGE LAYERS</span><span>ILLUSTRATION</span></div><svg viewBox="0 0 540 240" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60H540M0 120H540M0 180H540M90 0V240M180 0V240M270 0V240M360 0V240M450 0V240" stroke="currentColor" opacity=".08"/><g fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round"><path d="M20 195C85 190 95 105 165 130S245 45 315 70S410 90 520 25"/><path d="M20 205C110 180 130 150 200 145S340 80 520 55" opacity=".65"/><path d="M20 215C170 195 290 145 520 95" opacity=".35"/></g></svg><div class="mini-chart-foot"><span><i></i>Fast averages</span><span>Long-term context</span></div></div><button class="text-link" data-route="indicators">Explore the library <span aria-hidden="true">→</span></button></article>
-            <article class="feature"><div class="feature-top"><span class="feature-number">Readable source</span><span class="feature-symbol" aria-hidden="true">&lt;/&gt;</span></div><h3>Know what’s on your chart.</h3><p>Plain Pine Script. Read the calculation, tune the inputs, and make it your own.</p><div class="code"><div class="code-head"><span>52-week-high-line.pine</span><span>PINE V6</span></div><code><span class="c">// Context from the last 252 chart bars</span><br><span class="k">adaptedLen</span> = math.min(bar_index + 1, 252)<br><span class="k">weekHigh52</span> = <span class="f">ta.highest</span>(high, adaptedLen)</code></div></article>
-            <article class="feature"><div class="feature-top"><span class="feature-number">Custom alerts</span><span class="feature-symbol" aria-hidden="true">↗</span></div><h3>Notice when context changes.</h3><p>Configure alerts in TradingView for the conditions you want to follow.</p><div class="alerts" aria-label="Example alert conditions"><div class="alert"><span>Near 52W High</span><span class="status">Proximity</span></div><div class="alert"><span>Banker crossover</span><span class="status">Momentum</span></div><div class="alert"><span>New 52W High</span><span class="status">Breakout</span></div></div></article>
-          </div>
-          <div class="learn-callout"><div><p class="eyebrow">Learn by doing</p><h3>Go beyond the chart.</h3><p>Explore liquidity, spreads, and market depth in the interactive Order Book Lab.</p></div><button class="button ghost" data-route="learn">Open the learning lab <span aria-hidden="true">→</span></button></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="view" id="view-indicators" hidden aria-labelledby="tab-indicators">
-      <div class="shell">
-        <header class="page-head"><p class="eyebrow">The indicator library</p><h1>Your chart.<br><span>Your perspective.</span></h1><p>Choose a question. Explore the logic. Copy the source into TradingView and build a workspace that makes sense to you.</p></header>
-        <div class="toolbar"><span>3 indicators · Pine Script v6</span><div class="segments"><button class="segment active" data-filter="all">All indicators</button><button class="segment" data-filter="overlay">Overlay</button><button class="segment" data-filter="pane">Separate pane</button></div></div>
-        <div class="indicator-list">
-          <article class="indicator" data-type="overlay" data-key="high52" data-file="indicators/52-week-high-line.pine">
-            <div class="indicator-top"><div class="indicator-icon amber"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h20" opacity=".45"/><path d="m6 25 7-8 5 3 8-10m-6 0h6v6"/><circle cx="26" cy="7" r="2" fill="currentColor" stroke="none"/></svg></div><span class="indicator-category">Price context</span></div>
-            <div class="indicator-copy"><h2>52-Week High</h2><p>Where is price relative to its high? Track an adaptive 252-chart-bar reference and the distance from the current close.</p><div class="tags"><span class="tag">Overlay</span><span class="tag">2 alerts</span><span class="tag">Adaptive lookback</span></div></div>
-            <div class="indicator-actions"><button class="small detail-button">View details</button><button class="small dark copy-button">Copy source <span aria-hidden="true">↗</span></button></div>
-          </article>
-          <article class="indicator" data-type="overlay" data-key="maSpectrum" data-file="indicators/MA-Spectrum-7.pine">
-            <div class="indicator-top"><div class="indicator-icon blue"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c5 0 5-9 11-8s6 5 11-6"/><path d="M5 24c7-1 8-7 14-7s5-1 8-5" opacity=".65"/><path d="M5 28c8-1 14-4 22-7" opacity=".35"/></svg></div><span class="indicator-category">Trend context</span></div>
-            <div class="indicator-copy"><h2>MA Spectrum 7</h2><p>How does the trend look across time horizons? Layer seven configurable moving averages, from 20 to 1,400 periods.</p><div class="tags"><span class="tag">Overlay</span><span class="tag">7 averages</span><span class="tag">5 fast-group methods</span></div></div>
-            <div class="indicator-actions"><button class="small detail-button">View details</button><button class="small dark copy-button">Copy source <span aria-hidden="true">↗</span></button></div>
-          </article>
-          <article class="indicator" data-type="pane" data-key="mcdx" data-file="indicators/MCDX-SmartMoney.pine">
-            <div class="indicator-top"><div class="indicator-icon violet"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 26V17m9 9V11m9 15V6" stroke-width="5"/><path d="M5 10 13 6l6 2 8-5" stroke-width="1.75" opacity=".55"/></svg></div><span class="indicator-category">Momentum</span></div>
-            <div class="indicator-copy"><h2>MCDX Smart Money</h2><p>How is momentum shifting? Compare RSI-derived Banker, Hot Money, and Retailer components in a dedicated pane.</p><div class="tags"><span class="tag">Separate pane</span><span class="tag">5 alerts</span><span class="tag">RSI-based model</span></div></div>
-            <div class="indicator-actions"><button class="small detail-button">View details</button><button class="small dark copy-button">Copy source <span aria-hidden="true">↗</span></button></div>
-          </article>
-        </div>
-        <aside class="context-note"><svg class="note-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg><p>Understand the signal: MCDX labels are momentum proxies, not measured institutional flows. The 52-week reference uses chart bars.</p></aside>
-        <section class="setup" aria-labelledby="setup-title"><div class="setup-head"><div><p class="eyebrow">Get started</p><h2 id="setup-title">From source to chart.</h2></div><p>Four steps. No packages or private dependencies.</p></div><div class="steps"><div class="step"><span class="num">01</span><h3>Copy the source</h3><p>Choose an indicator and select Copy source.</p></div><div class="step"><span class="num">02</span><h3>Open Pine Editor</h3><p>Open a TradingView chart, then select Pine Editor.</p></div><div class="step"><span class="num">03</span><h3>Paste and save</h3><p>Replace the template and give your indicator a name.</p></div><div class="step"><span class="num">04</span><h3>Add to chart</h3><p>Add it, adjust the inputs, and configure your alerts.</p></div></div></section>
-      </div>
-    </section>
-
-    <section class="view" id="view-learn" hidden aria-labelledby="tab-learn">
-      <div class="shell">
-        <header class="lab-head"><div><p class="eyebrow">The learning lab</p><h1>See it.<br><span>Understand it.</span></h1></div><p>Build market knowledge through hands-on exploration. Start with the order book and see how liquidity shapes each move.</p></header>
-        <section class="lesson" aria-labelledby="orderBookLesson">
-          <div class="lesson-head"><div><p class="eyebrow">Interactive lesson 01</p><h2 id="orderBookLesson">Order Book Lab</h2><p>Explore a simulated Level II order book. Choose a scenario below, watch the depth change, and follow the event log.</p></div><span class="lesson-badge">Interactive simulation</span></div>
-          <div class="lesson-topics" aria-label="Lesson topics"><span><b>01</b>Liquidity &amp; spread</span><span><b>02</b>Walls &amp; spoofing</span><span><b>03</b>Breakouts &amp; breakdowns</span></div>
-          <div class="lab-shell" id="labShell"><div class="lab-bar"><div class="lab-title"><i aria-hidden="true"></i><span>Level II simulator <span class="lab-demo">/ Sample data</span></span></div><div class="lab-buttons"><button id="maximize" class="small">Maximize</button><a class="small" href="./note/level2_orderbook_cheatsheet.html" target="_blank" rel="noopener">Open in new tab <span aria-hidden="true">↗</span></a></div></div><iframe src="./note/level2_orderbook_cheatsheet.html" title="Interactive Level II order book simulator" loading="lazy"></iframe></div>
-          <p class="lesson-note">A space to experiment. All prices and orders in this lab are simulated.</p>
-        </section>
-      </div>
-    </section>
-  </main>
-
-  <footer><div class="footer-in"><div class="footer-brand"><strong>Terminal</strong><span>Clearer charts. Open source.</span></div><div class="footer-links"><span>Educational tools. Not financial advice.</span><a href="https://github.com/vtnhqw/TradingView-Indicator" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></div></div></footer>
-  <dialog id="dialog"><div class="dialog-head"><div><p class="eyebrow">Inside the indicator</p><h2 id="dialogTitle"></h2><p id="dialogSub"></p></div><button class="close" id="close" aria-label="Close details">×</button></div><div class="dialog-body" id="dialogBody"></div><div class="dialog-foot"><button class="small" id="done">Done</button><button class="small dark" id="dialogCopy">Copy source</button></div></dialog>
-  <div class="toast" id="toast" role="status">Source copied</div>
-  <script src="js/pine-sources.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/market.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="Open-source Pine Script indicators and an interactive order book learning lab."
+    />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <title>Terminal — Indicators & Learning Lab</title>
+    <script>
+      try {
+        var t = localStorage.getItem("signal-theme");
+        if (t !== "light" && t !== "dark")
+          t = matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        document.documentElement.classList.toggle("dark", t === "dark");
+        document.documentElement.dataset.theme = t;
+        document.documentElement.style.colorScheme = t;
+      } catch (e) {
+        if (matchMedia("(prefers-color-scheme: dark)").matches)
+          document.documentElement.classList.add("dark");
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript
+      >Enable JavaScript to use Terminal. Indicator source files are available
+      in the repository.</noscript
+    >
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
-

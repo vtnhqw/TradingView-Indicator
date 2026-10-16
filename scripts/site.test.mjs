@@ -1,49 +1,41 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { readFile, mkdtemp, cp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
-import vm from 'node:vm';
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile, readdir } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+const root = fileURLToPath(new URL("../", import.meta.url));
 
-const root = fileURLToPath(new URL('../', import.meta.url));
-
-// A missing catalog source or stale bundle must fail before users copy it.
-test('every catalog entry copies the exact source available in the repository', async () => {
-  const html = await readFile(path.join(root, 'index.html'), 'utf8');
-  const context = { window: {} };
-  vm.runInNewContext(await readFile(path.join(root, 'js/pine-sources.js'), 'utf8'), context);
-  const entries = [...html.matchAll(/data-key="([^"]+)" data-file="([^"]+)"/g)];
-  assert.ok(entries.length > 0, 'The catalog must contain indicators');
-  for (const [, key, file] of entries) {
-    const source = await readFile(path.join(root, file), 'utf8');
-    assert.equal(context.window.PINE_SOURCES[key], source, `Offline copy differs from ${file}`);
-    assert.match(source, /^\/\/@version=6/m);
+test("production build includes both pages, relative assets and unchanged downloadable Pine files", async () => {
+  const result = spawnSync(process.execPath, ["scripts/build.mjs"], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  for (const page of ["index.html", "note/level2_orderbook_cheatsheet.html"]) {
+    const file = path.join(root, "out", page);
+    const html = await readFile(file, "utf8");
+    const references = [...html.matchAll(/(?:src|href)="([^"#]+)"/g)]
+      .map((match) => match[1])
+      .filter((value) => !/^(?:https?:|data:)/.test(value));
+    assert.ok(references.some((ref) => ref.endsWith(".js")));
+    for (const ref of references) {
+      assert.ok(
+        !ref.startsWith("/"),
+        `Asset must work under a deployment subpath: ${ref}`,
+      );
+      assert.ok(
+        (await readFile(path.resolve(path.dirname(file), ref))).length > 0,
+        `Missing ${ref}`,
+      );
+    }
+  }
+  for (const file of (await readdir(path.join(root, "indicators"))).filter(
+    (file) => file.endsWith(".pine"),
+  )) {
+    assert.equal(
+      await readFile(path.join(root, "out/indicators", file), "utf8"),
+      await readFile(path.join(root, "indicators", file), "utf8"),
+    );
   }
 });
-
-// Exercise the real build in isolation so a passing build also proves that
-// assets needed by the redesigned site are actually shipped.
-test('the static build produces a self-contained website with working local asset links', async () => {
-  const fixture = await mkdtemp(path.join(tmpdir(), 'signal-studio-build-'));
-  try {
-    for (const file of ['index.html', 'js', 'css', 'assets', 'note', 'indicators', 'scripts']) {
-      await cp(path.join(root, file), path.join(fixture, file), { recursive: true });
-    }
-    const result = spawnSync(process.execPath, ['scripts/build.mjs'], { cwd: fixture, encoding: 'utf8' });
-    assert.equal(result.status, 0, result.stderr);
-    for (const page of ['index.html', 'note/level2_orderbook_cheatsheet.html']) {
-      const pagePath = path.join(fixture, 'out', page);
-      const html = await readFile(pagePath, 'utf8');
-      const references = [...html.matchAll(/(?:src|href|data-file)="([^"#]+)"/g)]
-        .map(match => match[1]).filter(value => !/^(?:https?:|data:)/.test(value));
-      for (const file of references) {
-        assert.ok((await readFile(path.resolve(path.dirname(pagePath), file))).length > 0, `Missing build asset: ${file} in ${page}`);
-      }
-    }
-  } finally {
-    await rm(fixture, { recursive: true, force: true });
-  }
-});
-

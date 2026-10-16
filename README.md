@@ -29,67 +29,69 @@ Signals evaluated on the current candle can change before that candle closes; co
 
 ## Local website
 
-The website provides a visual catalog, offline source-copying support, and a Learn section. The interactive Order Book Lab is its first lesson, with room for more learning modules later.
+Terminal is a React application using **actual shadcn/ui components**, Tailwind CSS, Radix primitives, and Vite. The overview, indicator library, dialogs, navigation, filters, and Order Book Lab share the same component system and light/dark theme.
 
-Terminal uses system typography, spacious layouts, neutral surfaces, and restrained blue accents. The shared stylesheet covers responsive navigation, indicator cards, and source dialogs. Informational labels are at least 12px, and copy buttons provide a temporary confirmation without shifting their width.
+The source lives in `src/`. Locally owned shadcn components are in `src/components/ui/` and configured by `components.json`. They were installed from the official shadcn registry; `cn` uses the local class-merging utility, and Sonner receives the app theme directly. Add components with `npx shadcn@latest add <component>` (see the [official Vite setup](https://ui.shadcn.com/docs/installation/vite)).
 
-The terminal and simulator apply the saved light or dark theme before the page paints. In the Learn view, the simulator frame adapts to its content so the outer page handles scrolling; maximized mode keeps a viewport-sized frame. System fonts and local illustrations keep the catalog and learning content usable offline.
+### Development
 
-The homepage embeds TradingView's Apple (`NASDAQ:AAPL`) Symbol Overview widget for actual stock quotes, candlesticks, volume, and selectable time ranges. The built-in moving average is disabled. It follows the site theme and needs an internet connection. TradingView's public Nasdaq widget data may be delayed; the chart displays the provider's market status. Connection failures show a retry option and an AAPL link instead of invented prices. This market chart does not run the repository's custom Pine indicators.
+Requires Node.js **22.12 or newer** (CI uses Node 24).
+
+```sh
+npm ci
+npm start
+```
+
+Open `http://localhost:8000`. The React source requires the development server; opening `index.html` directly with `file://` is no longer supported.
+
+```sh
+npm test          # simulator, production asset checks, React interaction tests
+npm run build    # production static website in out/
+npm run preview  # serve the production build locally on port 8000
+```
+
+The build validates that every `indicators/*.pine` file is included in the catalog, imports exact source text into the app for offline copying, and copies the unchanged files into `out/indicators/`. No generated `pine-sources.js` file is needed. Source copying, filtering, and simulation work without external requests after the local application loads; there is no offline page cache/service worker.
+
+The standalone lesson URL remains `note/level2_orderbook_cheatsheet.html`. Both entry pages use the same React components. The `#learn` route opens the lesson library. Lessons have independent URLs: `#learn/order-book` for the simulator and `#learn/darvas` for the documentation guide. Darvas sections are linkable, for example `#learn/darvas/worked-example`. `#home` opens the overview, while legacy `#note` and `#lab` shortcuts still open the Order Book Lab.
+
+The Order Book Lab preserves BTC, AAPL, and EUR/USD, seven scripted scenarios, speed selection, pause/resume, reset, event logging, cumulative depth, and maximized viewing. Its engine is isolated from rendering in `src/lib/simulator.js`. Simulation timers stop when the page is hidden or the lab unmounts. All simulator data is illustrative.
+
+The overview retains TradingView's Apple (`NASDAQ:AAPL`) Symbol Overview widget for actual quotes, candlesticks, volume, and selectable time ranges. Moving averages are disabled. The chart follows the selected theme and requires an internet connection. Public Nasdaq widget data may be delayed. Failures provide a retry control and a direct AAPL link. Loading an iframe does not guarantee quotes are available; reload remains accessible. The widget does not run the repository's custom Pine indicators.
 
 > **Hosting policy:** This repository must not be deployed or hosted using OpenAI hosting. Do not create or restore `.openai/hosting.json` or any other OpenAI hosting configuration. Keep the website local unless the repository owner explicitly chooses a different, non-OpenAI hosting provider.
 
-### Development & Build Commands
+The existing GitHub Pages workflow installs dependencies and builds `out/`. Relative asset URLs support repository subpaths. No deployment is performed by local development commands.
 
-Start the local zero-dependency development server (serves at `http://localhost:8000`):
+### Adding lessons
 
-```sh
-npm start
-# or: node scripts/serve.mjs
-```
+The Learn area separates the lesson library from individual guides and labs. It includes a responsive lesson sidebar, breadcrumbs, documentation section navigation, and direct URLs. Darvas is a standalone guide with a staged illustration, hypothetical risk example, practice question, and linked sources; it is not embedded in the Order Book Lab.
 
-Or open `index.html` directly in any web browser.
+To add a reading lesson:
 
-Build the local static output directory:
+1. Create a content module in `src/content/lessons/` (use `darvas.js` as an example).
+2. Add its metadata, unique `slug`, `kind: "guide"`, `sections`, and `sources` to `src/content/lessons/index.js`.
+3. Give every section a unique stable `id` and `title`. Supported content includes `paragraphs`, `bullets`, `table`, `paragraphsAfter`, `callout`, `question`, and source references. Register custom illustrations in `lesson-article.jsx` only when needed.
 
-```sh
-npm run build
-# or: node scripts/build.mjs
-```
+The library cards, lesson sidebar, section navigation, and lesson links use this registry automatically. Interactive lessons also register their React component in `src/components/learn/learn-page.jsx`. Preserve existing slugs and section IDs so saved links keep working.
 
-Verify source-copying consistency, interaction behavior, and local links in both generated pages:
-
-```sh
-npm test
-# or: node --test scripts/*.test.mjs
-```
-
-The build performs repository consistency checks before generating `js/pine-sources.js` and copying the site into `out/`. It fails when an indicator under `indicators/` is missing from the build manifest or when a mapped source is not a Pine v6 indicator.
-
-Generated output is intentionally excluded from Git. Commit `js/pine-sources.js` whenever an indicator source changes so direct-file users receive the current source bundle.
-
-## Repository layout
+### Repository layout
 
 ```text
-index.html                          Website shell and indicator catalog
-js/
-  app.js                            Website interactions
-  theme.js                          Theme initialization before first paint
-  market.js                         Apple market chart integration
-  lab-size.js                       Embedded lesson content sizing
-  orderbook.js                      Order book simulator interactions
-  pine-sources.js                   Generated offline Pine source bundle
-css/
-  studio.css                        Website styles and theme tokens
-  orderbook.css                     Order book simulator styles
-assets/
-  favicon.svg                       Rocket brand icon
-indicators/                         Three Pine Script sources (MUST REMAIN INTACT)
-note/
-  level2_orderbook_cheatsheet.html  Order book lesson markup
-scripts/                            Build tooling and regression tests
+src/App.jsx                         Shared shell, navigation, and routes
+src/components/overview.jsx         Homepage and indicator previews
+src/components/indicator-library.jsx Catalog, details, and source copying
+src/components/order-book-lab.jsx   Interactive lesson and shadcn controls
+src/components/learn/               Library, documentation layout, article renderer
+src/content/lessons/                Lesson registry and guide content
+src/components/market-chart.jsx     TradingView chart and recovery UI
+src/components/ui/                  Locally owned shadcn/ui components
+src/lib/                            Theme, indicator data, chart lifecycle, engine
+src/index.css                       Tailwind entry and shared theme tokens
+indicators/                         Pine Script sources (MUST REMAIN INTACT)
+note/level2_orderbook_cheatsheet.html Standalone React lesson entry
+scripts/                            Build validation and Node regression tests
+tests/                              React interaction and chart lifecycle tests
 out/                                Generated static website (Git-ignored)
-package.json                        Project scripts and metadata
 ```
 
 ## License

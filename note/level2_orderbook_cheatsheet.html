@@ -1,317 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#fbfbfd">
-  <script src="../js/theme.js"></script>
-  <script src="../js/lab-size.js" defer></script>
-  <title>Level II Order Book - Interactive Reference Guide & Simulator</title>
-  
-  <link rel="stylesheet" href="../css/orderbook.css">
-</head>
-<body>
-
-<div class="sheet">
-  <!-- Header -->
-  <div class="header-panel">
-    <div class="title-group">
-      <h1>Inside the order book</h1>
-      <p>Simulated market depth. Explore a scenario and follow the changes.</p>
-    </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      
-      <!-- Theme Toggle Switch -->
-      <button class="btn-theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
-        <svg class="sun-icon" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-        <span class="toggle-text">Light Mode</span>
-      </button>
-
-      <!-- Live Status -->
-      <div class="live-status" id="live-indicator">
-        <div class="status-dot"></div>
-        <span id="live-indicator-text">Simulator Live</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dashboard Grid -->
-  <div class="dashboard-grid">
-    
-    <!-- Left Column: Interactive Order Book Simulator -->
-    <div>
-      <div class="card simulator-card">
-        <div class="card-label">
-          <span>Live Order Book Simulator</span>
-          <span style="color: var(--color-text-secondary); font-size: 12px; font-weight: normal; text-transform: none;">Level II Depth</span>
-        </div>
-        
-        <div class="orderbook-panel">
-          <div class="orderbook-header">
-            <div class="symbol-info" id="ob-symbol-name">
-              BTC/USDT <span class="symbol-badge">Crypto</span>
-            </div>
-            <div class="spread-info" id="top-spread-indicator" style="font-family: var(--font-mono); font-size: 12px;">
-              Spread: $1.00 (0.01%)
-            </div>
-          </div>
-          
-          <div class="ob-table-container">
-            <table class="ob-table">
-              <thead>
-                <tr>
-                  <th style="width: 35%;">Price (USD)</th>
-                  <th id="ob-size-header" style="width: 30%;">Size (BTC)</th>
-                  <th id="ob-total-header" style="width: 35%;">Total (BTC)</th>
-                </tr>
-              </thead>
-              <tbody id="ob-tbody">
-                <!-- Javascript will inject order book rows here -->
-              </tbody>
-            </table>
-          </div>
-          
-          <!-- Simulator Controls -->
-          <div class="simulator-controls">
-            <div class="controls-grid">
-              
-              <!-- Custom Dropdown: Asset Class -->
-              <div class="control-row">
-                <span class="control-label">Asset Class</span>
-                <select class="native-select" id="custom-select-symbol" aria-label="Asset Class" onchange="changeSymbol(this.value)">
-                    <option value="BTC" selected>BTC/USDT (Crypto)</option>
-                    <option value="AAPL">AAPL (Stock)</option>
-                    <option value="EURUSD">EUR/USD (Forex)</option>
-                </select>
-              </div>
-              
-              <!-- Custom Dropdown: Scenario Mode -->
-              <div class="control-row">
-                <span class="control-label">Scenario Mode</span>
-                <select class="native-select" id="custom-select-scenario" aria-label="Scenario Mode" onchange="selectScenario(this.value)">
-                    <option value="normal" selected>Normal Market (Balanced)</option>
-                    <option value="bid_wall">Bid Wall (Support)</option>
-                    <option value="ask_wall">Ask Wall (Resistance)</option>
-                    <option value="breakout">Breakout (Ask Wall Eaten)</option>
-                    <option value="breakdown">Breakdown (Bid Wall Eaten)</option>
-                    <option value="spoofing">Spoofing (Fake Wall Canceled)</option>
-                    <option value="iceberg">Iceberg Order (Hidden Size)</option>
-                    <option value="liquidity_sweep">Liquidity Sweep (Stop Hunt)</option>
-                </select>
-              </div>
-              
-              <!-- Custom Dropdown: Update Speed -->
-              <div class="control-row">
-                <span class="control-label">Update Speed</span>
-                <select class="native-select" id="custom-select-speed" aria-label="Update Speed" onchange="changeSpeed(this.value)">
-                    <option value="1200">Slow (1.2s)</option>
-                    <option value="750" selected>Normal (0.75s)</option>
-                    <option value="400">Fast (0.4s)</option>
-                </select>
-              </div>
-
-              <!-- Button actions -->
-              <div class="control-row">
-                <span class="control-label">Action</span>
-                <div class="control-input-wrapper" style="width: 100%;">
-                  <button class="btn btn-primary" id="play-btn" onclick="togglePlayPause()" style="flex: 1;">Pause Simulator</button>
-                  <button class="btn btn-secondary" onclick="resetSimulator()" style="flex: 0 0 auto;">Reset Book</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Live Console -->
-      <div class="card" style="margin-bottom: 0;">
-        <div class="console-container">
-          <div class="console-header">
-            <span>Order Flow Mechanics Explainer</span>
-            <span style="color: var(--color-info); font-family: var(--font-mono);">TERMINAL // L2_LOG</span>
-          </div>
-          <div class="console-box" id="console-box">
-            <!-- Logs will be populated here -->
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Right Column: Cheatsheet Cards & Interactive Signal Linker -->
-    <div>
-      <!-- Core Cheatsheet Cards -->
-      <div class="cheatsheet-subgrid">
-        
-        <!-- Bid Side Card -->
-        <div class="cheatsheet-card" style="border-top: 3px solid var(--color-bid);">
-          <div class="card-label" style="color: var(--color-bid); margin-bottom: 8px;">Bid Side (Buyers)</div>
-          <div class="row">
-            <span class="key">Shows</span>
-            <span class="val">Prices buyers will pay</span>
-          </div>
-          <div class="row">
-            <span class="key">Direction</span>
-            <span class="val">Prices go down ↓</span>
-          </div>
-          <div class="row">
-            <span class="key">Big Order</span>
-            <span class="val" style="color: var(--color-bid);">Support / Floor</span>
-          </div>
-          <div class="row">
-            <span class="key">Stacking</span>
-            <span class="badge b-green">Bullish</span>
-          </div>
-        </div>
-        
-        <!-- Ask Side Card -->
-        <div class="cheatsheet-card" style="border-top: 3px solid var(--color-ask);">
-          <div class="card-label" style="color: var(--color-ask); margin-bottom: 8px;">Ask Side (Sellers)</div>
-          <div class="row">
-            <span class="key">Shows</span>
-            <span class="val">Prices sellers accept</span>
-          </div>
-          <div class="row">
-            <span class="key">Direction</span>
-            <span class="val">Prices go up ↑</span>
-          </div>
-          <div class="row">
-            <span class="key">Big Order</span>
-            <span class="val" style="color: var(--color-ask);">Resistance / Ceiling</span>
-          </div>
-          <div class="row">
-            <span class="key">Stacking</span>
-            <span class="badge b-red">Bearish</span>
-          </div>
-        </div>
-        
-      </div>
-      
-      <!-- Spread Card -->
-      <div class="card" style="padding: 12px 16px; margin-bottom: 16px;">
-        <div class="card-label" style="color: var(--color-warning); margin-bottom: 8px;">The Spread (Midpoint Gap)</div>
-        <div class="cheatsheet-subgrid" style="grid-template-columns: 1fr 1.2fr; gap: 15px; margin-bottom: 0;">
-          <div>
-            <div class="row">
-              <span class="key">Formula</span>
-              <span class="val" style="font-family: var(--font-mono);">Ask − Bid</span>
-            </div>
-            <div class="row">
-              <span class="key">Market Cost</span>
-              <span class="val">= Spread</span>
-            </div>
-          </div>
-          <div>
-            <div class="row">
-              <span class="key">Tight (&lt;$0.10)</span>
-              <span class="badge b-green">Liquid / Safe</span>
-            </div>
-            <div class="row">
-              <span class="key">Wide (&gt;$1.00)</span>
-              <span class="badge b-red">Illiquid / Risky</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Interactive Signals to Watch Card -->
-      <div class="card interactive-signals-card">
-        <div class="card-label" style="color: var(--color-info);">
-          <span>Signals to Watch</span>
-          <span style="font-size: 12px; font-weight: normal; text-transform: none; color: var(--color-text-secondary);">Click a signal to simulate ⚡</span>
-        </div>
-        
-        <!-- Signal Rows -->
-        <div class="signal-row" id="signal-bid_wall" onclick="triggerSignal('bid_wall')">
-          <div class="dot dot-green"></div>
-          <div class="signal-text">
-            <strong>Big bid wall below price</strong> — heavy buying support; protects downside, making it safer to enter long positions.
-          </div>
-        </div>
-        
-        <div class="signal-row" id="signal-ask_wall" onclick="triggerSignal('ask_wall')">
-          <div class="dot dot-red"></div>
-          <div class="signal-text">
-            <strong>Big ask wall above price</strong> — heavy selling resistance; wait for buyers to clear it before chasing breakouts.
-          </div>
-        </div>
-        
-        <div class="signal-row" id="signal-breakout" onclick="triggerSignal('breakout')">
-          <div class="dot dot-green"></div>
-          <div class="signal-text">
-            <strong>Ask wall disappears / clears</strong> — buying volume completely eats the wall, causing a rapid breakout surge.
-          </div>
-        </div>
-        
-        <div class="signal-row" id="signal-breakdown" onclick="triggerSignal('breakdown')">
-          <div class="dot dot-red"></div>
-          <div class="signal-text">
-            <strong>Bid wall disappears / cracks</strong> — selling volume breaches the support, resulting in a sudden panic drop.
-          </div>
-        </div>
-        
-        <div class="signal-row" id="signal-spoofing" onclick="triggerSignal('spoofing')">
-          <div class="dot dot-amber"></div>
-          <div class="signal-text">
-            <strong>Wall vanishes as price nears it</strong> — fake orders placed to manipulate price and canceled right before fills.
-          </div>
-        </div>
-        
-        <div class="signal-row" id="signal-iceberg" onclick="triggerSignal('iceberg')">
-          <div class="dot dot-cyan"></div>
-          <div class="signal-text">
-            <strong>Iceberg order reload</strong> — small visible size repeatedly refills as fills occur, masking massive institutional buying.
-          </div>
-        </div>
-        
-        <div class="signal-row" id="signal-liquidity_sweep" onclick="triggerSignal('liquidity_sweep')">
-          <div class="dot dot-amber"></div>
-          <div class="signal-text">
-            <strong>Liquidity sweep / stop hunt</strong> — rapid breach of key level sweeps retail stop-losses before an instant V-shaped reversal.
-          </div>
-        </div>
-      </div>
-      
-      <!-- Limitations Card -->
-      <div class="card" style="margin-bottom: 0;">
-        <div class="card-label" style="color: var(--color-text-secondary);">Market Limitations</div>
-        <div class="warn-container">
-          <div class="warn">
-            <div class="warn-item">
-              <span class="warn-bullet">✦</span>
-              <span><strong>Dark Pools:</strong> Huge institutional orders are often processed off-exchange and do not show up in the public order book.</span>
-            </div>
-            <div class="warn-item">
-              <span class="warn-bullet">✦</span>
-              <span><strong>High Latency:</strong> L2 order book updates happen in milliseconds; real-time manual analysis requires high concentration.</span>
-            </div>
-            <div class="warn-item">
-              <span class="warn-bullet">✦</span>
-              <span><strong>Combine Tools:</strong> Always combine order book depth analysis with price action charts and aggregate volume profiles.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-    </div>
-    
-  </div>
-</div>
-
-<!-- Simulation Script -->
-<script src="../js/orderbook.js"></script>
-
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="Open-source Pine Script indicators and an interactive order book learning lab."
+    />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <title>Order Book Lab — Terminal</title>
+    <script>
+      try {
+        var t = localStorage.getItem("signal-theme");
+        if (t !== "light" && t !== "dark")
+          t = matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        document.documentElement.classList.toggle("dark", t === "dark");
+        document.documentElement.dataset.theme = t;
+        document.documentElement.style.colorScheme = t;
+      } catch (e) {
+        if (matchMedia("(prefers-color-scheme: dark)").matches)
+          document.documentElement.classList.add("dark");
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript
+      >Enable JavaScript to use Terminal. Indicator source files are available
+      in the repository.</noscript
+    >
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

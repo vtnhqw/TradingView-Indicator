@@ -5,12 +5,14 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=18"
+    "node": ">=22.12"
   },
   "scripts": {
-    "start": "node scripts/serve.mjs",
+    "start": "vite --host 127.0.0.1 --port 8000",
+    "dev": "vite --host 127.0.0.1 --port 8000",
     "build": "node scripts/build.mjs",
-    "test": "node --test scripts/*.test.mjs"
+    "preview": "vite preview --host 127.0.0.1 --port 8000",
+    "test": "node --test scripts/*.test.mjs && vitest run"
   },
   "repository": {
     "type": "git",
@@ -24,5 +26,27 @@
     "moving-average",
     "order-book",
     "market-education"
-  ]
+  ],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.58.0",
+    "radix-ui": "^1.8.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sonner": "^2.0.8",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^30.1.3",
+    "tailwindcss": "^4.3.3",
+    "tw-animate-css": "^1.4.0",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
 }
