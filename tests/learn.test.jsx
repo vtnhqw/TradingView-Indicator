@@ -4,9 +4,10 @@ import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../src/App";
 
-it("opens Learn as a library without mounting the order book", () => {
+it("opens Learn as a library without mounting the order book", async () => {
   window.location.hash = "#learn";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   expect(
     screen.getByRole("heading", {
       level: 1,
@@ -26,6 +27,7 @@ it("opens Learn as a library without mounting the order book", () => {
 it("opens the Darvas documentation independently, with Learn active and working section links", async () => {
   window.location.hash = "#learn";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   await user.click(
     screen.getByRole("link", { name: "Read Darvas Box Strategy" }),
@@ -58,6 +60,7 @@ it("opens the Darvas documentation independently, with Learn active and working 
 it("supports direct section links and falls back safely for an unknown lesson", async () => {
   window.location.hash = "#learn/darvas/risk-and-exits";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   expect(
     screen.getByRole("heading", { level: 1, name: "Darvas Box Strategy" }),
   ).toBeInTheDocument();
@@ -77,7 +80,8 @@ it("navigates between independent lessons and releases the simulator timer", asy
   const intervals = vi.spyOn(window, "setInterval");
   const clear = vi.spyOn(window, "clearInterval");
   render(<App />);
-  const timer = intervals.mock.results[0].value;
+  await screen.findByRole("heading", { level: 1 });
+  const timer = intervals.mock.results[intervals.mock.calls.findIndex((call) => call[1] === 750)].value;
   const user = userEvent.setup();
   expect(
     screen.getByRole("heading", { name: "Order Book Lab" }),
@@ -109,6 +113,7 @@ it("navigates between independent lessons and releases the simulator timer", asy
 it("lets readers reveal diagram stages and the practice explanation", async () => {
   window.location.hash = "#learn/darvas";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   expect(screen.queryByText("Initial stop $44.80")).not.toBeInTheDocument();
   await user.click(screen.getByRole("tab", { name: "2. Breakout" }));
@@ -123,6 +128,7 @@ it("lets readers reveal diagram stages and the practice explanation", async () =
 it("can revisit the current section after scrolling elsewhere", async () => {
   window.location.hash = "#learn/darvas/worked-example";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   screen.getByRole("heading", { name: "Practice on a chart" }).focus();
   await user.click(

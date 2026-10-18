@@ -5,6 +5,7 @@ import {
   ArrowUp,
   Pause,
   Play,
+  StepForward,
   RotateCcw,
   Maximize2,
   FlaskConical,
@@ -172,14 +173,20 @@ function DepthTable({ state }) {
   );
 }
 
-export function OrderBookLab({ standalone = false, inLibrary = false }) {
+export function OrderBookLab({ standalone = false, inLibrary = false, session }) {
   const engine = useRef(null);
-  if (!engine.current) engine.current = createSimulator();
+  if (!engine.current) engine.current = session?.engine || createSimulator();
   const [state, setState] = useState(() => engine.current.snapshot());
-  const [paused, setPaused] = useState(false);
-  const [speed, setSpeed] = useState("750");
+  const [paused, setPaused] = useState(session?.paused ?? false);
+  const [speed, setSpeed] = useState(session?.speed ?? "750");
+  const [completed, setCompleted] = useState(session?.completed ?? null);
   const [maximized, setMaximized] = useState(false);
   const [visible, setVisible] = useState(() => !document.hidden);
+  useEffect(() => {
+    if (session) {
+      Object.assign(session, { engine: engine.current, paused, speed, completed });
+    }
+  }, [session, paused, speed, completed]);
   useEffect(() => {
     const changed = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", changed);
@@ -188,14 +195,25 @@ export function OrderBookLab({ standalone = false, inLibrary = false }) {
   useEffect(() => {
     if (paused || !visible) return;
     const id = setInterval(() => {
-      engine.current.tick();
-      setState(engine.current.snapshot());
+      run("tick");
     }, Number(speed));
     return () => clearInterval(id);
   }, [paused, speed, visible]);
   function run(method, value) {
+    const previous = engine.current.snapshot();
     engine.current[method](value);
-    setState(engine.current.snapshot());
+    const next = engine.current.snapshot();
+    setState(next);
+    if (
+      method === "tick" &&
+      previous.scenario !== "normal" &&
+      next.scenario === "normal"
+    ) {
+      setCompleted(previous.scenario);
+      setPaused(true);
+    } else {
+      setCompleted(null);
+    }
   }
   function scenario(value, resume = false) {
     run("selectScenario", value);
@@ -204,7 +222,7 @@ export function OrderBookLab({ standalone = false, inLibrary = false }) {
   const simulator = (
     <div className="space-y-5">
       <Card className="py-5">
-        <CardContent className="grid items-end gap-4 px-5 sm:grid-cols-3 lg:grid-cols-[1fr_1.4fr_1fr_auto]">
+        <CardContent className="grid items-end gap-4 px-5 sm:grid-cols-3">
           <Picker
             label="Asset"
             value={state.symbol}
@@ -233,7 +251,7 @@ export function OrderBookLab({ standalone = false, inLibrary = false }) {
               ["300", "Fast · 0.3s"],
             ]}
           />
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:col-span-3">
             <Button
               onClick={() => setPaused((value) => !value)}
               aria-label={paused ? "Resume simulation" : "Pause simulation"}
@@ -243,12 +261,25 @@ export function OrderBookLab({ standalone = false, inLibrary = false }) {
             </Button>
             <Button
               variant="outline"
+              onClick={() => {
+                setPaused(true);
+                run("tick");
+              }}
+            >
+              <StepForward />
+              Next step
+            </Button>
+            <Button
+              variant="outline"
               size="icon"
               aria-label="Reset book"
               onClick={() => run("reset")}
             >
               <RotateCcw />
             </Button>
+            <span className="w-full text-xs text-muted-foreground sm:ml-auto sm:w-auto">
+              Next step pauses playback so you can inspect each change.
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -257,15 +288,37 @@ export function OrderBookLab({ standalone = false, inLibrary = false }) {
         <div className="space-y-5">
           <Card className="gap-4">
             <CardHeader>
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <CardTitle className="text-base">What’s happening</CardTitle>
-                <Badge variant="secondary">
-                  {state.step > 0 ? `Step ${state.step} / 6` : "Observe"}
+                <Badge variant="secondary" role="status">
+                  {completed
+                    ? "Scenario completed"
+                    : state.step > 0
+                      ? `Step ${state.step} / 6`
+                      : "Observe"}
                 </Badge>
               </div>
-              <CardDescription>{SCENARIOS[state.scenario][1]}</CardDescription>
+              <CardDescription>
+                {completed
+                  ? `${SCENARIOS[completed][0]} finished. Inspect the final book or replay the scenario.`
+                  : SCENARIOS[state.scenario][1]}
+              </CardDescription>
             </CardHeader>
             <CardContent>
+              {completed && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mb-4"
+                  onClick={() => {
+                    run("reset");
+                    scenario(completed, true);
+                  }}
+                >
+                  <RotateCcw />
+                  Replay {SCENARIOS[completed][0]}
+                </Button>
+              )}
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span
                   className={`size-2 rounded-full ${paused ? "bg-amber-500" : "bg-emerald-500"}`}

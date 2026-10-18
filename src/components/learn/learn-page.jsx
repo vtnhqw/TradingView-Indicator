@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { getLesson } from "@/content/lessons";
-import { OrderBookLab } from "@/components/order-book-lab";
+import { LazyOrderBookLab as OrderBookLab } from "@/components/lazy-order-book-lab";
 import { LessonLibrary } from "./lesson-library";
 import { LessonLayout } from "./lesson-layout";
 import { LessonArticle } from "./lesson-article";
 
 const interactiveLessons = { "order-book": OrderBookLab };
-export function LearnPage({ slug, section }) {
+export function LearnPage({ slug, section, session }) {
   if (!slug) return <LessonLibrary />;
   const lesson = getLesson(slug);
   if (!lesson)
@@ -28,7 +28,7 @@ export function LearnPage({ slug, section }) {
       {lesson.kind === "guide" ? (
         <LessonArticle lesson={lesson} activeSection={section} />
       ) : (
-        <InteractiveLesson inLibrary />
+        <InteractiveLesson inLibrary session={session} />
       )}
     </LessonLayout>
   );

@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import brandIcon from "../assets/favicon.svg";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
   BookOpen,
@@ -22,10 +21,20 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { useTheme } from "@/lib/use-theme";
 import { Overview } from "@/components/overview";
-import { IndicatorLibrary } from "@/components/indicator-library";
-import { OrderBookLab } from "@/components/order-book-lab";
-import { LearnPage } from "@/components/learn/learn-page";
+import { LazyOrderBookLab as OrderBookLab } from "@/components/lazy-order-book-lab";
 import { getLesson } from "@/content/lessons";
+import { PageBoundary } from "@/components/page-boundary";
+
+const IndicatorLibrary = lazy(() =>
+  import("@/components/indicator-library").then((module) => ({
+    default: module.IndicatorLibrary,
+  })),
+);
+const LearnPage = lazy(() =>
+  import("@/components/learn/learn-page").then((module) => ({
+    default: module.LearnPage,
+  })),
+);
 const routes = {
   overview: "Overview",
   indicators: "Indicators",
@@ -43,25 +52,8 @@ function readRoute() {
     ? hash
     : "overview";
 }
-export default function App() {
-  const standalone = location.pathname.endsWith(
-    "/note/level2_orderbook_cheatsheet.html",
-  );
-  const [route, setRoute] = useState(readRoute);
-  const [activeRoute, lessonSlug, sectionId] = route.split("/");
-  const lesson = activeRoute === "learn" ? getLesson(lessonSlug) : null;
-  const moveFocus = useRef(false);
-  const { theme, toggleTheme } = useTheme();
-  useEffect(() => {
-    const changed = () => {
-      moveFocus.current = document
-        .getElementById("main")
-        ?.contains(document.activeElement);
-      setRoute(readRoute());
-    };
-    window.addEventListener("hashchange", changed);
-    return () => window.removeEventListener("hashchange", changed);
-  }, []);
+// Runs inside Suspense, after the destination content is ready to receive focus.
+function RouteEffects({ route, standalone, activeRoute, lesson, sectionId, moveFocus }) {
   useEffect(() => {
     document.title = `${standalone ? "Order Book Lab" : lesson?.title || routes[activeRoute]} — Terminal`;
     const section =
@@ -83,7 +75,29 @@ export default function App() {
       }
       moveFocus.current = false;
     }
-  }, [route, standalone, activeRoute, lesson, sectionId]);
+  }, [route, standalone, activeRoute, lesson, sectionId, moveFocus]);
+  return null;
+}
+export default function App() {
+  const standalone = location.pathname.endsWith(
+    "/note/level2_orderbook_cheatsheet.html",
+  );
+  const [route, setRoute] = useState(readRoute);
+  const [activeRoute, lessonSlug, sectionId] = route.split("/");
+  const lesson = activeRoute === "learn" ? getLesson(lessonSlug) : null;
+  const moveFocus = useRef(false);
+  const labSession = useRef({});
+  const { theme, toggleTheme } = useTheme();
+  useEffect(() => {
+    const changed = () => {
+      moveFocus.current = document
+        .getElementById("main")
+        ?.contains(document.activeElement);
+      setRoute(readRoute());
+    };
+    window.addEventListener("hashchange", changed);
+    return () => window.removeEventListener("hashchange", changed);
+  }, []);
   return (
     <TooltipProvider>
       <div className="flex min-h-dvh flex-col">
@@ -98,13 +112,15 @@ export default function App() {
           Skip to content
         </a>
         <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-sm">
-          <div className="page-wrap flex min-h-16 flex-wrap items-center gap-x-8 gap-y-2 py-3 sm:py-0">
+          <div
+            className={`page-wrap flex min-h-16 flex-wrap items-center gap-x-8 gap-y-2 py-3 sm:py-0 ${standalone ? "" : "sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"}`}
+          >
             <a
               href={standalone ? "../index.html" : "#overview"}
               className="flex items-center gap-2.5 font-semibold tracking-tight"
               aria-label="Terminal home"
             >
-              <img src={brandIcon} alt="" className="size-8 rounded-lg dark:invert" />
+              <TerminalSquare aria-hidden="true" className="size-8 shrink-0" />
               <span>
                 terminal<span className="text-muted-foreground">.</span>
               </span>
@@ -112,7 +128,7 @@ export default function App() {
             {!standalone && (
               <nav
                 aria-label="Primary navigation"
-                className="order-3 flex w-full gap-1 sm:order-none sm:w-auto"
+                className="order-3 flex w-full justify-center gap-1 sm:order-none sm:w-auto"
               >
                 {Object.entries(routes).map(([key, name]) => {
                   const Icon =
@@ -126,7 +142,7 @@ export default function App() {
                       key={key}
                       variant={activeRoute === key ? "secondary" : "ghost"}
                       size="sm"
-                      className="flex-1 sm:flex-none"
+                      className="flex-none"
                       asChild
                     >
                       <a
@@ -141,7 +157,7 @@ export default function App() {
                 })}
               </nav>
             )}
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2 sm:justify-self-end">
               <Badge
                 variant="outline"
                 className="hidden text-[10px] font-normal lg:inline-flex"
@@ -179,19 +195,38 @@ export default function App() {
           </div>
         </header>
         <main id="main" tabIndex={-1} className="page-wrap flex-1 outline-none">
+          <PageBoundary key={`${activeRoute}/${lessonSlug || ""}`}>
+          <Suspense
+            fallback={
+              <p role="status" className="py-12 text-sm text-muted-foreground">
+                Loading page…
+              </p>
+            }
+          >
           {standalone ? (
-            <OrderBookLab standalone />
+            <OrderBookLab standalone session={labSession.current} />
           ) : route === "indicators" ? (
             <IndicatorLibrary />
           ) : activeRoute === "learn" ? (
             <LearnPage
               key={lessonSlug || "library"}
+              session={labSession.current}
               slug={lessonSlug}
               section={sectionId}
             />
           ) : (
             <Overview theme={theme} />
           )}
+            <RouteEffects
+              route={route}
+              standalone={standalone}
+              activeRoute={activeRoute}
+              lesson={lesson}
+              sectionId={sectionId}
+              moveFocus={moveFocus}
+            />
+          </Suspense>
+          </PageBoundary>
         </main>
         <footer className="mt-8 border-t">
           <div className="page-wrap flex flex-wrap items-center justify-between gap-4 py-6 text-xs text-muted-foreground">

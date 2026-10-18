@@ -3,7 +3,6 @@
 export function mountMarketChart(mount, theme, onStatus) {
   let disposed = false;
   let frame;
-  let timedOut = false;
   onStatus("loading");
   mount.replaceChildren();
   const container = document.createElement("div");
@@ -22,13 +21,12 @@ export function mountMarketChart(mount, theme, onStatus) {
   mount.append(container);
   const unavailable = () => {
     if (!disposed) {
-      timedOut = true;
       onStatus("error");
     }
   };
   const timeout = setTimeout(unavailable, 15000);
   const ready = () => {
-    if (!disposed && !timedOut) {
+    if (!disposed) {
       clearTimeout(timeout);
       onStatus("ready");
     }

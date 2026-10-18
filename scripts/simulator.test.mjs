@@ -2,6 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createSimulator, SYMBOLS, SCENARIOS } from "../src/lib/simulator.js";
 
+test("breakout and breakdown retain their new liquidity stacks", () => {
+  for (const [symbol, expected] of [["BTC", 6.75], ["AAPL", 2025], ["EURUSD", 54]]) {
+    for (const [scenario, side] of [["breakout", "bids"], ["breakdown", "asks"]]) {
+      const engine = createSimulator();
+      engine.changeSymbol(symbol);
+      engine.selectScenario(scenario);
+      for (let i = 0; i < 5; i++) engine.tick();
+      assert.equal(engine.snapshot()[side][0].size, expected, `${symbol}: ${scenario}`);
+      engine.tick();
+      assert.equal(engine.snapshot()[side][0].size, expected);
+    }
+  }
+});
+
 test("every asset has five ordered levels and correct cumulative depth", () => {
   for (const symbol of Object.keys(SYMBOLS)) {
     const engine = createSimulator();

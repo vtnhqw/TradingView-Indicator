@@ -199,11 +199,11 @@ export function createSimulator() {
         a.isWall = true;
         a.size = wallSize;
       } else {
-        a.isWall = false;
-        // If it was just converted back from a wall, give it a normal size
-        if (a.size > sym.normalVol * 3) {
+        // Reset only former walls; preserve newly stacked liquidity.
+        if (a.isWall) {
           a.size = getRandomNormalSize();
         }
+        a.isWall = false;
       }
     });
 
@@ -220,11 +220,11 @@ export function createSimulator() {
         b.isWall = true;
         b.size = wallSize;
       } else {
-        b.isWall = false;
-        // Reset if it was a wall before
-        if (b.size > sym.normalVol * 3) {
+        // Reset only former walls; preserve newly stacked liquidity.
+        if (b.isWall) {
           b.size = getRandomNormalSize();
         }
+        b.isWall = false;
       }
     });
   }

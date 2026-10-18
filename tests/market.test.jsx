@@ -20,7 +20,7 @@ it("requests actual AAPL candles, volume and no moving average from TradingView"
   cleanup();
   expect(mount.children).toHaveLength(0);
 });
-it("ignores late iframe loads after a timeout and cleans up pending work", async () => {
+it("recovers from a late iframe load after timeout and ignores loads after cleanup", async () => {
   vi.useFakeTimers();
   try {
     const mount = document.createElement("div");
@@ -32,7 +32,7 @@ it("ignores late iframe loads after a timeout and cleans up pending work", async
     vi.advanceTimersByTime(15000);
     expect(status).toHaveBeenLastCalledWith("error");
     frame.dispatchEvent(new Event("load"));
-    expect(status).toHaveBeenLastCalledWith("error");
+    expect(status).toHaveBeenLastCalledWith("ready");
     cleanup();
     status.mockClear();
     frame.dispatchEvent(new Event("load"));

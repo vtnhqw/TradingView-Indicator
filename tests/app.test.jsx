@@ -5,12 +5,54 @@ import userEvent from "@testing-library/user-event";
 import App from "../src/App";
 import { indicators } from "../src/lib/indicators";
 
+it("advances one scenario step and stays paused until resumed", async () => {
+  try {
+    window.location.hash = "#learn/order-book";
+    render(<App />);
+  await screen.findByRole("heading", { level: 1 });
+    vi.useFakeTimers();
+    act(() => screen.getByRole("button", { name: "Run Bid wall scenario" }).click());
+    act(() => screen.getByRole("button", { name: "Next step" }).click());
+    expect(screen.getByText("Step 1 / 6")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Resume simulation" })).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(3000));
+    expect(screen.getByText("Step 1 / 6")).toBeInTheDocument();
+    act(() => screen.getByRole("button", { name: "Next step" }).click());
+    expect(screen.getByText("Step 2 / 6")).toBeInTheDocument();
+    act(() => screen.getByRole("button", { name: "Resume simulation" }).click());
+    act(() => vi.advanceTimersByTime(750));
+    expect(screen.getByText("Step 3 / 6")).toBeInTheDocument();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 async function openCatalog() {
   window.location.hash = "#indicators";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   return userEvent.setup();
 }
-describe("indicator library", () => {
+
+it("keeps a paused scenario when navigating away from the lab and back", async () => {
+  window.location.hash = "#learn/order-book";
+  render(<App />);
+  await screen.findByRole("heading", { name: "Order Book Lab" });
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("button", { name: "Run Bid wall scenario" }));
+  await user.click(screen.getByRole("button", { name: "Next step" }));
+  const step = screen.getByText(/Step \d \/ 6/).textContent;
+  const price = screen.getByTestId("mid-price").textContent;
+  await user.click(screen.getByRole("link", { name: "Indicators" }));
+  await screen.findByRole("heading", { level: 1, name: "A little more perspective." });
+  await user.click(screen.getByRole("link", { name: "Learn" }));
+  await user.click(await screen.findByRole("link", { name: "Open Order Book Lab" }));
+  await screen.findByRole("heading", { name: "Order Book Lab" });
+  expect(screen.getByText(step)).toBeInTheDocument();
+  expect(screen.getByTestId("mid-price")).toHaveTextContent(price);
+  expect(screen.getByRole("button", { name: "Resume simulation" })).toBeInTheDocument();
+});
+describe("indicator library", async () => {
   it("filters cards and shows the exact source in an accessible details dialog", async () => {
     const user = await openCatalog();
     await user.click(screen.getByRole("tab", { name: "Separate pane" }));
@@ -87,6 +129,7 @@ describe("indicator library", () => {
 it("supports route aliases and pauses the simulator while controls remain usable", async () => {
   window.location.hash = "#lab";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   expect(
     screen.getByRole("heading", { name: "Order Book Lab" }),
@@ -108,15 +151,17 @@ it("persists the selected theme", async () => {
   window.location.hash = "#indicators";
   localStorage.setItem("signal-theme", "light");
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "Switch to dark mode" }));
   await waitFor(() => expect(document.documentElement).toHaveClass("dark"));
   expect(localStorage.getItem("signal-theme")).toBe("dark");
 });
 
-it("renders the overview with the chart and all three indicator previews", () => {
+it("renders the overview with the chart and all three indicator previews", async () => {
   window.location.hash = "#overview";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
     "A clearer view",
   );
@@ -135,6 +180,7 @@ it("renders the overview with the chart and all three indicator previews", () =>
 it("preserves a paused book across maximization and restores focus on Escape", async () => {
   window.location.hash = "#learn/order-book";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "Pause simulation" }));
   const price = screen.getByTestId("mid-price").textContent;
@@ -153,6 +199,7 @@ it("preserves a paused book across maximization and restores focus on Escape", a
 it("selects assets and scenarios with the shadcn keyboard controls while paused", async () => {
   window.location.hash = "#learn/order-book";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "Pause simulation" }));
   await user.click(screen.getByRole("combobox", { name: "Asset" }));
@@ -173,16 +220,18 @@ it("stops the simulation interval when leaving the lab", async () => {
   const set = vi.spyOn(window, "setInterval");
   const clear = vi.spyOn(window, "clearInterval");
   render(<App />);
-  const interval = set.mock.results[0].value;
+  await screen.findByRole("heading", { level: 1 });
+  const interval = set.mock.results[set.mock.calls.findIndex((call) => call[1] === 750)].value;
   const user = userEvent.setup();
   await user.click(screen.getByRole("link", { name: "Indicators" }));
   await waitFor(() => expect(clear).toHaveBeenCalledWith(interval));
 });
 
-it("renders the standalone lesson without the catalog navigation", () => {
+it("renders the standalone lesson without the catalog navigation", async () => {
   window.history.replaceState({}, "", "/note/level2_orderbook_cheatsheet.html");
   try {
     render(<App />);
+  await screen.findByRole("heading", { level: 1 });
     expect(
       screen.getByRole("heading", { name: "Order Book Lab" }),
     ).toBeInTheDocument();
@@ -201,6 +250,7 @@ it("renders the standalone lesson without the catalog navigation", () => {
 it("moves keyboard focus to the destination heading after a content navigation link", async () => {
   window.location.hash = "#overview";
   render(<App />);
+  await screen.findByRole("heading", { level: 1 });
   const user = userEvent.setup();
   screen.getByRole("link", { name: "Explore lessons" }).focus();
   await user.keyboard("{Enter}");

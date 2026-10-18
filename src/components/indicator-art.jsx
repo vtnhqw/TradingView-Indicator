@@ -1,12 +1,20 @@
 export function IndicatorArt({ kind, compact = false }) {
   return (
     <div
-      className={`relative overflow-hidden bg-muted/35 ${compact ? "h-32" : "h-44"}`}
+      className={`flex flex-col overflow-hidden bg-muted/35 ${compact ? "h-32" : "h-44"}`}
     >
+      {kind === "high52" && (
+        <div aria-hidden="true" className="flex h-6 shrink-0 items-center gap-3 pl-3">
+          <span className="whitespace-nowrap text-[10px] font-medium text-muted-foreground">
+            52 WEEKS HIGH
+          </span>
+          <span className="min-w-0 flex-1 border-t border-dashed border-blue-500/60" />
+        </div>
+      )}
       <svg
         viewBox="0 0 500 180"
         preserveAspectRatio="none"
-        className="h-full w-full"
+        className="min-h-0 w-full flex-1"
         aria-hidden="true"
       >
         <defs>
@@ -66,26 +74,7 @@ export function IndicatorArt({ kind, compact = false }) {
               strokeWidth="2.5"
               strokeLinejoin="round"
             />
-            {kind === "high52" ? (
-              <>
-                <path
-                  d="M0 20 H500"
-                  stroke="#3b82f6"
-                  strokeWidth="1.5"
-                  strokeDasharray="5 5"
-                  opacity=".6"
-                />
-                <text
-                  x="18"
-                  y="15"
-                  fill="currentColor"
-                  opacity=".5"
-                  fontSize="9"
-                >
-                  252-BAR HIGH
-                </text>
-              </>
-            ) : (
+            {kind !== "high52" && (
               <g fill="none" strokeWidth="2">
                 <path
                   d="M0 151 Q90 111 180 105 T360 66 T500 40"
@@ -99,7 +88,7 @@ export function IndicatorArt({ kind, compact = false }) {
           </>
         )}
       </svg>
-      <span className="absolute right-3 bottom-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+      <span className="flex h-6 shrink-0 items-center justify-end px-3 text-[10px] uppercase tracking-wider text-muted-foreground">
         Illustration
       </span>
     </div>
