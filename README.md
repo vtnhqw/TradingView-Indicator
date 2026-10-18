@@ -62,6 +62,10 @@ The overview retains TradingView's Apple (`NASDAQ:AAPL`) Symbol Overview widget 
 
 The existing GitHub Pages workflow installs dependencies and builds `out/`. Relative asset URLs support repository subpaths. No deployment is performed by local development commands.
 
+In **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. Do not select **Deploy from a branch**: the repository root contains unbuilt React source, not the production website. Publishing it directly leaves the page requesting `/src/main.jsx`, which fails on GitHub Pages. The workflow uploads the compiled `out/` directory instead.
+
+To redeploy the current `main` branch, open **Actions → Deploy Signal Studio to GitHub Pages → Run workflow**, select `main`, and run it. Changes on other branches are not deployed until merged into `main`.
+
 ### Adding lessons
 
 The Learn area separates the lesson library from individual guides and labs. It includes a responsive lesson sidebar, breadcrumbs, documentation section navigation, and direct URLs. Darvas is a standalone guide with a staged illustration, hypothetical risk example, practice question, and linked sources; it is not embedded in the Order Book Lab.
