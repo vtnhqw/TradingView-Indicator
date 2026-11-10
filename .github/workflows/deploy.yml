@@ -36,6 +36,15 @@ jobs:
       - name: Run test suite
         run: npm test
 
+      - name: Check unused code
+        run: npm run check:unused
+
+      - name: Install test browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Run browser regression checks
+        run: npm run test:browser
+
       - name: Build static site
         run: npm run build
 

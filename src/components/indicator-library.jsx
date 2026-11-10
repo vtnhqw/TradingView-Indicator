@@ -31,7 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { indicators } from "@/lib/indicators";
 import { IndicatorArt } from "./indicator-art";
 
-export function CopyButton({ indicator, onFailure }) {
+function CopyButton({ indicator, onFailure }) {
   const [state, setState] = useState("idle");
   const pending = useRef(false);
   const alive = useRef(true);
@@ -43,7 +43,8 @@ export function CopyButton({ indicator, onFailure }) {
       clearTimeout(timer.current);
     };
   }, []);
-  async function copy() {
+  async function copy(event) {
+    const trigger = event.currentTarget;
     if (pending.current) return;
     pending.current = true;
     setState("loading");
@@ -59,7 +60,7 @@ export function CopyButton({ indicator, onFailure }) {
     } catch {
       if (!alive.current) return;
       setState("idle");
-      onFailure(indicator);
+      onFailure(indicator, trigger);
     } finally {
       pending.current = false;
     }
@@ -86,21 +87,32 @@ export function CopyButton({ indicator, onFailure }) {
   );
 }
 
-export function IndicatorLibrary() {
+export function IndicatorLibrary({ indicatorKey, navigate }) {
   const [filter, setFilter] = useState("all");
-  const [detail, setDetail] = useState(null);
+  const [detail, setDetail] = useState(() => indicators.find((item) => item.key === indicatorKey) || null);
   const [manual, setManual] = useState(false);
   const [expanded, setExpanded] = useState("");
   const trigger = useRef(null);
   const source = useRef(null);
+  const selected = useRef(indicatorKey);
+  useEffect(() => {
+    setDetail(indicators.find((item) => item.key === indicatorKey) || null);
+    if (selected.current !== indicatorKey) {
+      setManual(false);
+      setExpanded("");
+    }
+    selected.current = indicatorKey;
+  }, [indicatorKey]);
   const filtered = indicators.filter(
     (item) => filter === "all" || item.type === filter,
   );
-  function openDetails(indicator, fallback = false) {
-    trigger.current = document.activeElement;
+  function openDetails(indicator, fallback = false, triggerElement = null) {
+    trigger.current = triggerElement;
     setDetail(indicator);
     setManual(fallback);
     setExpanded(fallback ? "source" : "");
+    selected.current = indicator.key;
+    navigate(`#indicators/${indicator.key}`, { preserveScroll: true });
   }
   useEffect(() => {
     if (manual && detail) {
@@ -173,13 +185,14 @@ export function IndicatorLibrary() {
                   <Button
                     variant="outline"
                     aria-label={`Details for ${indicator.title}`}
-                    onClick={() => openDetails(indicator)}
+                    data-indicator-key={indicator.key}
+                    onClick={(event) => openDetails(indicator, false, event.currentTarget)}
                   >
                     View details
                   </Button>
                   <CopyButton
                     indicator={indicator}
-                    onFailure={(item) => openDetails(item, true)}
+                    onFailure={(item, element) => openDetails(item, true, element)}
                   />
                 </CardFooter>
               </Card>
@@ -236,6 +249,7 @@ export function IndicatorLibrary() {
           if (!open) {
             setDetail(null);
             setManual(false);
+            navigate("#indicators", { replace: true, preserveScroll: true });
           }
         }}
       >
@@ -244,7 +258,8 @@ export function IndicatorLibrary() {
             className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl"
             onCloseAutoFocus={(event) => {
               event.preventDefault();
-              trigger.current?.focus();
+              const fallback = document.querySelector(`[data-indicator-key="${detail.key}"]`);
+              (trigger.current?.isConnected ? trigger.current : fallback)?.focus({ preventScroll: true });
             }}
           >
             <DialogHeader>

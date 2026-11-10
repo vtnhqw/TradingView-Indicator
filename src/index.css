@@ -71,6 +71,9 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    background: var(--background);
+  }
   body {
     @apply bg-background text-foreground antialiased;
     margin: 0;
@@ -88,6 +91,54 @@
   ::selection {
     background: oklch(0.7 0.12 250 / 30%);
   }
+}
+/* Native scrolling stays enabled; the page control overlays the content. */
+html.has-page-scrollbar {
+  scrollbar-width: none;
+  scrollbar-gutter: auto;
+}
+html.has-page-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.page-scrollbar {
+  position: fixed;
+  top: 4px;
+  right: 0;
+  bottom: 4px;
+  z-index: 40;
+  width: 14px;
+  touch-action: pan-y;
+  user-select: none;
+  outline: none;
+}
+.page-scrollbar-thumb {
+  width: 5px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--muted-foreground);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.page-scrollbar[data-active="true"] .page-scrollbar-thumb,
+.page-scrollbar:hover .page-scrollbar-thumb,
+.page-scrollbar:focus-visible .page-scrollbar-thumb {
+  opacity: 0.55;
+}
+.page-scrollbar:focus-visible .page-scrollbar-thumb {
+  opacity: 1;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+body[data-scroll-locked] .page-scrollbar {
+  display: none;
+}
+@media (hover: none), (pointer: coarse) {
+  .page-scrollbar { pointer-events: none; }
+}
+@media (forced-colors: active) {
+  html.has-page-scrollbar { scrollbar-width: auto; }
+  html.has-page-scrollbar::-webkit-scrollbar { display: block; }
+  .page-scrollbar { display: none; }
 }
 @layer components {
   .page-wrap {

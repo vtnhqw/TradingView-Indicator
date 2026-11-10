@@ -1,4 +1,3 @@
-import * as React from "react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Tabs as TabsPrimitive } from "radix-ui";
@@ -70,4 +69,4 @@ function TabsContent({ className, ...props }) {
   );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants };
+export { Tabs, TabsList, TabsTrigger, TabsContent };

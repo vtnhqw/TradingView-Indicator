@@ -1,14 +1,9 @@
-import * as React from "react";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
 
 function Select({ ...props }) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
-}
-
-function SelectGroup({ ...props }) {
-  return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
 function SelectValue({ ...props }) {
@@ -71,16 +66,6 @@ function SelectContent({
   );
 }
 
-function SelectLabel({ className, ...props }) {
-  return (
-    <SelectPrimitive.Label
-      data-slot="select-label"
-      className={cn("px-2 py-1.5 text-xs text-muted-foreground", className)}
-      {...props}
-    />
-  );
-}
-
 function SelectItem({ className, children, ...props }) {
   return (
     <SelectPrimitive.Item
@@ -101,16 +86,6 @@ function SelectItem({ className, children, ...props }) {
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
-  );
-}
-
-function SelectSeparator({ className, ...props }) {
-  return (
-    <SelectPrimitive.Separator
-      data-slot="select-separator"
-      className={cn("pointer-events-none -mx-1 my-1 h-px bg-border", className)}
-      {...props}
-    />
   );
 }
 
@@ -147,12 +122,7 @@ function SelectScrollDownButton({ className, ...props }) {
 export {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
-  SelectScrollDownButton,
-  SelectScrollUpButton,
-  SelectSeparator,
   SelectTrigger,
   SelectValue,
 };

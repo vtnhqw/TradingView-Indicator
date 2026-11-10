@@ -1,8 +1,24 @@
-import React from "react";
 import { it, expect, vi } from "vitest";
-import { render, screen, within, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../src/App";
+
+it("tracks the visible lesson section without rewriting the URL or moving focus", async () => {
+  window.location.hash = "#learn/darvas";
+  render(<App />);
+  await screen.findByRole("heading", { name: "Darvas Box Strategy", level: 1 });
+  const headings = [...document.querySelectorAll('h2[id^="section-"]')];
+  const target = headings.findIndex((heading) => heading.id === "section-worked-example");
+  headings.forEach((heading, index) => {
+    vi.spyOn(heading, "getBoundingClientRect").mockReturnValue({ top: (index - target) * 600 + 50 });
+  });
+  const focused = document.activeElement;
+  fireEvent.scroll(window);
+  const link = within(screen.getByRole("navigation", { name: "On this page" })).getByRole("link", { name: "Worked example" });
+  await waitFor(() => expect(link).toHaveAttribute("aria-current", "location"));
+  expect(window.location.hash).toBe("#learn/darvas");
+  expect(document.activeElement).toBe(focused);
+});
 
 it("opens Learn as a library without mounting the order book", async () => {
   window.location.hash = "#learn";

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { lessons, lessonHref } from "@/content/lessons";
 import { DarvasDiagram } from "./darvas-diagram";
+import { useActiveSection } from "@/lib/use-active-section";
 
 const figures = { darvas: DarvasDiagram };
 function SourceLink({ source }) {
@@ -34,6 +35,7 @@ function SourceLink({ source }) {
   );
 }
 export function LessonArticle({ lesson, activeSection }) {
+  const visibleSection = useActiveSection(lesson.sections, activeSection);
   const next =
     lessons[
       (lessons.findIndex((item) => item.slug === lesson.slug) + 1) %
@@ -68,9 +70,9 @@ export function LessonArticle({ lesson, activeSection }) {
               href={lessonHref(lesson.slug, section.id)}
               onClick={(event) => revisitSection(event, section.id)}
               aria-current={
-                activeSection === section.id ? "location" : undefined
+                visibleSection === section.id ? "location" : undefined
               }
-              className={`text-xs leading-5 hover:text-foreground hover:underline ${activeSection === section.id ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+              className={`text-xs leading-5 hover:text-foreground hover:underline ${visibleSection === section.id ? "font-semibold text-foreground" : "text-muted-foreground"}`}
             >
               {section.title}
             </a>

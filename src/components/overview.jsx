@@ -126,7 +126,7 @@ export function Overview({ theme }) {
               </CardHeader>
               <CardContent className="mt-auto pt-4 pb-5">
                 <Button variant="link" className="h-auto p-0" asChild>
-                  <a href="#indicators" aria-label={`Explore ${item.title}`}>
+                  <a href={`#indicators/${item.key}`} aria-label={`Explore ${item.title}`}>
                     Explore indicator
                     <ArrowUpRight />
                   </a>

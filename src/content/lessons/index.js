@@ -13,7 +13,6 @@ export const lessons = [
     description:
       "See buyers, sellers, and liquidity in motion. Explore spreads, depth, and seven market scenarios.",
     kind: "lab",
-    action: "Open Order Book Lab",
     outcomes: [
       "Read bids, asks, and spreads",
       "Watch liquidity change",
@@ -30,7 +29,6 @@ export const lessons = [
     description:
       "Follow price from consolidation to breakout. Learn how boxes frame entries, exits, and planned risk.",
     kind: "guide",
-    action: "Read Darvas Box Strategy",
     outcomes: [
       "Identify a price box",
       "Understand breakout rules",
