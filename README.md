@@ -46,9 +46,23 @@ Open `http://localhost:8000`. The React source requires the development server; 
 
 ```sh
 npm test          # simulator, production asset checks, React interaction tests
+npm run check:unused # unused files, exports and dependencies
 npm run build    # production static website in out/
 npm run preview  # serve the production build locally on port 8000
 ```
+
+Run browser regressions with `npx playwright install chromium webkit` followed by
+`npm run test:browser`. The suite builds and serves the production site on port
+8001, then checks Chromium, WebKit, and a mobile viewport. It covers reload and
+Back/Forward scroll restoration, overlay scrolling, indicator deep links,
+lesson section highlighting, dialogs, and light/dark layouts. It uses isolated
+browser profiles; third-party chart requests are blocked in these navigation
+tests. Failure traces and layout screenshots are saved in `test-results/`.
+
+Page scrollbars overlay the content and fade when idle without reserving a
+gutter. Touch users can swipe through the right edge. Browser history entries
+store reading positions, with a session-storage fallback for immediate reloads.
+Each indicator has a direct detail URL such as `#indicators/maSpectrum`.
 
 The build validates that every `indicators/*.pine` file is included in the catalog, imports exact source text into the app for offline copying, and copies the unchanged files into `out/indicators/`. No generated `pine-sources.js` file is needed. Source copying, filtering, and simulation work without external requests after the local application loads; there is no offline page cache/service worker.
 

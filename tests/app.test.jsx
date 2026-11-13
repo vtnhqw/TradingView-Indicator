@@ -1,9 +1,46 @@
-import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../src/App";
 import { indicators } from "../src/lib/indicators";
+
+it("restores a saved history entry after the page mounts", async () => {
+  window.history.replaceState({ terminalNavigation: {
+    key: "reload-test", href: new URL("#learn/darvas", window.location.href).href, position: 650,
+  } }, "", "#learn/darvas");
+  window.scrollTo.mockClear();
+  render(<App />);
+  await screen.findByRole("heading", { name: "Darvas Box Strategy", level: 1 });
+  await waitFor(() => expect(window.scrollTo).toHaveBeenLastCalledWith({ top: 650, behavior: "instant" }));
+});
+
+it("opens the selected homepage indicator directly", async () => {
+  window.location.hash = "#overview";
+  render(<App />);
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole("link", { name: "Explore MA Spectrum 7" }));
+  const dialog = await screen.findByRole("dialog");
+  expect(within(dialog).getByRole("heading", { name: "MA Spectrum 7" })).toBeInTheDocument();
+  expect(window.location.hash).toBe("#indicators/maSpectrum");
+});
+
+it("opens indicator details from a direct URL and closes back to the catalog", async () => {
+  window.location.hash = "#indicators/mcdx";
+  render(<App />);
+  const user = userEvent.setup();
+  const dialog = await screen.findByRole("dialog");
+  expect(within(dialog).getByRole("heading", { name: "MCDX Smart Money" })).toBeInTheDocument();
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(window.location.hash).toBe("#indicators");
+});
+
+it("keeps unknown indicator URLs usable", async () => {
+  window.location.hash = "#indicators/missing";
+  render(<App />);
+  expect(await screen.findByRole("heading", { name: "A little more perspective." })).toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
 
 it("advances one scenario step and stays paused until resumed", async () => {
   try {

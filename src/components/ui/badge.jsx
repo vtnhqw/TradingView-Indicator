@@ -1,4 +1,3 @@
-import * as React from "react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Slot } from "radix-ui";
@@ -38,4 +37,4 @@ function Badge({ className, variant = "default", asChild = false, ...props }) {
   );
 }
 
-export { Badge, badgeVariants };
+export { Badge };

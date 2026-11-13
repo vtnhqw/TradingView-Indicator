@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useRef } from "react";
 import {
   ArrowUpRight,
   BookOpen,
@@ -24,6 +24,8 @@ import { Overview } from "@/components/overview";
 import { LazyOrderBookLab as OrderBookLab } from "@/components/lazy-order-book-lab";
 import { getLesson } from "@/content/lessons";
 import { PageBoundary } from "@/components/page-boundary";
+import { PageScrollbar } from "@/components/page-scrollbar";
+import { usePageNavigation, useRouteEffects } from "@/lib/page-navigation";
 
 const IndicatorLibrary = lazy(() =>
   import("@/components/indicator-library").then((module) => ({
@@ -40,67 +42,23 @@ const routes = {
   indicators: "Indicators",
   learn: "Learn",
 };
-function readRoute() {
-  const hash = location.hash.slice(1);
-  const aliases = {
-    home: "overview",
-    note: "learn/order-book",
-    lab: "learn/order-book",
-  };
-  if (Object.hasOwn(aliases, hash)) return aliases[hash];
-  return hash.startsWith("learn/") || Object.hasOwn(routes, hash)
-    ? hash
-    : "overview";
-}
 // Runs inside Suspense, after the destination content is ready to receive focus.
-function RouteEffects({ route, standalone, activeRoute, lesson, sectionId, moveFocus }) {
-  useEffect(() => {
-    document.title = `${standalone ? "Order Book Lab" : lesson?.title || routes[activeRoute]} — Terminal`;
-    const section =
-      activeRoute === "learn" && sectionId
-        ? document.getElementById(`section-${sectionId}`)
-        : null;
-    if (section) {
-      section.scrollIntoView({ behavior: "instant", block: "start" });
-      section.focus({ preventScroll: true });
-      moveFocus.current = false;
-      return;
-    }
-    window.scrollTo({ top: 0, behavior: "instant" });
-    if (moveFocus.current) {
-      const heading = document.querySelector("main h1");
-      if (heading) {
-        heading.tabIndex = -1;
-        heading.focus({ preventScroll: true });
-      }
-      moveFocus.current = false;
-    }
-  }, [route, standalone, activeRoute, lesson, sectionId, moveFocus]);
+function RouteEffects({ navigation, complete, title, sectionId }) {
+  useRouteEffects(navigation, complete, title, sectionId);
   return null;
 }
 export default function App() {
   const standalone = location.pathname.endsWith(
     "/note/level2_orderbook_cheatsheet.html",
   );
-  const [route, setRoute] = useState(readRoute);
-  const [activeRoute, lessonSlug, sectionId] = route.split("/");
+  const { navigation, navigate, complete } = usePageNavigation();
+  const [activeRoute, lessonSlug, sectionId] = navigation.route.split("/");
   const lesson = activeRoute === "learn" ? getLesson(lessonSlug) : null;
-  const moveFocus = useRef(false);
   const labSession = useRef({});
   const { theme, toggleTheme } = useTheme();
-  useEffect(() => {
-    const changed = () => {
-      moveFocus.current = document
-        .getElementById("main")
-        ?.contains(document.activeElement);
-      setRoute(readRoute());
-    };
-    window.addEventListener("hashchange", changed);
-    return () => window.removeEventListener("hashchange", changed);
-  }, []);
   return (
     <TooltipProvider>
-      <div className="flex min-h-dvh flex-col">
+      <div id="page-content" className="flex min-h-dvh flex-col">
         <a
           href="#main"
           onClick={(event) => {
@@ -195,7 +153,7 @@ export default function App() {
           </div>
         </header>
         <main id="main" tabIndex={-1} className="page-wrap flex-1 outline-none">
-          <PageBoundary key={`${activeRoute}/${lessonSlug || ""}`}>
+          <PageBoundary key={activeRoute === "learn" ? `${activeRoute}/${lessonSlug || ""}` : activeRoute}>
           <Suspense
             fallback={
               <p role="status" className="py-12 text-sm text-muted-foreground">
@@ -205,8 +163,8 @@ export default function App() {
           >
           {standalone ? (
             <OrderBookLab standalone session={labSession.current} />
-          ) : route === "indicators" ? (
-            <IndicatorLibrary />
+          ) : activeRoute === "indicators" ? (
+            <IndicatorLibrary indicatorKey={lessonSlug} navigate={navigate} />
           ) : activeRoute === "learn" ? (
             <LearnPage
               key={lessonSlug || "library"}
@@ -218,12 +176,10 @@ export default function App() {
             <Overview theme={theme} />
           )}
             <RouteEffects
-              route={route}
-              standalone={standalone}
-              activeRoute={activeRoute}
-              lesson={lesson}
-              sectionId={sectionId}
-              moveFocus={moveFocus}
+              navigation={navigation}
+              complete={complete}
+              title={standalone ? "Order Book Lab" : lesson?.title || routes[activeRoute]}
+              sectionId={activeRoute === "learn" ? sectionId : undefined}
             />
           </Suspense>
           </PageBoundary>
@@ -247,6 +203,7 @@ export default function App() {
           </div>
         </footer>
         <Toaster theme={theme} richColors closeButton />
+        <PageScrollbar />
       </div>
     </TooltipProvider>
   );
